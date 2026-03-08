@@ -1,0 +1,663 @@
+openapi: 3.0.3
+info:
+  title: Procar Poland — Auction API
+  description: |
+    REST API агрегатора автомобильных аукционов Procar Poland.
+    Агрегирует лоты из внешних аукционных домов, предоставляет поиск по лотам,
+    справочник брендов и моделей, а также возможность делать ставки в реальном времени.
+  version: 1.0.0
+  contact:
+    name: Procar Poland Dev Team
+    url: https://procar.pl
+
+servers:
+  - url: https://api.procar.pl/v1
+    description: Production
+  - url: https://staging-api.procar.pl/v1
+    description: Staging
+
+tags:
+  - name: Catalog
+    description: Справочник брендов и моделей
+  - name: Lots
+    description: Аукционные лоты (включают данные об автомобиле)
+  - name: Bids
+    description: Ставки на лоты
+  - name: Users
+    description: Профиль пользователя и его активность
+
+paths:
+  /catalog/brand:
+    get:
+      tags: [Catalog]
+      summary: Список доступных брендов
+      description: |
+        Возвращает унифицированный список брендов автомобилей, доступных в текущих лотах.
+        Используется для построения фильтров на фронте. Бренды нормализованы — 
+        разные написания с внешних площадок приведены к единому виду.
+      parameters:
+        - name: query
+          in: query
+          description: Поиск бренда по названию (autocomplete)
+          schema:
+            type: string
+          example: bm
+      responses:
+        '200':
+          description: Список брендов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Brand'
+
+  /catalog/brand/{brandId}/models:
+    get:
+      tags: [Catalog]
+      summary: Модели указанного бренда
+      description: |
+        Возвращает список моделей для выбранного бренда, доступных в текущих лотах.
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: bmw
+        - name: query
+          in: query
+          description: Поиск модели по названию (autocomplete)
+          schema:
+            type: string
+          example: x5
+      responses:
+        '200':
+          description: Список моделей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Model'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /lots:
+    get:
+      tags: [Lots]
+      summary: Список лотов
+      description: |
+        Возвращает аукционные лоты агрегированные из внешних аукционных домов.
+        Каждый лот содержит полные данные об автомобиле — отдельного /cars эндпоинта нет.
+      parameters:
+        - name: status
+          in: query
+          description: Статус лота
+          schema:
+            type: string
+            enum: [upcoming, active, finished, cancelled]
+        - name: source
+          in: query
+          description: Источник лота (внешний аукционный дом)
+          schema:
+            type: string
+          example: copart
+        - name: endsInMinutes
+          in: query
+          description: Лоты, заканчивающиеся в ближайшие N минут
+          schema:
+            type: integer
+          example: 60
+        - name: brandId
+          in: query
+          description: ID бренда из /catalog/brand
+          schema:
+            type: string
+          example: bmw
+        - name: modelId
+          in: query
+          description: ID модели из /catalog/brand/{brandId}/models
+          schema:
+            type: string
+          example: x5
+        - name: yearFrom
+          in: query
+          schema:
+            type: integer
+          example: 2018
+        - name: yearTo
+          in: query
+          schema:
+            type: integer
+          example: 2023
+        - name: priceFrom
+          in: query
+          description: Минимальная текущая ставка (EUR)
+          schema:
+            type: number
+        - name: priceTo
+          in: query
+          description: Максимальная текущая ставка (EUR)
+          schema:
+            type: number
+        - name: condition
+          in: query
+          schema:
+            type: string
+            enum: [new, used, damaged]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: endTime,asc
+      responses:
+        '200':
+          description: Список лотов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LotPage'
+
+  
+  /lots/{lotId}:
+    get:
+      tags: [Lots]
+      summary: Детали лота
+      description: Возвращает полную информацию о лоте включая текущую ставку и историю
+      parameters:
+        - $ref: '#/components/parameters/LotId'
+      responses:
+        '200':
+          description: Детальная информация о лоте
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LotDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /lots/{lotId}/bids:
+    get:
+      tags: [Bids]
+      summary: История ставок по лоту
+      parameters:
+        - $ref: '#/components/parameters/LotId'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: История ставок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidPage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Bids]
+      summary: Сделать ставку
+      description: Размещает новую ставку на лот. Ставка должна превышать текущую минимум на шаг аукциона.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LotId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BidRequest'
+      responses:
+        '201':
+          description: Ставка принята
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bid'
+        '400':
+          description: Ставка слишком мала или некорректна
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Лот уже завершён или ставка перебита
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ─── USERS ──────────────────────────────────────────────────────────────────
+
+  /users/me/bids:
+    get:
+      tags: [Users]
+      summary: Мои ставки
+      description: Возвращает все ставки текущего пользователя
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Фильтр по статусу ставки
+          schema:
+            type: string
+            enum: [winning, outbid, won, lost]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Список ставок пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserBidPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me/watchlist:
+    get:
+      tags: [Users]
+      summary: Избранные лоты пользователя
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Список отслеживаемых лотов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LotSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me/watchlist/{lotId}:
+    put:
+      tags: [Users]
+      summary: Добавить лот в избранное
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LotId'
+      responses:
+        '204':
+          description: Лот добавлен в избранное
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Users]
+      summary: Убрать лот из избранного
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LotId'
+      responses:
+        '204':
+          description: Лот убран из избранного
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    LotId:
+      name: lotId
+      in: path
+      required: true
+      schema:
+        type: string
+      example: 64f1a2b3c4d5e6f7a8b9c0d2
+
+  responses:
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Требуется авторизация
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          example: 243
+        totalPages:
+          type: integer
+          example: 13
+
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Нормализованный slug бренда
+          example: bmw
+        name:
+          type: string
+          description: Отображаемое название бренда
+          example: BMW
+        logoUrl:
+          type: string
+          format: uri
+          example: https://cdn.procar.pl/brand/bmw.svg
+        lotsCount:
+          type: integer
+          description: Количество активных лотов этого бренда
+          example: 42
+
+    Model:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Нормализованный slug модели
+          example: x5
+        name:
+          type: string
+          description: Отображаемое название модели
+          example: X5
+        brandId:
+          type: string
+          example: bmw
+        lotsCount:
+          type: integer
+          description: Количество активных лотов этой модели
+          example: 12
+
+    # ── Car (embedded в лот) ─────────────────────────────────────────────────
+
+    CarInfo:
+      type: object
+      description: Данные об автомобиле, нормализованные из источника
+      properties:
+        brandId:
+          type: string
+          example: bmw
+        brandName:
+          type: string
+          example: BMW
+        modelId:
+          type: string
+          example: x5
+        modelName:
+          type: string
+          example: X5
+        year:
+          type: integer
+          example: 2021
+        condition:
+          type: string
+          enum: [new, used, damaged]
+          example: used
+        mileage:
+          type: integer
+          description: Пробег в км
+          example: 45000
+        vin:
+          type: string
+          example: WBAKJ8C56BCY65329
+        color:
+          type: string
+          example: Черный металлик
+        engine:
+          type: string
+          example: 3.0L 6-cylinder
+        transmission:
+          type: string
+          enum: [automatic, manual, cvt]
+          example: automatic
+        drivetrain:
+          type: string
+          enum: [fwd, rwd, awd, 4wd]
+          example: awd
+        description:
+          type: string
+          example: Один владелец, полная история обслуживания
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          example:
+            - https://cdn.procar.pl/lots/img1.jpg
+            - https://cdn.procar.pl/lots/img2.jpg
+        documents:
+          type: object
+          properties:
+            hasTitle:
+              type: boolean
+            titleState:
+              type: string
+              example: CA
+
+    # ── Lot ─────────────────────────────────────────────────────────────────
+
+    LotSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 64f1a2b3c4d5e6f7a8b9c0d2
+        car:
+          $ref: '#/components/schemas/CarInfo'
+        status:
+          type: string
+          enum: [upcoming, active, finished, cancelled]
+          example: active
+        currentBid:
+          type: number
+          description: Текущая максимальная ставка (EUR)
+          example: 12500
+        startingBid:
+          type: number
+          example: 5000
+        bidStep:
+          type: number
+          description: Минимальный шаг ставки (EUR)
+          example: 250
+        bidsCount:
+          type: integer
+          example: 17
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        source:
+          type: object
+          description: Источник лота (внешний аукционный дом)
+          properties:
+            name:
+              type: string
+              example: Copart
+            lotUrl:
+              type: string
+              format: uri
+              example: https://www.copart.com/lot/12345678
+
+    LotDetail:
+      allOf:
+        - $ref: '#/components/schemas/LotSummary'
+        - type: object
+          properties:
+            car:
+              $ref: '#/components/schemas/CarInfo'
+            location:
+              type: object
+              properties:
+                city:
+                  type: string
+                  example: Los Angeles
+                state:
+                  type: string
+                  example: CA
+                country:
+                  type: string
+                  example: US
+            fees:
+              type: object
+              description: Дополнительные сборы аукционного дома
+              properties:
+                buyerPremiumPercent:
+                  type: number
+                  example: 10
+                documentationFee:
+                  type: number
+                  example: 79
+            recentBids:
+              type: array
+              description: Последние 5 ставок
+              items:
+                $ref: '#/components/schemas/Bid'
+
+    LotPage:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/LotSummary'
+
+    # ── Bid ─────────────────────────────────────────────────────────────────
+
+    BidRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          description: Сумма ставки в EUR
+          example: 13000
+
+    Bid:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 64f1a2b3c4d5e6f7a8b9c0d3
+        lotId:
+          type: string
+          example: 64f1a2b3c4d5e6f7a8b9c0d2
+        amount:
+          type: number
+          example: 13000
+        bidderId:
+          type: string
+          description: ID пользователя (замаскированный для других участников)
+          example: user_***abc
+        placedAt:
+          type: string
+          format: date-time
+        isWinning:
+          type: boolean
+          example: true
+
+    BidPage:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/Bid'
+
+    UserBid:
+      allOf:
+        - $ref: '#/components/schemas/Bid'
+        - type: object
+          properties:
+            lot:
+              $ref: '#/components/schemas/LotSummary'
+            bidStatus:
+              type: string
+              enum: [winning, outbid, won, lost]
+              example: winning
+
+    UserBidPage:
+      allOf:
+        - $ref: '#/components/schemas/Pagination'
+        - type: object
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserBid'
+
+    # ── Error ────────────────────────────────────────────────────────────────
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+          example: LOT_NOT_FOUND
+        message:
+          type: string
+          example: Лот с указанным ID не найден
+        timestamp:
+          type: string
+          format: date-time

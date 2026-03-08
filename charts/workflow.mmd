@@ -1,0 +1,33 @@
+C4Container
+    title Аукционный дом — Container Diagram
+
+    Person(user, "Пользователь")
+
+    System_Boundary(auction, "Auction System") {
+        Container(frontend, "Frontend", "SPA", "Интерфейс для пользователей")
+        Container(api, "Auction API", "Java, Spring", "Основная бизнес-логика")
+        Container(ws, "WebSocket Server", "WS", "Realtime ставки и обновления")
+        Container(aggregator, "Aggregator Service", "Worker / Scheduler", "Забирает лоты из внешних аукционов, нормализует данные")
+        ContainerDb(db, "MongoDB", "Database", "Лоты, авто, ставки, пользователи")
+        ContainerDb(cache, "Redis", "Cache", "Текущие ставки, сессии")
+    }
+
+    System_Ext(auth, "Auth Service")
+    System_Ext(payment, "Payment Gateway")
+    System_Ext(house1, "Аукционный дом A", "Внешний аукцион — API / RSS / Scraping")
+    System_Ext(house2, "Аукционный дом B", "Внешний аукцион — API / RSS / Scraping")
+    System_Ext(house3, "Аукционный дом C", "Внешний аукцион — API / RSS / Scraping")
+
+    Rel(user, frontend, "Использует", "HTTPS")
+    Rel(frontend, api, "REST запросы", "HTTPS / JSON")
+    Rel(frontend, ws, "Подписка на ставки", "WebSocket")
+    Rel(api, db, "Читает / пишет", "MongoDB Driver")
+    Rel(api, cache, "Кэширует ставки", "Redis")
+    Rel(api, auth, "Валидация токенов")
+    Rel(api, payment, "Платежи")
+    Rel(ws, cache, "Читает текущие ставки")
+    Rel(aggregator, house1, "Забирает лоты", "HTTP / Polling")
+    Rel(aggregator, house2, "Забирает лоты", "HTTP / Polling")
+    Rel(aggregator, house3, "Забирает лоты", "HTTP / Polling")
+    Rel(aggregator, db, "Сохраняет нормализованные лоты", "MongoDB Driver")
+    Rel(api, aggregator, "Триггерит синхронизацию", "Internal")

@@ -1,4 +1,4 @@
-package com.procar.saleshouse
+package com.procar.core
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

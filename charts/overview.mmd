@@ -1,0 +1,19 @@
+C4Context
+    title Аукционный дом автомобилей — System Context
+
+    Person(buyer, "Покупатель", "Делает ставки на автомобили")
+    Person(seller, "Продавец", "Выставляет автомобили на аукцион")
+    Person(admin, "Администратор", "Управляет лотами и аукционами")
+
+    System(auction_api, "Auction API", "REST API аукционного дома")
+
+    System_Ext(auth, "Auth Service", "Аутентификация и авторизация")
+    System_Ext(payment, "Payment Gateway", "Обработка платежей")
+    System_Ext(notification, "Notification Service", "Email / Push уведомления")
+
+    Rel(buyer, auction_api, "Ищет авто, делает ставки", "HTTPS")
+    Rel(seller, auction_api, "Создаёт лоты", "HTTPS")
+    Rel(admin, auction_api, "Управляет аукционом", "HTTPS")
+    Rel(auction_api, auth, "Проверяет токены", "HTTPS")
+    Rel(auction_api, payment, "Проводит оплату", "HTTPS")
+    Rel(auction_api, notification, "Отправляет уведомления", "HTTPS")
