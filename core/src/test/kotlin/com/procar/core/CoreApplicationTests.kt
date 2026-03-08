@@ -1,4 +1,4 @@
-package com.procar.saleshouse
+package com.procar.core
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest

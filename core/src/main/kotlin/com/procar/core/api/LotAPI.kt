@@ -1,14 +1,18 @@
 package com.procar.core.api
 
+import com.procar.core.api.dto.CarCondition
 import com.procar.core.api.dto.LotDetail
 import com.procar.core.api.dto.LotPage
+import com.procar.core.api.dto.LotSearchRequest
 import com.procar.core.api.dto.LotStatus
-import com.procar.core.api.dto.CarCondition
+import com.procar.core.service.LotService
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/lots")
-class LotAPI {
+class LotAPI(
+    private val lotService: LotService
+) {
 
     @GetMapping
     fun getLots(
@@ -26,11 +30,37 @@ class LotAPI {
         @RequestParam(defaultValue = "20") size: Int,
         @RequestParam(defaultValue = "endTime,asc") sort: String
     ): LotPage {
-        TODO("Implement lots listing with filters")
+        val request = LotSearchRequest(
+            status = status,
+            source = source,
+            endsInMinutes = endsInMinutes,
+            brandId = brandId,
+            modelId = modelId,
+            yearFrom = yearFrom,
+            yearTo = yearTo,
+            priceFrom = priceFrom,
+            priceTo = priceTo,
+            condition = condition,
+            offset = page * size,
+            limit = size,
+            sort = sort
+        )
+        
+        val lots = lotService.getLots(request)
+        val totalElements = lotService.countLots(request)
+        val totalPages = (totalElements + size - 1) / size
+        
+        return LotPage(
+            page = page,
+            size = size,
+            totalElements = totalElements,
+            totalPages = totalPages,
+            content = lots
+        )
     }
 
     @GetMapping("/{lotId}")
     fun getLotDetail(@PathVariable lotId: String): LotDetail {
-        TODO("Implement lot detail retrieval")
+        return lotService.getLotDetail(lotId)
     }
 }
