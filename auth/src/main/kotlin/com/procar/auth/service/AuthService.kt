@@ -1,54 +1,74 @@
 package com.procar.auth.service
 
 import com.procar.auth.dto.AccessToken
-import com.procar.auth.dto.AuthResult
+import com.procar.auth.entity.AuthReason
+import com.procar.auth.entity.RefreshToken as RefreshTokenEntity
+import com.procar.auth.repo.RefreshTokenRepository
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.time.Instant
 import java.util.*
 
 @Service
-class AuthService {
+class AuthService(
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val accessTokenRedisTemplate: RedisTemplate<String, AccessTokenData>
+) {
 
-	fun authenticate(username: String, password: String): AuthResult {
-		// TODO: Implement actual authentication logic
-		// For now, accept demo credentials
-		return when {
-			username == "demo" && password == "password" -> {
-				val accessToken = generateAccessToken()
-				val refreshToken = generateRefreshToken()
-				AuthResult(
-					success = true,
-					message = "Authentication successful",
-					accessToken = accessToken,
-					refreshToken = refreshToken
-				)
-			}
-			else -> {
-				AuthResult(
-					success = false,
-					message = "Invalid username or password"
-				)
-			}
-		}
-	}
+    fun refreshAccessToken(refreshToken: String): AccessToken? {
+        val tokenEntity = refreshTokenRepository.findByToken(refreshToken)
+        
+        return when {
+            tokenEntity != null -> {
+                generateAccessToken()
+            }
+            else -> {
+                null
+            }
+        }
+    }
 
-	fun refreshAccessToken(refreshToken: String): AccessToken? {
-		// TODO: Implement actual refresh token validation
-		// For now, accept any non-empty token
-		return if (refreshToken.isNotBlank()) {
-			generateAccessToken()
-		} else {
-			null
-		}
-	}
+    fun generateAccessToken(authReason: AuthReason? = null): AccessToken {
+        val token = UUID.randomUUID().toString()
+        val validUntil = Instant.now().plusSeconds(3600) // 1 hour
+        val accessTokenData = AccessTokenData(token, validUntil, authReason)
+        accessTokenRedisTemplate.opsForValue().set(token, accessTokenData, Duration.ofHours(1))
+        return AccessToken(token, validUntil)
+    }
 
-	private fun generateAccessToken(): AccessToken {
-		val token = UUID.randomUUID().toString()
-		val validUntil = Instant.now().plusSeconds(3600) // 1 hour
-		return AccessToken(token, validUntil)
-	}
+    fun generateRefreshToken(authReason: AuthReason): String {
+        val token = UUID.randomUUID().toString()
+        val refreshTokenEntity = RefreshTokenEntity(
+            token = token,
+            userId = authReason.userId
+        )
+        refreshTokenRepository.save(refreshTokenEntity)
+        return token
+    }
 
-	private fun generateRefreshToken(): String {
-		return UUID.randomUUID().toString()
-	}
+    fun validateAccessToken(accessToken: String): Boolean {
+        val tokenData = accessTokenRedisTemplate.opsForValue().get(accessToken)
+        return tokenData != null && !tokenData.isExpired()
+    }
+
+    fun getAccessTokenData(accessToken: String): AccessTokenData? {
+        return accessTokenRedisTemplate.opsForValue().get(accessToken)
+    }
+
+    fun logout(accessToken: String) {
+        accessTokenRedisTemplate.delete(accessToken)
+    }
+
+    fun invalidateAllUserRefreshTokens(userId: String): Boolean {
+        return refreshTokenRepository.deleteByUserId(userId)
+    }
+
+    data class AccessTokenData(
+        val token: String,
+        val expiresAt: Instant,
+        val authReason: AuthReason?
+    ) {
+        fun isExpired(): Boolean = Instant.now().isAfter(expiresAt)
+    }
 }
