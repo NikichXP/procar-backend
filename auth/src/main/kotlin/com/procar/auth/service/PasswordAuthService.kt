@@ -3,18 +3,16 @@ package com.procar.auth.service
 import com.procar.auth.dto.AuthResult
 import com.procar.auth.entity.PasswordAuthReason
 import com.procar.auth.repo.PasswordAuthRepository
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.security.spec.KeySpec
+import java.util.*
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-import java.util.Base64
 
 @Service
 class PasswordAuthService(
     private val authService: AuthService,
-    private val mongoTemplate: MongoTemplate,
     private val passwordAuthRepository: PasswordAuthRepository
 ) {
 

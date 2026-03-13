@@ -1,19 +1,18 @@
 package com.procar.auth.service
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.procar.auth.dto.AccessToken
 import com.procar.auth.entity.AuthReason
-import com.procar.auth.entity.RefreshToken as RefreshTokenEntity
 import com.procar.auth.repo.RefreshTokenRepository
-import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
-import java.time.Duration
 import java.time.Instant
 import java.util.*
+import com.procar.auth.entity.RefreshToken as RefreshTokenEntity
 
 @Service
 class AuthService(
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val accessTokenRedisTemplate: RedisTemplate<String, AccessTokenData>
+    private val accessTokenService: AccessTokenService
 ) {
 
     fun refreshAccessToken(refreshToken: String): AccessToken? {
@@ -33,7 +32,7 @@ class AuthService(
         val token = UUID.randomUUID().toString()
         val validUntil = Instant.now().plusSeconds(3600) // 1 hour
         val accessTokenData = AccessTokenData(token, validUntil, authReason)
-        accessTokenRedisTemplate.opsForValue().set(token, accessTokenData, Duration.ofHours(1))
+        accessTokenService.storeAccessToken(accessTokenData)
         return AccessToken(token, validUntil)
     }
 
@@ -48,16 +47,15 @@ class AuthService(
     }
 
     fun validateAccessToken(accessToken: String): Boolean {
-        val tokenData = accessTokenRedisTemplate.opsForValue().get(accessToken)
-        return tokenData != null && !tokenData.isExpired()
+        return accessTokenService.validateAccessToken(accessToken)
     }
 
     fun getAccessTokenData(accessToken: String): AccessTokenData? {
-        return accessTokenRedisTemplate.opsForValue().get(accessToken)
+        return accessTokenService.getAccessTokenData(accessToken)
     }
 
     fun logout(accessToken: String) {
-        accessTokenRedisTemplate.delete(accessToken)
+        accessTokenService.deleteAccessToken(accessToken)
     }
 
     fun invalidateAllUserRefreshTokens(userId: String): Boolean {
@@ -69,6 +67,7 @@ class AuthService(
         val expiresAt: Instant,
         val authReason: AuthReason?
     ) {
+        @JsonIgnore
         fun isExpired(): Boolean = Instant.now().isAfter(expiresAt)
     }
 }
