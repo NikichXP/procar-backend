@@ -4,67 +4,42 @@ import com.procar.provider.common.*
 import java.time.LocalDateTime
 
 data class AdvancedLotSearchRequest(
-    val query: String?,
-    val filters: LotSearchFilters,
-    val sorting: List<SortCriteria>,
-    val pagination: PaginationRequest,
-    val searchType: SearchType = SearchType.STANDARD,
-    val fuzzyMatching: Boolean = true,
-    val semanticSearch: Boolean = false
+    val query: String? = null,
+    val filters: LotSearchFilters? = null,
+    val sorting: List<SortCriteria> = listOf(),
+    val pagination: PaginationRequest = PaginationRequest()
 )
 
 data class LotSearchFilters(
-    val providers: List<String>?,
-    val status: List<LotStatus>?,
-    val priceRange: PriceRange?,
-    val yearRange: IntRange?,
-    val mileageRange: IntRange?,
-    val vehicle: VehicleFilters,
-    val auction: AuctionFilters,
-    val location: LocationFilters,
-    val seller: SellerFilters,
-    val tags: List<String>?,
-    val categories: List<String>?,
-    val conditions: List<VehicleCondition>?,
-    val titleStatus: List<TitleStatus>?
+    val providers: List<String>? = null,
+    val status: List<LotStatus>? = null,
+    val priceRange: PriceRange? = null,
+    val yearRange: IntRange? = null,
+    val mileageRange: IntRange? = null,
+    val vehicle: VehicleFilters? = null,
+    val location: LocationFilters? = null,
+    val tags: List<String>? = null,
+    val categories: List<String>? = null,
+    val conditions: List<VehicleCondition>? = null,
+    val titleStatus: List<TitleStatus>? = null
 )
 
 data class VehicleFilters(
-    val makes: List<String>?,
-    val models: List<String>?,
-    val bodyTypes: List<String>?,
-    val fuelTypes: List<FuelType>?,
-    val transmissions: List<TransmissionType>?,
-    val drivetrains: List<DrivetrainType>?,
-    val colors: List<String>?,
-    val features: List<String>?,
-    val hasDamage: Boolean?,
-    val hasInspection: Boolean?
+    val makes: List<String>? = null,
+    val models: List<String>? = null,
+    val bodyTypes: List<String>? = null,
+    val fuelTypes: List<FuelType>? = null,
+    val transmissions: List<TransmissionType>? = null,
+    val drivetrains: List<DrivetrainType>? = null,
+    val colors: List<String>? = null,
+    val features: List<String>? = null,
+    val hasDamage: Boolean? = null,
+    val hasInspection: Boolean? = null
 )
 
-data class AuctionFilters(
-    val auctionTypes: List<AuctionType>?,
-    val endTimeRange: LocalDateTimeRange?,
-    val bidCountRange: IntRange?,
-    val hasReserve: Boolean?,
-    val hasBuyItNow: Boolean?
-)
 
 data class LocationFilters(
-    val states: List<String>?,
-    val cities: List<String>?,
-    val zipCodes: List<String>?,
-    val radius: LocationRadius?
-)
-
-data class SellerFilters(
-    val sellerTypes: List<SellerType>?,
-    val minRating: Double?,
-    val minTotalSales: Int?
-)
-
-data class LocationRadius(
-    val latitude: Double,
-    val longitude: Double,
-    val radiusMiles: Int
+    val states: List<String>? = null,
+    val cities: List<String>? = null,
+    val zipCodes: List<String>? = null
 )

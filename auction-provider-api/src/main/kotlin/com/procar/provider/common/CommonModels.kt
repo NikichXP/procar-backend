@@ -1,16 +1,10 @@
 package com.procar.provider.common
 
-import java.time.LocalDateTime
-
 data class PriceRange(
-    val min: Double?,
-    val max: Double?
+    val min: Double? = null,
+    val max: Double? = null
 )
 
-data class LocalDateTimeRange(
-    val start: LocalDateTime?,
-    val end: LocalDateTime?
-)
 
 data class GeoCoordinates(
     val latitude: Double,
@@ -19,7 +13,7 @@ data class GeoCoordinates(
 
 data class PaginationResponse(
     val hasNext: Boolean,
-    val nextCursor: String?
+    val nextCursor: String? = null
 )
 
 data class PaginationRequest(
@@ -38,16 +32,4 @@ enum class SortDirection {
 
 enum class SortField {
     END_TIME, START_TIME, CURRENT_BID, STARTING_BID, MILEAGE, YEAR, MAKE, MODEL, LOCATION, RATING, AMOUNT, PLACED_AT
-}
-
-enum class SearchType {
-    STANDARD, FUZZY, SEMANTIC, HYBRID
-}
-
-enum class AlertSeverity {
-    INFO, WARNING, URGENT, CRITICAL
-}
-
-enum class ActivityType {
-    VIEW, BID, WATCH, SHARE, QUESTION, ALERT
 }

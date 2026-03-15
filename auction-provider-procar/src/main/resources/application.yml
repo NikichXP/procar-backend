@@ -1,0 +1,42 @@
+# Spring Boot Configuration
+spring:
+  application:
+    name: auction-provider-procar
+  
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/auction_procar
+      database: auction_procar
+      auto-index-creation: true
+
+# Server Configuration
+server:
+  port: 8083
+
+# Auction Configuration
+auction:
+  bid:
+    minimum-increment: 50.0
+    maximum-increment: 1000.0
+    default-increment: 100.0
+    max-auto-bid-amount: 100000.0
+
+# Logging Configuration
+logging:
+  level:
+    com.procar.auction: DEBUG
+    org.springframework.data.mongodb: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

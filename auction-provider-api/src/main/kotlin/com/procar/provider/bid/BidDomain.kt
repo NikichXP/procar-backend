@@ -13,17 +13,7 @@ data class ProviderBid(
     val status: BidStatus,
     val isWinning: Boolean,
     val isAutoBid: Boolean,
-    val placedAt: LocalDateTime,
-    val metadata: BidMetadata
-)
-
-data class BidMetadata(
-    val source: String,
-    val ipAddress: String?,
-    val userAgent: String?,
-    val sessionId: String?,
-    val provider: String,
-    val externalBidId: String?
+    val placedAt: LocalDateTime
 )
 
 enum class BidStatus {
