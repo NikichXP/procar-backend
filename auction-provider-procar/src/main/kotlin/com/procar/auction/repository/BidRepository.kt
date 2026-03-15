@@ -17,4 +17,6 @@ interface BidRepository : MongoRepository<BidDocument, String> {
     
     @Query("{ 'lot_id': ?0, 'status': 'ACCEPTED' }")
     fun findAcceptedBidsByLotId(lotId: String): List<BidDocument>
+    
+    fun deleteByLotId(lotId: String)
 }

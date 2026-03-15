@@ -1,5 +1,7 @@
 package com.procar.auction.service
 
+import com.procar.auction.api.admin.AdminLotResponse
+import com.procar.auction.api.admin.AdminPaginatedLotsResponse
 import com.procar.auction.document.LotDocument
 import com.procar.auction.repository.LotRepository
 import com.procar.provider.common.PaginationResponse
@@ -7,10 +9,12 @@ import com.procar.provider.common.SortDirection
 import com.procar.provider.common.SortField
 import com.procar.provider.lot.AdvancedLotSearchRequest
 import com.procar.provider.lot.LotSearchResponse
+import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.ProviderLot
 import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional
@@ -154,5 +158,95 @@ class InternalAuctionLotService(
         return fieldValues?.let { values ->
             lots.filter { lot -> extractor(lot) in values }
         } ?: lots
+    }
+
+    fun updateLot(lotId: String, lotDocument: LotDocument): LotDocument {
+        val existingLot = lotRepository.findById(lotId)
+            .orElseThrow { IllegalArgumentException("Lot not found with id: $lotId") }
+        
+        val updatedLot = existingLot.copy(
+            title = lotDocument.title,
+            description = lotDocument.description,
+            vehicle = lotDocument.vehicle,
+            auction = lotDocument.auction,
+            location = lotDocument.location,
+            metadata = lotDocument.metadata,
+            status = lotDocument.status,
+            updatedAt = LocalDateTime.now()
+        )
+        
+        return lotRepository.save(updatedLot)
+    }
+
+    fun deleteLot(lotId: String): Boolean {
+        return if (lotRepository.existsById(lotId)) {
+            lotRepository.deleteById(lotId)
+            true
+        } else {
+            false
+        }
+    }
+
+    fun updateLotStatus(lotId: String, status: LotStatus): LotDocument? {
+        val existingLot = lotRepository.findById(lotId).orElse(null) ?: return null
+        
+        val updatedLot = existingLot.copy(
+            status = status,
+            updatedAt = LocalDateTime.now()
+        )
+        
+        return lotRepository.save(updatedLot)
+    }
+
+    fun getAllLots(cursor: String?, limit: Int, status: LotStatus?): AdminPaginatedLotsResponse {
+        // Parse cursor to get starting position (simple implementation)
+        val startPosition = cursor?.let { 
+            try {
+                it.substringAfter("cursor-").toInt()
+            } catch (e: Exception) {
+                0
+            }
+        } ?: 0
+        
+        // Get all lots (in production, use proper cursor-based query)
+        val allLots = when (status) {
+            null -> lotRepository.findAll()
+            else -> lotRepository.findByStatus(status)
+        }
+        
+        // Sort by creation date for consistent pagination
+        val sortedLots = allLots.sortedByDescending { it.createdAt }
+        
+        // Apply cursor and limit
+        val paginatedLots = sortedLots.drop(startPosition).take(limit + 1) // +1 to check if there are more
+        
+        val hasMore = paginatedLots.size > limit
+        val lotsToReturn = if (hasMore) paginatedLots.dropLast(1) else paginatedLots
+        
+        val adminLots = lotsToReturn.map { lot ->
+            AdminLotResponse.fromLotDocument(lot)
+        }
+        
+        val nextCursor = if (hasMore) {
+            "cursor-${startPosition + limit}"
+        } else {
+            null
+        }
+        
+        return AdminPaginatedLotsResponse(
+            lots = adminLots,
+            pagination = PaginationResponse(
+                hasNext = hasMore,
+                nextCursor = nextCursor
+            )
+        )
+    }
+
+    fun archiveLot(lotId: String): LotDocument? {
+        return updateLotStatus(lotId, LotStatus.CANCELLED)
+    }
+
+    fun unarchiveLot(lotId: String): LotDocument? {
+        return updateLotStatus(lotId, LotStatus.ACTIVE)
     }
 }

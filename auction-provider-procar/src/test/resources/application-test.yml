@@ -1,0 +1,32 @@
+# Test application properties for auction-provider-procar
+
+# MongoDB configuration for embedded MongoDB
+spring:
+  data:
+    mongodb:
+      uri: "mongodb://localhost:27017/procar-auction-test"
+  
+  # Disable Redis for tests
+  autoconfigure:
+    exclude: "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
+  
+  # Test-specific configurations
+  profiles:
+    active: "test"
+
+# Embedded MongoDB configuration
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: "6.0.8"
+
+# Logging configuration for tests
+logging:
+  level:
+    com.procar.auction: "DEBUG"
+    org.springframework.data.mongodb: "DEBUG"
+
+# Server configuration (for RANDOM_PORT in tests)
+server:
+  port: 0

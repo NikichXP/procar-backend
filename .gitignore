@@ -5,3 +5,7 @@ gradle/
 build/
 */build/*
 .vscode/
+*.class
+*/out/test/*
+*/out/production/*
+auction-provider-procar/target/

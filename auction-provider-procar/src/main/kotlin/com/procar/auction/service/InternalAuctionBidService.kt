@@ -325,4 +325,21 @@ class InternalAuctionBidService(
     private fun createErrorBid(request: PlaceBidRequest): ProviderBid {
         return BidsFactory.createErrorBid(request)
     }
+
+    fun deleteAllBidsForLot(lotId: String) {
+        bidRepository.deleteByLotId(lotId)
+        
+        // Reset lot's auction information
+        val lot = lotRepository.findById(lotId).orElse(null)
+        if (lot != null) {
+            val updatedLot = lot.copy(
+                auction = lot.auction.copy(
+                    currentBid = lot.auction.startingBid,
+                    totalBids = 0
+                ),
+                updatedAt = LocalDateTime.now()
+            )
+            lotRepository.save(updatedLot)
+        }
+    }
 }
