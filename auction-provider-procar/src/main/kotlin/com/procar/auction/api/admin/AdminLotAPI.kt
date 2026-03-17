@@ -7,6 +7,7 @@ import com.procar.provider.admin.AdminLotController
 import com.procar.provider.admin.AdminLotResponse
 import com.procar.provider.admin.AdminPaginatedLotsResponse
 import com.procar.provider.admin.AdminUpdateLotRequest
+import com.procar.provider.admin.AdminHiddenRequest
 import com.procar.provider.admin.AdminUpdateStatusRequest
 import com.procar.provider.lot.LotStatus
 import org.springframework.core.convert.ConversionService
@@ -74,17 +75,17 @@ class AdminLotAPI(
         return ResponseEntity.ok(lots)
     }
 
-    override fun archiveLot(lotId: String): ResponseEntity<AdminLotResponse> {
-        val archivedLot = lotService.archiveLot(lotId)
-            ?: return ResponseEntity.notFound().build()
-        val adminResponse = conversionService.convert(archivedLot, AdminLotResponse::class.java)!!
-        return ResponseEntity.ok(adminResponse)
-    }
-
-    override fun unarchiveLot(lotId: String): ResponseEntity<AdminLotResponse> {
-        val unarchivedLot = lotService.unarchiveLot(lotId)
-            ?: return ResponseEntity.notFound().build()
-        val adminResponse = conversionService.convert(unarchivedLot, AdminLotResponse::class.java)!!
+    override fun setHiddenStatus(
+        lotId: String,
+        request: AdminHiddenRequest
+    ): ResponseEntity<AdminLotResponse> {
+        val updatedLot = if (request.hidden) {
+            lotService.archiveLot(lotId)
+        } else {
+            lotService.unarchiveLot(lotId)
+        }
+        updatedLot ?: return ResponseEntity.notFound().build()
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(adminResponse)
     }
 }

@@ -43,6 +43,10 @@ data class AdminUpdateStatusRequest(
     val status: LotStatus
 )
 
+data class AdminHiddenRequest(
+    val hidden: Boolean
+)
+
 data class AdminVehicleInfoRequest(
     val vin: String? = null,
     val make: String,

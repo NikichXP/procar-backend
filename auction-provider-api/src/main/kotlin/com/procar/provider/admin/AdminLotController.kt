@@ -43,9 +43,9 @@ interface AdminLotController {
         @RequestParam status: LotStatus?
     ): ResponseEntity<AdminPaginatedLotsResponse>
 
-    @PostMapping("/{lotId}/archive")
-    fun archiveLot(@PathVariable lotId: String): ResponseEntity<AdminLotResponse>
-
-    @PostMapping("/{lotId}/unarchive")
-    fun unarchiveLot(@PathVariable lotId: String): ResponseEntity<AdminLotResponse>
+    @PostMapping("/{lotId}/hidden")
+    fun setHiddenStatus(
+        @PathVariable lotId: String,
+        @RequestBody request: AdminHiddenRequest
+    ): ResponseEntity<AdminLotResponse>
 }

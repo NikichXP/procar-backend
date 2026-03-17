@@ -1,3 +1,6 @@
 spring:
   application:
     name: procar-gateway
+
+connector:
+  auction-provider-procar-url: http://localhost:8081
