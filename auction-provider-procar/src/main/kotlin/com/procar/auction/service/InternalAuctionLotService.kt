@@ -1,7 +1,7 @@
 package com.procar.auction.service
 
-import com.procar.auction.api.admin.AdminLotResponse
-import com.procar.auction.api.admin.AdminPaginatedLotsResponse
+import com.procar.provider.admin.AdminLotResponse
+import com.procar.provider.admin.AdminPaginatedLotsResponse
 import com.procar.auction.document.LotDocument
 import com.procar.auction.repository.LotRepository
 import com.procar.provider.common.PaginationResponse
@@ -224,7 +224,7 @@ class InternalAuctionLotService(
         val lotsToReturn = if (hasMore) paginatedLots.dropLast(1) else paginatedLots
         
         val adminLots = lotsToReturn.map { lot ->
-            AdminLotResponse.fromLotDocument(lot)
+            conversionService.convert(lot, AdminLotResponse::class.java)!!
         }
         
         val nextCursor = if (hasMore) {

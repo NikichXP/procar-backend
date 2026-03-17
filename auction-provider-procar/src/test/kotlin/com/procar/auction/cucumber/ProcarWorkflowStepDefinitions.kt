@@ -1,6 +1,19 @@
 package com.procar.auction.cucumber
 
-import com.procar.auction.api.admin.*
+import com.procar.provider.admin.AdminAuctionInfoRequest
+import com.procar.provider.admin.AdminCreateLotRequest
+import com.procar.provider.admin.AdminDocumentRequest
+import com.procar.provider.admin.AdminEngineInfoRequest
+import com.procar.provider.admin.AdminFeeRequest
+import com.procar.provider.admin.AdminInspectionInfoRequest
+import com.procar.provider.admin.AdminLocationInfoRequest
+import com.procar.provider.admin.AdminLotMetadataRequest
+import com.procar.provider.admin.AdminLotResponse
+import com.procar.provider.admin.AdminSellerInfoRequest
+import com.procar.provider.admin.AdminShippingInfoRequest
+import com.procar.provider.admin.AdminVehicleHistoryRequest
+import com.procar.provider.admin.AdminVehicleImageRequest
+import com.procar.provider.admin.AdminVehicleInfoRequest
 import com.procar.provider.bid.BidType
 import com.procar.provider.bid.PlaceBidRequest
 import com.procar.provider.common.GeoCoordinates

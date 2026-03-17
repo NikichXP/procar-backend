@@ -1,53 +1,52 @@
 package com.procar.auction.api.admin
 
+import com.procar.auction.document.LotDocument
 import com.procar.auction.service.InternalAuctionLotService
+import com.procar.provider.admin.AdminCreateLotRequest
+import com.procar.provider.admin.AdminLotController
+import com.procar.provider.admin.AdminLotResponse
+import com.procar.provider.admin.AdminPaginatedLotsResponse
+import com.procar.provider.admin.AdminUpdateLotRequest
+import com.procar.provider.admin.AdminUpdateStatusRequest
 import com.procar.provider.lot.LotStatus
-import jakarta.validation.Valid
+import org.springframework.core.convert.ConversionService
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/admin/lots")
 class AdminLotAPI(
-    private val lotService: InternalAuctionLotService
-) {
+    private val lotService: InternalAuctionLotService,
+    private val conversionService: ConversionService
+) : AdminLotController {
 
-    @PostMapping
-    fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<AdminLotResponse> {
-        val lotDocument = request.toLotDocument()
+    override fun createLot(request: AdminCreateLotRequest): ResponseEntity<AdminLotResponse> {
+        val lotDocument = conversionService.convert(request, LotDocument::class.java)!!
         val savedLot = lotService.createLot(lotDocument)
-        return ResponseEntity.ok(AdminLotResponse.fromLotDocument(savedLot))
+        val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(adminResponse)
     }
 
-    @GetMapping("/{lotId}")
-    fun getLot(@PathVariable lotId: String): ResponseEntity<AdminLotResponse> {
+    override fun getLot(lotId: String): ResponseEntity<AdminLotResponse> {
         val lot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(AdminLotResponse.fromLotDocument(lot))
+        val adminResponse = conversionService.convert(lot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(adminResponse)
     }
 
-    @PutMapping("/{lotId}")
-    fun updateLot(
-        @PathVariable lotId: String,
-        @Valid @RequestBody request: AdminUpdateLotRequest
+    override fun updateLot(
+        lotId: String,
+        request: AdminUpdateLotRequest
     ): ResponseEntity<AdminLotResponse> {
         val existingLot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
         
-        val updatedLot = lotService.updateLot(lotId, request.toLotDocument(existingLot))
-        return ResponseEntity.ok(AdminLotResponse.fromLotDocument(updatedLot))
+        val updatedLot = conversionService.convert(Pair(request, existingLot), LotDocument::class.java)!!
+        val savedLot = lotService.updateLot(lotId, updatedLot)
+        val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(adminResponse)
     }
 
-    @DeleteMapping("/{lotId}")
-    fun deleteLot(@PathVariable lotId: String): ResponseEntity<Void> {
+    override fun deleteLot(lotId: String): ResponseEntity<Void> {
         val success = lotService.deleteLot(lotId)
         return if (success) {
             ResponseEntity.noContent().build()
@@ -56,37 +55,36 @@ class AdminLotAPI(
         }
     }
 
-    @PostMapping("/{lotId}/status")
-    fun updateLotStatus(
-        @PathVariable lotId: String,
-        @RequestBody request: AdminUpdateStatusRequest
+    override fun updateLotStatus(
+        lotId: String,
+        request: AdminUpdateStatusRequest
     ): ResponseEntity<AdminLotResponse> {
         val updatedLot = lotService.updateLotStatus(lotId, request.status)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(AdminLotResponse.fromLotDocument(updatedLot))
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(adminResponse)
     }
 
-    @GetMapping
-    fun getAllLots(
-        @RequestParam cursor: String? = null,
-        @RequestParam(defaultValue = "20") limit: Int,
-        @RequestParam status: LotStatus?
+    override fun getAllLots(
+        cursor: String?,
+        limit: Int,
+        status: LotStatus?
     ): ResponseEntity<AdminPaginatedLotsResponse> {
         val lots = lotService.getAllLots(cursor, limit, status)
         return ResponseEntity.ok(lots)
     }
 
-    @PostMapping("/{lotId}/archive")
-    fun archiveLot(@PathVariable lotId: String): ResponseEntity<AdminLotResponse> {
+    override fun archiveLot(lotId: String): ResponseEntity<AdminLotResponse> {
         val archivedLot = lotService.archiveLot(lotId)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(AdminLotResponse.fromLotDocument(archivedLot))
+        val adminResponse = conversionService.convert(archivedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(adminResponse)
     }
 
-    @PostMapping("/{lotId}/unarchive")
-    fun unarchiveLot(@PathVariable lotId: String): ResponseEntity<AdminLotResponse> {
+    override fun unarchiveLot(lotId: String): ResponseEntity<AdminLotResponse> {
         val unarchivedLot = lotService.unarchiveLot(lotId)
             ?: return ResponseEntity.notFound().build()
-        return ResponseEntity.ok(AdminLotResponse.fromLotDocument(unarchivedLot))
+        val adminResponse = conversionService.convert(unarchivedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(adminResponse)
     }
 }
