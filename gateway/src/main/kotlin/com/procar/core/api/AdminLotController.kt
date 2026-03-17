@@ -1,6 +1,6 @@
 package com.procar.core.api
 
-import com.procar.core.service.AdminLotConnectorService
+import com.procar.core.service.admin.AdminLotConnectorService
 import com.procar.provider.admin.AdminCreateLotRequest
 import com.procar.provider.admin.AdminLotController
 import com.procar.provider.admin.AdminLotResponse

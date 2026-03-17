@@ -22,8 +22,6 @@ class LotAPITest {
     @MockBean
     private lateinit var lotService: LotService
 
-    private val objectMapper = jacksonObjectMapper()
-
     @Test
     fun `getLots should call service with correct parameters`() {
         // Given

@@ -1,4 +1,4 @@
-package com.procar.core.service
+package com.procar.core.service.admin
 
 import com.procar.provider.admin.AdminCreateLotRequest
 import com.procar.provider.admin.AdminLotController
