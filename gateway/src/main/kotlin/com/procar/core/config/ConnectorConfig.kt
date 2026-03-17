@@ -1,6 +1,9 @@
 package com.procar.core.config
 
+import com.procar.provider.admin.AdminBidController
 import com.procar.provider.admin.AdminLotController
+import com.procar.provider.InternalBidAPI
+import com.procar.provider.InternalLotAPI
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -27,6 +30,30 @@ class ConnectorConfig {
             .builderFor(WebClientAdapter.create(webClient))
             .build()
         return factory.createClient(AdminLotController::class.java)
+    }
+
+    @Bean("adminBidHttpClient")
+    fun adminBidController(webClient: WebClient): AdminBidController {
+        val factory = HttpServiceProxyFactory
+            .builderFor(WebClientAdapter.create(webClient))
+            .build()
+        return factory.createClient(AdminBidController::class.java)
+    }
+
+    @Bean("internalBidHttpClient")
+    fun internalBidAPI(webClient: WebClient): InternalBidAPI {
+        val factory = HttpServiceProxyFactory
+            .builderFor(WebClientAdapter.create(webClient))
+            .build()
+        return factory.createClient(InternalBidAPI::class.java)
+    }
+
+    @Bean("internalLotHttpClient")
+    fun internalLotAPI(webClient: WebClient): InternalLotAPI {
+        val factory = HttpServiceProxyFactory
+            .builderFor(WebClientAdapter.create(webClient))
+            .build()
+        return factory.createClient(InternalLotAPI::class.java)
     }
 }
 
