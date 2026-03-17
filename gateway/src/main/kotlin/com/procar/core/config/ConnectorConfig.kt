@@ -13,6 +13,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 @EnableConfigurationProperties(ConnectorProperties::class)
 class ConnectorConfig {
 
+    // TODO this one is bound to only one provider, to be refactored in the future
     @Bean
     fun webClient(connectorProperties: ConnectorProperties): WebClient {
         return WebClient.builder()
@@ -23,7 +24,7 @@ class ConnectorConfig {
     @Bean("adminLotHttpClient")
     fun adminLotController(webClient: WebClient): AdminLotController {
         val factory = HttpServiceProxyFactory
-            .builder(WebClientAdapter.forClient(webClient))
+            .builderFor(WebClientAdapter.create(webClient))
             .build()
         return factory.createClient(AdminLotController::class.java)
     }
