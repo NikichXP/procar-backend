@@ -9,16 +9,15 @@ import org.mockito.kotlin.argThat
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.get
+import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(controllers = [LotAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [LotAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
 class LotAPITest {
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private lateinit var webTestClient: WebTestClient
 
     @MockBean
     private lateinit var lotService: LotService
@@ -35,9 +34,9 @@ class LotAPITest {
         whenever(lotService.countLots(any<LotSearchRequest>())).thenReturn(totalCount)
 
         // When
-        mockMvc.get("/lots").andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/lots")
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(lotService).getLots(argThat<LotSearchRequest> { request ->
@@ -58,9 +57,9 @@ class LotAPITest {
         whenever(lotService.countLots(any<LotSearchRequest>())).thenReturn(totalCount)
 
         // When
-        mockMvc.get("/lots").andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/lots")
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(lotService).getLots(argThat<LotSearchRequest> { request ->
@@ -78,9 +77,9 @@ class LotAPITest {
         whenever(lotService.getLotDetail(lotId)).thenReturn(null)
 
         // When
-        mockMvc.get("/lots/{lotId}", lotId).andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/lots/{lotId}", lotId)
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(lotService).getLotDetail(lotId)

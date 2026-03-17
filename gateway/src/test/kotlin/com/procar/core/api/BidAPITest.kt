@@ -10,19 +10,17 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.post
+import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(controllers = [BidAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [BidAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
 class BidAPITest {
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private lateinit var webTestClient: WebTestClient
 
     @MockBean
     private lateinit var bidService: BidService
@@ -53,15 +51,13 @@ class BidAPITest {
         whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage)
 
         // When
-        mockMvc.get("/lots/{lotId}/bids", lotId) {
-            param("page", "0")
-            param("size", "20")
-        }.andExpect {
-            status { isOk() }
-            content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$.content[0].lotId") { value(lotId) }
-            jsonPath("$.content[0].amount") { value(15000.0) }
-        }
+        webTestClient.get().uri("/lots/{lotId}/bids?page=0&size=20", lotId)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.content[0].lotId").isEqualTo(lotId)
+            .jsonPath("$.content[0].amount").isEqualTo(15000.0)
 
         // Then
         verify(bidService).getBidHistory(lotId, 0, 20)
@@ -82,9 +78,9 @@ class BidAPITest {
         whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage)
 
         // When
-        mockMvc.get("/lots/{lotId}/bids", lotId).andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/lots/{lotId}/bids", lotId)
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(bidService).getBidHistory(lotId, 0, 20)
@@ -108,16 +104,16 @@ class BidAPITest {
         whenever(bidService.placeBid(lotId, bidRequest)).thenReturn(mockBid)
 
         // When
-        mockMvc.post("/lots/{lotId}/bids", lotId) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(bidRequest)
-        }.andExpect {
-            status { isCreated() }
-            content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$.id") { value("new-bid-id") }
-            jsonPath("$.lotId") { value(lotId) }
-            jsonPath("$.amount") { value(16000.0) }
-        }
+        webTestClient.post().uri("/lots/{lotId}/bids", lotId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(bidRequest))
+            .exchange()
+            .expectStatus().isCreated
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.id").isEqualTo("new-bid-id")
+            .jsonPath("$.lotId").isEqualTo(lotId)
+            .jsonPath("$.amount").isEqualTo(16000.0)
 
         // Then
         verify(bidService).placeBid(lotId, bidRequest)
@@ -131,12 +127,11 @@ class BidAPITest {
 
         // When & Then
         // With security disabled, @PreAuthorize is not enforced
-        mockMvc.post("/lots/{lotId}/bids", lotId) {
-            contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(bidRequest)
-        }.andExpect {
-            status { isCreated() }
-        }
+        webTestClient.post().uri("/lots/{lotId}/bids", lotId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(objectMapper.writeValueAsString(bidRequest))
+            .exchange()
+            .expectStatus().isCreated
 
         // Then
         verify(bidService).placeBid(lotId, bidRequest)
@@ -151,12 +146,11 @@ class BidAPITest {
 
         // When & Then
         // With no validation configured, the request will be processed
-        mockMvc.post("/lots/{lotId}/bids", lotId) {
-            contentType = MediaType.APPLICATION_JSON
-            content = invalidRequest
-        }.andExpect {
-            status { isCreated() }
-        }
+        webTestClient.post().uri("/lots/{lotId}/bids", lotId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(invalidRequest)
+            .exchange()
+            .expectStatus().isCreated
 
         // Then
         verify(bidService).placeBid(any(), any())

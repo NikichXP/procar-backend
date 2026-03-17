@@ -7,18 +7,16 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.security.test.context.support.WithMockUser
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.delete
-import org.springframework.test.web.servlet.get
+import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(controllers = [UserAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [UserAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
 class UserAPITest {
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private lateinit var webTestClient: WebTestClient
 
     @MockBean
     private lateinit var userService: UserService
@@ -41,9 +39,9 @@ class UserAPITest {
         whenever(userService.getUserBids(status, page, size)).thenReturn(mockUserBidPage)
 
         // When
-        mockMvc.get("/users/me/bids").andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/users/me/bids")
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(userService).getUserBids(null, 0, 20) // Verify default parameters
@@ -64,9 +62,9 @@ class UserAPITest {
         whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage)
 
         // When
-        mockMvc.get("/users/me/bids").andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/users/me/bids")
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(userService).getUserBids(null, 0, 20)
@@ -79,9 +77,9 @@ class UserAPITest {
         whenever(userService.getUserWatchlist()).thenReturn(emptyList())
 
         // When
-        mockMvc.get("/users/me/watchlist").andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/users/me/watchlist")
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(userService).getUserWatchlist()
@@ -96,9 +94,9 @@ class UserAPITest {
         whenever(userService.removeFromWatchlist(lotId)).thenAnswer {}
 
         // When
-        mockMvc.delete("/users/me/watchlist/{lotId}", lotId).andExpect {
-            status { isNoContent() }
-        }
+        webTestClient.delete().uri("/users/me/watchlist/{lotId}", lotId)
+            .exchange()
+            .expectStatus().isNoContent
 
         // Then
         verify(userService).removeFromWatchlist(lotId)

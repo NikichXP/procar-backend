@@ -7,17 +7,16 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.get
+import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebMvcTest(controllers = [CarCatalogAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [CarCatalogAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
 class CarCatalogAPITest {
 
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    private lateinit var webTestClient: WebTestClient
 
     @MockBean
     private lateinit var catalogService: CatalogService
@@ -44,16 +43,15 @@ class CarCatalogAPITest {
         whenever(catalogService.getBrands(query)).thenReturn(mockBrands)
 
         // When
-        mockMvc.get("/catalog/brand") {
-            param("query", query)
-        }.andExpect {
-            status { isOk() }
-            content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$[0].id") { value("bmw") }
-            jsonPath("$[0].name") { value("BMW") }
-            jsonPath("$[0].lotsCount") { value(42) }
-            jsonPath("$[1].id") { value("bentley") }
-        }
+        webTestClient.get().uri("/catalog/brand?query={query}", query)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$[0].id").isEqualTo("bmw")
+            .jsonPath("$[0].name").isEqualTo("BMW")
+            .jsonPath("$[0].lotsCount").isEqualTo(42)
+            .jsonPath("$[1].id").isEqualTo("bentley")
 
         // Then
         verify(catalogService).getBrands(query)
@@ -74,10 +72,11 @@ class CarCatalogAPITest {
         whenever(catalogService.getBrands(null)).thenReturn(mockBrands)
 
         // When
-        mockMvc.get("/catalog/brand").andExpect {
-            status { isOk() }
-            jsonPath("$[0].id") { value("audi") }
-        }
+        webTestClient.get().uri("/catalog/brand")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$[0].id").isEqualTo("audi")
 
         // Then
         verify(catalogService).getBrands(null)
@@ -106,15 +105,14 @@ class CarCatalogAPITest {
         whenever(catalogService.getBrandModels(brandId, query)).thenReturn(mockModels)
 
         // When
-        mockMvc.get("/catalog/brand/{brandId}/models", brandId) {
-            param("query", query)
-        }.andExpect {
-            status { isOk() }
-            content { contentType(MediaType.APPLICATION_JSON) }
-            jsonPath("$[0].id") { value("x5") }
-            jsonPath("$[0].brandId") { value(brandId) }
-            jsonPath("$[0].lotsCount") { value(12) }
-        }
+        webTestClient.get().uri("/catalog/brand/{brandId}/models?query={query}", brandId, query)
+            .exchange()
+            .expectStatus().isOk
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$[0].id").isEqualTo("x5")
+            .jsonPath("$[0].brandId").isEqualTo(brandId)
+            .jsonPath("$[0].lotsCount").isEqualTo(12)
 
         // Then
         verify(catalogService).getBrandModels(brandId, query)
@@ -136,11 +134,12 @@ class CarCatalogAPITest {
         whenever(catalogService.getBrandModels(brandId, null)).thenReturn(mockModels)
 
         // When
-        mockMvc.get("/catalog/brand/{brandId}/models", brandId).andExpect {
-            status { isOk() }
-            jsonPath("$[0].id") { value("a4") }
-            jsonPath("$[0].brandId") { value(brandId) }
-        }
+        webTestClient.get().uri("/catalog/brand/{brandId}/models", brandId)
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$[0].id").isEqualTo("a4")
+            .jsonPath("$[0].brandId").isEqualTo(brandId)
 
         // Then
         verify(catalogService).getBrandModels(brandId, null)
@@ -154,9 +153,9 @@ class CarCatalogAPITest {
         whenever(catalogService.getBrandModels(brandId, null)).thenReturn(emptyList())
 
         // When
-        mockMvc.get("/catalog/brand/{brandId}/models", brandId).andExpect {
-            status { isOk() }
-        }
+        webTestClient.get().uri("/catalog/brand/{brandId}/models", brandId)
+            .exchange()
+            .expectStatus().isOk
 
         // Then
         verify(catalogService).getBrandModels(brandId, null)
