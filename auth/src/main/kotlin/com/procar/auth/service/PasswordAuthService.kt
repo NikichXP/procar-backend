@@ -1,6 +1,6 @@
 package com.procar.auth.service
 
-import com.procar.auth.dto.AuthResult
+import com.procar.auth.api.dto.AuthResult
 import com.procar.auth.entity.PasswordAuthReason
 import com.procar.auth.repo.PasswordAuthRepository
 import org.springframework.stereotype.Service

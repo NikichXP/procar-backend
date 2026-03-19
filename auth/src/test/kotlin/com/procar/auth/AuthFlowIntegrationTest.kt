@@ -1,10 +1,10 @@
 package com.procar.auth
 
-import com.procar.auth.dto.AccessToken
-import com.procar.auth.dto.AuthResult
-import com.procar.auth.dto.LoginRequest
-import com.procar.auth.dto.RefreshRequest
-import com.procar.auth.dto.RegisterRequest
+import com.procar.auth.api.dto.AccessToken
+import com.procar.auth.api.dto.AuthResult
+import com.procar.auth.api.dto.LoginRequest
+import com.procar.auth.api.dto.RefreshRequest
+import com.procar.auth.api.dto.RegisterRequest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

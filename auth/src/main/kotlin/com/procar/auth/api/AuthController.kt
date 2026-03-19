@@ -1,31 +1,27 @@
-package com.procar.auth.controller
+package com.procar.auth.api
 
-import com.procar.auth.dto.AccessToken
-import com.procar.auth.dto.AuthResult
-import com.procar.auth.dto.LoginRequest
-import com.procar.auth.dto.RefreshRequest
-import com.procar.auth.dto.RegisterRequest
+import com.procar.auth.api.dto.AccessToken
+import com.procar.auth.api.dto.AuthResult
+import com.procar.auth.api.dto.LoginRequest
+import com.procar.auth.api.dto.RefreshRequest
+import com.procar.auth.api.dto.RegisterRequest
 import com.procar.auth.service.AuthService
 import com.procar.auth.service.PasswordAuthService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/auth")
-class AuthController(
+class AuthControllerImpl(
     private val authService: AuthService,
     private val passwordAuthService: PasswordAuthService
-) {
+) : AuthController {
 
-    @PostMapping("/login")
-    fun login(
+    override fun login(
         @Valid @RequestBody(required = false) loginRequest: LoginRequest?,
         @RequestParam(required = false) username: String?,
         @RequestParam(required = false) password: String?
@@ -42,8 +38,7 @@ class AuthController(
         }
     }
 
-    @PostMapping("/access")
-    fun refreshAccess(
+    override fun refreshAccess(
         @Valid @RequestBody(required = false) refreshRequest: RefreshRequest?,
         @RequestParam(required = false) refreshToken: String?
     ): ResponseEntity<AccessToken> {
@@ -57,8 +52,7 @@ class AuthController(
         }
     }
 
-    @PostMapping("/logout")
-    fun logout(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Void> {
+    override fun logout(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Void> {
         val token = authorization?.removePrefix("Bearer ")
         return if (token != null && authService.validateAccessToken(token)) {
             authService.logout(token)
@@ -68,8 +62,7 @@ class AuthController(
         }
     }
 
-    @PostMapping("/logout-all")
-    fun logoutAllDevices(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Map<String, Any>> {
+    override fun logoutAllDevices(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Map<String, Any>> {
         val token = authorization?.removePrefix("Bearer ")
         return if (token != null && authService.validateAccessToken(token)) {
             val tokenData = authService.getAccessTokenData(token)
@@ -92,8 +85,7 @@ class AuthController(
         }
     }
 
-    @PostMapping("/register")
-    fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResult> {
+    override fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResult> {
         return try {
             val authReason = passwordAuthService.registerUser(
                 userId = request.userId,

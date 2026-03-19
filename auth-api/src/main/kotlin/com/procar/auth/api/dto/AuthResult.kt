@@ -1,4 +1,4 @@
-package com.procar.auth.dto
+package com.procar.auth.api.dto
 
 data class AuthResult(
 	val success: Boolean,

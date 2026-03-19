@@ -18,6 +18,7 @@ tasks.named<Jar>("jar") {
 }
 
 dependencies {
+	implementation(project(":auth-api"))
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")

@@ -1,4 +1,4 @@
-package com.procar.auth.dto
+package com.procar.auth.api.dto
 
 import java.time.Instant
 

@@ -1,7 +1,7 @@
 package com.procar.auth.service
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.procar.auth.dto.AccessToken
+import com.procar.auth.api.dto.AccessToken
 import com.procar.auth.entity.AuthReason
 import com.procar.auth.repo.RefreshTokenRepository
 import org.springframework.stereotype.Service
