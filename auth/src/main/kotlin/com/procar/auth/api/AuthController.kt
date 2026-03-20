@@ -5,6 +5,7 @@ import com.procar.auth.api.dto.AuthResult
 import com.procar.auth.api.dto.LoginRequest
 import com.procar.auth.api.dto.RefreshRequest
 import com.procar.auth.api.dto.RegisterRequest
+import com.procar.auth.api.dto.TokenValidationResult
 import com.procar.auth.service.AuthService
 import com.procar.auth.service.PasswordAuthService
 import jakarta.validation.Valid
@@ -99,6 +100,15 @@ class AuthControllerImpl(
             ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(AuthResult(false, "Registration failed: ${e.message}"))
         }
+    }
+
+    override fun validateToken(authorization: String): ResponseEntity<TokenValidationResult> {
+        val token = authorization.removePrefix("Bearer ").trim()
+        val tokenData = authService.getAccessTokenData(token)
+        return if (tokenData != null && !tokenData.isExpired())
+            ResponseEntity.ok(TokenValidationResult(valid = true, userId = tokenData.authReason?.userId))
+        else
+            ResponseEntity.ok(TokenValidationResult(valid = false, userId = null))
     }
 
     private fun extractLoginRequest(

@@ -5,6 +5,7 @@ import com.procar.core.api.dto.BidPage
 import com.procar.core.api.dto.BidRequest
 import com.procar.core.service.BidService
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -26,10 +27,9 @@ class BidAPI(
     @ResponseStatus(HttpStatus.CREATED)
     fun placeBid(
         @PathVariable lotId: String,
-        @RequestBody bidRequest: BidRequest
+        @RequestBody bidRequest: BidRequest,
+        authentication: Authentication
     ): Bid {
-        // TODO: Extract bidderId from security context when authentication is properly configured
-        val bidderId = "test-user"
-        return bidService.placeBid(lotId, bidRequest, bidderId)
+        return bidService.placeBid(lotId, bidRequest, authentication.name)
     }
 }

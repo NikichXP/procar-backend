@@ -4,6 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.procar.core.api.dto.Bid
 import com.procar.core.api.dto.BidPage
 import com.procar.core.api.dto.BidRequest
+import com.procar.core.config.SecurityConfig
+import com.procar.core.service.AuthService
 import com.procar.core.service.BidService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -12,10 +14,13 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockUser
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebFluxTest(controllers = [BidAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [BidAPI::class])
+@Import(SecurityConfig::class)
 class BidAPITest {
 
     @Autowired
@@ -23,6 +28,9 @@ class BidAPITest {
 
     @MockBean
     private lateinit var bidService: BidService
+
+    @MockBean
+    private lateinit var authService: AuthService
 
     private val objectMapper = jacksonObjectMapper()
 
@@ -46,7 +54,7 @@ class BidAPITest {
                 )
             )
         )
-        
+
         whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage)
 
         // When
@@ -73,7 +81,7 @@ class BidAPITest {
             totalPages = 0,
             content = emptyList()
         )
-        
+
         whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage)
 
         // When
@@ -94,15 +102,15 @@ class BidAPITest {
             id = "new-bid-id",
             lotId = lotId,
             amount = 16000.0,
-            bidderId = "current-user",
+            bidderId = "user",
             placedAt = "2023-01-01T10:05:00Z",
             isWinning = true
         )
-        
-        whenever(bidService.placeBid(lotId, bidRequest, "test-user")).thenReturn(mockBid)
+
+        whenever(bidService.placeBid(lotId, bidRequest, "user")).thenReturn(mockBid)
 
         // When
-        webTestClient.post().uri("/lots/{lotId}/bids", lotId)
+        webTestClient.mutateWith(mockUser()).post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(objectMapper.writeValueAsString(bidRequest))
             .exchange()
@@ -114,35 +122,31 @@ class BidAPITest {
             .jsonPath("$.amount").isEqualTo(16000.0)
 
         // Then
-        verify(bidService).placeBid(lotId, bidRequest, "test-user")
+        verify(bidService).placeBid(lotId, bidRequest, "user")
     }
 
     @Test
-    fun `temporary disabled security - should work for now but TODO to fix that ASAP`() {
+    fun `placeBid should return 401 when not authenticated`() {
         // Given
         val lotId = "test-lot-id"
         val bidRequest = BidRequest(amount = 16000.0)
 
-        // When & Then - With security disabled, the request should work
+        // When & Then
         webTestClient.post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(objectMapper.writeValueAsString(bidRequest))
             .exchange()
-            .expectStatus().isCreated
-
-        // Then
-        verify(bidService).placeBid(lotId, bidRequest, "test-user")
+            .expectStatus().isUnauthorized
     }
 
     @Test
     fun `placeBid should return 400 for invalid request`() {
         // Given
         val lotId = "test-lot-id"
-        val invalidRequest = """{"amount": -1000}""" // Negative amount
+        val invalidRequest = """{"amount": -1000}"""
 
         // When & Then
-        // With no validation configured, the request will be processed
-        webTestClient.post().uri("/lots/{lotId}/bids", lotId)
+        webTestClient.mutateWith(mockUser()).post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(invalidRequest)
             .exchange()

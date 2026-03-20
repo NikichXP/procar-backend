@@ -2,6 +2,8 @@ package com.procar.core.api
 
 import com.procar.core.api.dto.Brand
 import com.procar.core.api.dto.Model
+import com.procar.core.config.SecurityConfig
+import com.procar.core.service.AuthService
 import com.procar.core.service.CatalogService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
@@ -9,10 +11,12 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebFluxTest(controllers = [CarCatalogAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [CarCatalogAPI::class])
+@Import(SecurityConfig::class)
 class CarCatalogAPITest {
 
     @Autowired
@@ -20,6 +24,9 @@ class CarCatalogAPITest {
 
     @MockBean
     private lateinit var catalogService: CatalogService
+
+    @MockBean
+    private lateinit var authService: AuthService
 
     @Test
     fun `getBrands should call service with query parameter`() {

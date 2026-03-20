@@ -2,6 +2,8 @@ package com.procar.core.api
 
 import com.procar.core.api.dto.BidStatus
 import com.procar.core.api.dto.UserBidPage
+import com.procar.core.config.SecurityConfig
+import com.procar.core.service.AuthService
 import com.procar.core.service.UserService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
@@ -9,10 +11,12 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.security.test.context.support.WithMockUser
+import org.springframework.context.annotation.Import
+import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockUser
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebFluxTest(controllers = [UserAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [UserAPI::class])
+@Import(SecurityConfig::class)
 class UserAPITest {
 
     @Autowired
@@ -21,34 +25,32 @@ class UserAPITest {
     @MockBean
     private lateinit var userService: UserService
 
+    @MockBean
+    private lateinit var authService: AuthService
+
     @Test
-    @WithMockUser
     fun `getUserBids should call service with correct parameters`() {
         // Given
-        val status = BidStatus.WINNING
-        val page = 1
-        val size = 20
         val mockUserBidPage = UserBidPage(
-            page = page,
-            size = size,
+            page = 0,
+            size = 20,
             totalElements = 0,
             totalPages = 0,
             content = emptyList()
         )
-        
-        whenever(userService.getUserBids(status, page, size)).thenReturn(mockUserBidPage)
+
+        whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage)
 
         // When
-        webTestClient.get().uri("/users/me/bids")
+        webTestClient.mutateWith(mockUser()).get().uri("/users/me/bids")
             .exchange()
             .expectStatus().isOk
 
         // Then
-        verify(userService).getUserBids(null, 0, 20) // Verify default parameters
+        verify(userService).getUserBids(null, 0, 20)
     }
 
     @Test
-    @WithMockUser
     fun `getUserBids should call service with default pagination`() {
         // Given
         val mockUserBidPage = UserBidPage(
@@ -58,11 +60,11 @@ class UserAPITest {
             totalPages = 0,
             content = emptyList()
         )
-        
+
         whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage)
 
         // When
-        webTestClient.get().uri("/users/me/bids")
+        webTestClient.mutateWith(mockUser()).get().uri("/users/me/bids")
             .exchange()
             .expectStatus().isOk
 
@@ -71,13 +73,12 @@ class UserAPITest {
     }
 
     @Test
-    @WithMockUser
     fun `getUserWatchlist should call service`() {
         // Given
         whenever(userService.getUserWatchlist()).thenReturn(emptyList())
 
         // When
-        webTestClient.get().uri("/users/me/watchlist")
+        webTestClient.mutateWith(mockUser()).get().uri("/users/me/watchlist")
             .exchange()
             .expectStatus().isOk
 
@@ -86,15 +87,14 @@ class UserAPITest {
     }
 
     @Test
-    @WithMockUser
     fun `removeFromWatchlist should call service`() {
         // Given
         val lotId = "lot1"
-        
+
         whenever(userService.removeFromWatchlist(lotId)).thenAnswer {}
 
         // When
-        webTestClient.delete().uri("/users/me/watchlist/{lotId}", lotId)
+        webTestClient.mutateWith(mockUser()).delete().uri("/users/me/watchlist/{lotId}", lotId)
             .exchange()
             .expectStatus().isNoContent
 

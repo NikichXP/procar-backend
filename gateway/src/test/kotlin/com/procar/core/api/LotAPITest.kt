@@ -2,6 +2,8 @@ package com.procar.core.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.procar.core.api.dto.LotSearchRequest
+import com.procar.core.config.SecurityConfig
+import com.procar.core.service.AuthService
 import com.procar.core.service.LotService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -11,9 +13,11 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.context.annotation.Import
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebFluxTest(controllers = [LotAPI::class], excludeAutoConfiguration = [org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration::class])
+@WebFluxTest(controllers = [LotAPI::class])
+@Import(SecurityConfig::class)
 class LotAPITest {
 
     @Autowired
@@ -21,6 +25,9 @@ class LotAPITest {
 
     @MockBean
     private lateinit var lotService: LotService
+
+    @MockBean
+    private lateinit var authService: AuthService
 
     @Test
     fun `getLots should call service with correct parameters`() {

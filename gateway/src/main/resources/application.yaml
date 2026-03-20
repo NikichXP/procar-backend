@@ -4,3 +4,4 @@ spring:
 
 connector:
   auction-provider-procar-url: http://localhost:8081
+  auth-url: http://localhost:8082

@@ -1,11 +1,13 @@
 package com.procar.core.config
 
+import com.procar.auth.api.AuthController
 import com.procar.provider.admin.AdminBidController
 import com.procar.provider.admin.AdminLotController
 import com.procar.provider.InternalBidAPI
 import com.procar.provider.InternalLotAPI
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
@@ -22,6 +24,21 @@ class ConnectorConfig {
         return WebClient.builder()
             .baseUrl(connectorProperties.auctionProviderProcarUrl)
             .build()
+    }
+
+    @Bean("authWebClient")
+    fun authWebClient(connectorProperties: ConnectorProperties): WebClient {
+        return WebClient.builder()
+            .baseUrl(connectorProperties.authUrl)
+            .build()
+    }
+
+    @Bean("authHttpClient")
+    fun authController(@Qualifier("authWebClient") webClient: WebClient): AuthController {
+        val factory = HttpServiceProxyFactory
+            .builderFor(WebClientAdapter.create(webClient))
+            .build()
+        return factory.createClient(AuthController::class.java)
     }
 
     @Bean("adminLotHttpClient")
@@ -59,5 +76,6 @@ class ConnectorConfig {
 
 @ConfigurationProperties(prefix = "connector")
 data class ConnectorProperties(
-    val auctionProviderProcarUrl: String = "http://localhost:8081"
+    val auctionProviderProcarUrl: String = "http://localhost:8081",
+    val authUrl: String = "http://localhost:8082"
 )
