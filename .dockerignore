@@ -1,0 +1,53 @@
+# Gradle (but keep wrapper)
+.gradle/
+
+# Build artifacts
+build/
+out/
+target/
+*.jar
+*.war
+*.ear
+*.class
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+HELP.md
+*.md
+docs/
+
+# Logs
+*.log
+logs/
+
+# Test reports
+reports/
+test-results/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker files (except the ones we need)
+Dockerfile*
+docker-compose.yaml
+.dockerignore
+
+# Scripts
+scripts/

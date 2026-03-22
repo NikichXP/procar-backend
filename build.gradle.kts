@@ -22,6 +22,12 @@ subprojects {
 	group = rootProject.group
 	version = rootProject.version
 	
+	// Set consistent JAR naming
+	tasks.withType<Jar> {
+		archiveBaseName.set("procar-${project.name}")
+		archiveVersion.set(rootProject.version.toString())
+	}
+	
 	extensions.configure<JavaPluginExtension> {
 		toolchain {
 			languageVersion.set(JavaLanguageVersion.of(21))

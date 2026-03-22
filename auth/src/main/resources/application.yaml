@@ -1,9 +1,13 @@
 spring:
   application:
     name: auth-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   data:
     mongodb:
-      uri: mongodb://localhost:27017/procar-auth
+      uri: ${MONGODB_URI:mongodb://localhost:27017/procar-auth}
+    redis:
+      uri: ${REDIS_URI:redis://localhost:6379}
 
 server:
   port: 8082

@@ -2,19 +2,21 @@ import org.gradle.jvm.tasks.Jar
 
 
 plugins {
-	id("org.springframework.boot")
 	kotlin("jvm")
 	kotlin("plugin.spring")
 }
 
-// Enable regular jar task
-tasks.named<Jar>("jar") {
+apply(plugin = "org.springframework.boot")
+apply(plugin = "io.spring.dependency-management")
+
+// Enable bootJar task
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
 	enabled = true
 	archiveClassifier.set("")
 }
 
-// Disable bootJar task to avoid Gradle 9.x compatibility issues
-tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+// Disable regular jar task
+tasks.named<Jar>("jar") {
 	enabled = false
 }
 

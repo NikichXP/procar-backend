@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # MongoDB for shared data
+  mongodb:
+    image: mongo:7.0
+    container_name: procar-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: procar
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - procar-network
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7.2-alpine
+    container_name: procar-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - procar-network
+
+  # Gateway Service
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: procar-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/procar-gateway?authSource=admin
+      REDIS_URI: redis://redis:6379
+      AUCTION_PROVIDER_PROCAR_URL: http://auction-provider-procar:8083
+      AUTH_URL: http://auth:8082
+    depends_on:
+      - mongodb
+      - redis
+      - auth
+      - auction-provider-procar
+    networks:
+      - procar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Auth Service
+  auth:
+    build:
+      context: .
+      dockerfile: auth/Dockerfile
+    container_name: procar-auth
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/procar-auth?authSource=admin
+      REDIS_URI: redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - procar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Auction Provider Procar Service
+  auction-provider-procar:
+    build:
+      context: .
+      dockerfile: auction-provider-procar/Dockerfile
+    container_name: procar-auction-provider-procar
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/auction_procar?authSource=admin
+      REDIS_URI: redis://redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - procar-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  procar-network:
+    driver: bridge
