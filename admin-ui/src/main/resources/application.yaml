@@ -1,0 +1,23 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: admin-ui
+  
+  security:
+    user:
+      name: admin
+      password: admin
+      roles: ADMIN
+
+# Vaadin configuration
+vaadin:
+  frontend:
+    directory: src/main/resources/frontend
+    output-directory: generated/frontend
+
+logging:
+  level:
+    com.procar.admin: DEBUG
+    org.springframework.security: INFO
