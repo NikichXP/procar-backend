@@ -29,6 +29,8 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .authorizeExchange { exchanges ->
                 exchanges
+                    .pathMatchers("/actuator/health").permitAll()
+                    .pathMatchers("/actuator/info").permitAll()
                     .pathMatchers("/auth/**").permitAll()
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
