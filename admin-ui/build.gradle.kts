@@ -5,18 +5,22 @@ plugins {
     kotlin("plugin.spring")
 }
 
-// Set build directory for this module to generated/
 layout.buildDirectory.set(file("generated"))
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
     
-    // Vaadin dependencies - simplified
+    implementation(project(":auction-provider-api"))
+    implementation(project(":auth-api"))
+    
     implementation("com.vaadin:vaadin-spring-boot-starter")
     
     developmentOnly("org.springframework.boot:spring-boot-devtools")

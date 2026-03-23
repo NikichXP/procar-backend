@@ -11,6 +11,10 @@ spring:
       password: admin
       roles: ADMIN
 
+# Gateway configuration
+gateway:
+  base-url: http://localhost:8080
+
 # Vaadin configuration
 vaadin:
   frontend:

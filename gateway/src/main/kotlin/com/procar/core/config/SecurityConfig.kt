@@ -34,6 +34,7 @@ class SecurityConfig(
                     .pathMatchers("/auth/**").permitAll()
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
+                    .pathMatchers("/api/admin/**").permitAll() // temporary that
                     .anyExchange().authenticated()
             }
             .addFilterAt(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)

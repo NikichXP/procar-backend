@@ -1,48 +1,43 @@
 package com.procar.admin.ui
 
+import com.procar.admin.service.GatewayClientService
+import com.procar.provider.admin.AdminLotResponse
+import com.procar.provider.bid.ProviderBid
 import com.vaadin.flow.component.Component
+import com.vaadin.flow.component.UI
+import com.vaadin.flow.component.button.Button
+import com.vaadin.flow.component.dialog.Dialog
+import com.vaadin.flow.component.formlayout.FormLayout
 import com.vaadin.flow.component.grid.Grid
 import com.vaadin.flow.component.html.H1
 import com.vaadin.flow.component.html.H2
-import com.vaadin.flow.component.orderedlayout.VerticalLayout
-import com.vaadin.flow.router.Route
-import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.notification.Notification
-import com.vaadin.flow.component.textfield.TextField
-import com.vaadin.flow.component.formlayout.FormLayout
-import com.vaadin.flow.component.dialog.Dialog
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment
-
-data class StubUser(val id: String, val name: String, val email: String, val role: String)
-data class StubLot(val id: String, val title: String, val status: String, val price: Double)
-data class StubBid(val id: String, val lotId: String, val userId: String, val amount: Double)
+import com.vaadin.flow.component.orderedlayout.VerticalLayout
+import com.vaadin.flow.component.textfield.TextField
+import com.vaadin.flow.router.Route
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 
 @Route("")
-class AdminView : VerticalLayout() {
+class AdminView(
+    private val gatewayClientService: GatewayClientService
+) : VerticalLayout() {
     
-    private val users = mutableListOf(
-        StubUser("1", "John Doe", "john@example.com", "ADMIN"),
-        StubUser("2", "Jane Smith", "jane@example.com", "USER"),
-        StubUser("3", "Bob Johnson", "bob@example.com", "USER")
-    )
-    
-    private val lots = mutableListOf(
-        StubLot("1", "2023 BMW M3", "ACTIVE", 75000.0),
-        StubLot("2", "2022 Mercedes C63", "ACTIVE", 68000.0),
-        StubLot("3", "2021 Audi RS5", "SOLD", 62000.0)
-    )
-    
-    private val bids = mutableListOf(
-        StubBid("1", "1", "2", 72000.0),
-        StubBid("2", "1", "3", 73000.0),
-        StubBid("3", "2", "2", 67000.0)
-    )
+    private val users = mutableListOf<String>()
+    private val lots = mutableListOf<AdminLotResponse>()
+    private val bids = mutableListOf<ProviderBid>()
     
     init {
         addClassName("admin-view")
         defaultHorizontalComponentAlignment = Alignment.CENTER
         
         add(H1("Procar Admin Dashboard"))
+        
+        // Load initial data
+        loadData()
         
         add(createUserSection())
         add(createLotSection())
@@ -55,12 +50,13 @@ class AdminView : VerticalLayout() {
         
         layout.add(H2("Users"))
         
-        val userGrid = Grid(StubUser::class.java)
+        val userGrid = Grid<String>()
         userGrid.setItems(users)
-        userGrid.setColumns("id", "name", "email", "role")
+        userGrid.addColumn { user -> user }.setHeader("User")
         
         val addButton = Button("Add User") { showAddUserDialog() }
         val refreshButton = Button("Refresh") { 
+            loadUsers()
             userGrid.setItems(users)
             Notification.show("Users refreshed")
         }
@@ -75,12 +71,16 @@ class AdminView : VerticalLayout() {
         
         layout.add(H2("Lots"))
         
-        val lotGrid = Grid(StubLot::class.java)
+        val lotGrid = Grid<AdminLotResponse>()
         lotGrid.setItems(lots)
-        lotGrid.setColumns("id", "title", "status", "price")
+        lotGrid.addColumn(AdminLotResponse::id).setHeader("ID")
+        lotGrid.addColumn(AdminLotResponse::title).setHeader("Title")
+        lotGrid.addColumn(AdminLotResponse::status).setHeader("Status")
+        lotGrid.addColumn { it.auction.currentBid }.setHeader("Current Bid")
         
         val addButton = Button("Add Lot") { showAddLotDialog() }
         val refreshButton = Button("Refresh") { 
+            loadLots()
             lotGrid.setItems(lots)
             Notification.show("Lots refreshed")
         }
@@ -95,12 +95,16 @@ class AdminView : VerticalLayout() {
         
         layout.add(H2("Bids"))
         
-        val bidGrid = Grid(StubBid::class.java)
+        val bidGrid = Grid<ProviderBid>()
         bidGrid.setItems(bids)
-        bidGrid.setColumns("id", "lotId", "userId", "amount")
+        bidGrid.addColumn(ProviderBid::id).setHeader("ID")
+        bidGrid.addColumn(ProviderBid::lotId).setHeader("Lot ID")
+        bidGrid.addColumn(ProviderBid::bidderId).setHeader("User ID")
+        bidGrid.addColumn(ProviderBid::amount).setHeader("Amount")
         
         val addButton = Button("Add Bid") { showAddBidDialog() }
         val refreshButton = Button("Refresh") { 
+            loadBids()
             bidGrid.setItems(bids)
             Notification.show("Bids refreshed")
         }
@@ -120,14 +124,9 @@ class AdminView : VerticalLayout() {
         val form = FormLayout(nameField, emailField, roleField)
         
         val saveButton = Button("Save") {
-            val newUser = StubUser(
-                id = (users.size + 1).toString(),
-                name = nameField.value,
-                email = emailField.value,
-                role = roleField.value
-            )
+            val newUser = nameField.value
             users.add(newUser)
-            Notification.show("User added: ${newUser.name}")
+            Notification.show("User added: $newUser")
             dialog.close()
         }
         
@@ -148,14 +147,8 @@ class AdminView : VerticalLayout() {
         val form = FormLayout(titleField, statusField, priceField)
         
         val saveButton = Button("Save") {
-            val newLot = StubLot(
-                id = (lots.size + 1).toString(),
-                title = titleField.value,
-                status = statusField.value,
-                price = priceField.value.toDoubleOrNull() ?: 0.0
-            )
-            lots.add(newLot)
-            Notification.show("Lot added: ${newLot.title}")
+            // TODO: Implement lot creation with proper AdminCreateLotRequest
+            Notification.show("Lot creation to be implemented")
             dialog.close()
         }
         
@@ -176,14 +169,8 @@ class AdminView : VerticalLayout() {
         val form = FormLayout(lotIdField, userIdField, amountField)
         
         val saveButton = Button("Save") {
-            val newBid = StubBid(
-                id = (bids.size + 1).toString(),
-                lotId = lotIdField.value,
-                userId = userIdField.value,
-                amount = amountField.value.toDoubleOrNull() ?: 0.0
-            )
-            bids.add(newBid)
-            Notification.show("Bid added: $${newBid.amount}")
+            // TODO: Implement bid creation
+            Notification.show("Bid creation to be implemented")
             dialog.close()
         }
         
@@ -191,5 +178,62 @@ class AdminView : VerticalLayout() {
         
         dialog.add(form, saveButton, cancelButton)
         dialog.open()
+    }
+    
+    private fun loadData() {
+        loadUsers()
+        loadLots()
+        loadBids()
+    }
+    
+    private fun loadUsers() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val userList = gatewayClientService.getUsers().toList()
+                UI.getCurrent().access {
+                    users.clear()
+                    users.addAll(userList)
+                }
+            } catch (error: Exception) {
+                UI.getCurrent().access {
+                    Notification.show("Error loading users: ${error.message}")
+                }
+            }
+        }
+    }
+    
+    private fun loadLots() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val lotList = gatewayClientService.getLots().toList()
+                UI.getCurrent().access {
+                    lots.clear()
+                    lots.addAll(lotList)
+                }
+            } catch (error: Exception) {
+                UI.getCurrent().access {
+                    Notification.show("Error loading lots: ${error.message}")
+                }
+            }
+        }
+    }
+    
+    private fun loadBids() {
+        // For now, load bids for first lot if available
+        if (lots.isNotEmpty()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val bidList = gatewayClientService.getBidsForLot(lots.first().id).toList()
+                    UI.getCurrent().access {
+                        bids.clear()
+                        bids.addAll(bidList)
+                    }
+                } catch (error: Exception) {
+                    UI.getCurrent().access {
+                        Notification.show("Error loading bids: ${error.message}")
+                    }
+                }
+            }
+        }
     }
 }
