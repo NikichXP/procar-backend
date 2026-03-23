@@ -1,20 +1,4 @@
 services:
-  # MongoDB for shared data
-  mongodb:
-    image: mongo:7.0
-    container_name: procar-mongodb
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: procar
-    volumes:
-      - mongodb_data:/data/db
-      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-    networks:
-      - procar-network
 
   # Redis for caching and session management
   redis:
@@ -40,12 +24,11 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      MONGODB_URI: mongodb://admin:password@mongodb:27017/procar-gateway?authSource=admin
+      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/?appName=${MONGO_APP_NAME}
       REDIS_URI: redis://redis:6379
       AUCTION_PROVIDER_PROCAR_URL: http://auction-provider-procar:8083
       AUTH_URL: http://auth:8082
     depends_on:
-      - mongodb
       - redis
       - auth
       - auction-provider-procar
@@ -68,10 +51,9 @@ services:
       - "8082:8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      MONGODB_URI: mongodb://admin:password@mongodb:27017/procar-auth?authSource=admin
+      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/?appName=${MONGO_APP_NAME}
       REDIS_URI: redis://redis:6379
     depends_on:
-      - mongodb
       - redis
     networks:
       - procar-network
@@ -92,10 +74,9 @@ services:
       - "8083:8083"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      MONGODB_URI: mongodb://admin:password@mongodb:27017/auction_procar?authSource=admin
+      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/?appName=${MONGO_APP_NAME}
       REDIS_URI: redis://redis:6379
     depends_on:
-      - mongodb
       - redis
     networks:
       - procar-network
@@ -106,8 +87,6 @@ services:
       retries: 3
 
 volumes:
-  mongodb_data:
-    driver: local
   redis_data:
     driver: local
 

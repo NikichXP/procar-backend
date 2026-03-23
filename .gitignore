@@ -17,3 +17,6 @@ auction-provider-procar/target/
 # vaadin generates those 2
 /src/
 /target/
+
+# Environment files
+.env
