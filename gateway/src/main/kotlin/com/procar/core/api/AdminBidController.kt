@@ -2,15 +2,10 @@ package com.procar.core.api
 
 import com.procar.core.service.admin.AdminBidConnectorService
 import com.procar.provider.admin.AdminBidController
-import com.procar.provider.bid.BidAnalyticsResponse
-import com.procar.provider.bid.BidHistoryResponse
+import com.procar.provider.bid.*
+import com.procar.provider.common.ApiResponse
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/admin/bids")
@@ -19,7 +14,7 @@ class AdminBidController(
 ) : AdminBidController {
 
     @GetMapping("/lot/{lotId}")
-    override fun getBidHistoryForLot(@PathVariable lotId: String): ResponseEntity<BidHistoryResponse> {
+    override fun getBidHistoryForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
         return adminBidConnectorService.getBidHistoryForLot(lotId)
     }
 
@@ -27,12 +22,12 @@ class AdminBidController(
     override fun getBidAnalyticsForLot(
         @PathVariable lotId: String,
         @RequestParam timeRange: String?
-    ): ResponseEntity<BidAnalyticsResponse> {
+    ): ResponseEntity<ApiResponse<BidAnalyticsResponse>> {
         return adminBidConnectorService.getBidAnalyticsForLot(lotId, timeRange)
     }
 
     @DeleteMapping("/lot/{lotId}")
-    override fun deleteAllBidsForLot(@PathVariable lotId: String): ResponseEntity<Void> {
+    override fun deleteAllBidsForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminBidConnectorService.deleteAllBidsForLot(lotId)
     }
 }

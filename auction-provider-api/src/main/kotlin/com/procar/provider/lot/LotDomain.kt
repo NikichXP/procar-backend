@@ -2,7 +2,7 @@ package com.procar.provider.lot
 
 import java.time.LocalDateTime
 
-data class ProviderLot(
+data class VehicleLot(
     val id: String,
     val providerId: String,
     val providerName: String,

@@ -32,6 +32,7 @@ class SecurityConfig(
                     .pathMatchers("/actuator/health").permitAll()
                     .pathMatchers("/actuator/info").permitAll()
                     .pathMatchers("/auth/**").permitAll()
+                    .pathMatchers("/api-docs").permitAll() // TODO disable some day
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
                     .pathMatchers("/api/admin/**").permitAll() // temporary that

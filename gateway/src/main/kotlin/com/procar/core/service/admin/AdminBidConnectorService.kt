@@ -1,8 +1,8 @@
 package com.procar.core.service.admin
 
 import com.procar.provider.admin.AdminBidController
-import com.procar.provider.bid.BidAnalyticsResponse
-import com.procar.provider.bid.BidHistoryResponse
+import com.procar.provider.bid.*
+import com.procar.provider.common.ApiResponse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -12,15 +12,15 @@ class AdminBidConnectorService(
     @Qualifier("adminBidHttpClient") private val adminBidController: AdminBidController
 ) {
 
-    fun getBidHistoryForLot(lotId: String): ResponseEntity<BidHistoryResponse> {
+    fun getBidHistoryForLot(lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
         return adminBidController.getBidHistoryForLot(lotId)
     }
 
-    fun getBidAnalyticsForLot(lotId: String, timeRange: String?): ResponseEntity<BidAnalyticsResponse> {
+    fun getBidAnalyticsForLot(lotId: String, timeRange: String?): ResponseEntity<ApiResponse<BidAnalyticsResponse>> {
         return adminBidController.getBidAnalyticsForLot(lotId, timeRange)
     }
 
-    fun deleteAllBidsForLot(lotId: String): ResponseEntity<Void> {
+    fun deleteAllBidsForLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminBidController.deleteAllBidsForLot(lotId)
     }
 }

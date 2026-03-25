@@ -1,11 +1,7 @@
 package com.procar.provider
 
-import com.procar.provider.bid.BidAnalyticsResponse
-import com.procar.provider.bid.BidHistoryResponse
-import com.procar.provider.bid.PlaceBidRequest
-import com.procar.provider.bid.PlaceBidResponse
-import com.procar.provider.bid.ValidateBidRequest
-import com.procar.provider.bid.ValidateBidResponse
+import com.procar.provider.common.*
+import com.procar.provider.bid.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,21 +19,21 @@ interface InternalBidAPI {
     fun getBidHistory(
         @PathVariable lotId: String,
         @RequestParam(required = false) connectionId: String?
-    ): ResponseEntity<BidHistoryResponse>
+    ): ResponseEntity<ApiResponse<BidHistoryResponse>>
     
     @PostMapping("/place")
     fun placeBid(
         @RequestBody request: PlaceBidRequest
-    ): ResponseEntity<PlaceBidResponse>
+    ): ResponseEntity<ApiResponse<PlaceBidResponse>>
     
     @PostMapping("/validate")
     fun validateBid(
         @RequestBody request: ValidateBidRequest
-    ): ResponseEntity<ValidateBidResponse>
+    ): ResponseEntity<ApiResponse<ValidateBidResponse>>
     
     @GetMapping("/{lotId}/analytics")
     fun getBidAnalytics(
         @PathVariable lotId: String,
         @RequestParam(required = false) timeRange: String?
-    ): ResponseEntity<BidAnalyticsResponse>
+    ): ResponseEntity<ApiResponse<BidAnalyticsResponse>>
 }

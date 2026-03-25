@@ -1,39 +1,26 @@
 package com.procar.core.api
 
 import com.procar.core.service.admin.AdminLotConnectorService
-import com.procar.provider.admin.AdminCreateLotRequest
-import com.procar.provider.admin.AdminLotController
-import com.procar.provider.admin.AdminLotResponse
-import com.procar.provider.admin.AdminPaginatedLotsResponse
-import com.procar.provider.admin.AdminUpdateLotRequest
-import com.procar.provider.admin.AdminHiddenRequest
-import com.procar.provider.admin.AdminUpdateStatusRequest
+import com.procar.provider.admin.*
+import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/admin/lots")
-class AdminLotController(
+class GatewayAdminLotController(
     private val adminLotConnectorService: AdminLotConnectorService
 ) : AdminLotController {
 
     @PostMapping
-    override fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<AdminLotResponse> {
+    override fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.createLot(request)
     }
 
     @GetMapping("/{lotId}")
-    override fun getLot(@PathVariable lotId: String): ResponseEntity<AdminLotResponse> {
+    override fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.getLot(lotId)
     }
 
@@ -41,12 +28,12 @@ class AdminLotController(
     override fun updateLot(
         @PathVariable lotId: String,
         @Valid @RequestBody request: AdminUpdateLotRequest
-    ): ResponseEntity<AdminLotResponse> {
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.updateLot(lotId, request)
     }
 
     @DeleteMapping("/{lotId}")
-    override fun deleteLot(@PathVariable lotId: String): ResponseEntity<Void> {
+    override fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminLotConnectorService.deleteLot(lotId)
     }
 
@@ -54,7 +41,7 @@ class AdminLotController(
     override fun updateLotStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminUpdateStatusRequest
-    ): ResponseEntity<AdminLotResponse> {
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.updateLotStatus(lotId, request)
     }
 
@@ -63,7 +50,7 @@ class AdminLotController(
         @RequestParam cursor: String?,
         @RequestParam limit: Int,
         @RequestParam status: LotStatus?
-    ): ResponseEntity<AdminPaginatedLotsResponse> {
+    ): ResponseEntity<ApiResponse<AdminPaginatedLotsResponse>> {
         return adminLotConnectorService.getAllLots(cursor, limit, status)
     }
 
@@ -71,7 +58,7 @@ class AdminLotController(
     override fun setHiddenStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminHiddenRequest
-    ): ResponseEntity<AdminLotResponse> {
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.setHiddenStatus(lotId, request)
     }
 }
