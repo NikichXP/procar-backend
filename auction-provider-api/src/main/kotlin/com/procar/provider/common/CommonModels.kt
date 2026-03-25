@@ -17,19 +17,7 @@ data class PaginationResponse(
 )
 
 data class PaginationRequest(
-    val size: Int = 20,
-    val cursor: String? = null
+    val cursor: String? = null,
+    val limit: Int = 20
 )
 
-data class SortCriteria(
-    val field: SortField,
-    val direction: SortDirection
-)
-
-enum class SortDirection {
-    ASC, DESC
-}
-
-enum class SortField {
-    END_TIME, START_TIME, CURRENT_BID, STARTING_BID, MILEAGE, YEAR, MAKE, MODEL, LOCATION, RATING, AMOUNT, PLACED_AT
-}

@@ -1,26 +1,9 @@
 package com.procar.core.service
 
-import com.procar.core.api.dto.CarCondition
-import com.procar.core.api.dto.CarDocuments
-import com.procar.core.api.dto.CarInfo
-import com.procar.core.api.dto.LotDetail
-import com.procar.core.api.dto.LotFees
-import com.procar.core.api.dto.LotLocation
-import com.procar.core.api.dto.LotSearchRequest
-import com.procar.core.api.dto.LotSource
-import com.procar.core.api.dto.LotStatus
-import com.procar.core.api.dto.LotSummary
+import com.procar.core.api.dto.*
 import com.procar.provider.InternalLotAPI
-import com.procar.provider.common.PaginationRequest
-import com.procar.provider.common.PriceRange
-import com.procar.provider.lot.AdvancedLotSearchRequest
-import com.procar.provider.lot.DocumentType
-import com.procar.provider.lot.FeeType
-import com.procar.provider.lot.LotSearchFilters
-import com.procar.provider.lot.LotSearchResponse
-import com.procar.provider.lot.ProviderLot
-import com.procar.provider.lot.VehicleCondition
-import com.procar.provider.lot.VehicleFilters
+import com.procar.provider.common.*
+import com.procar.provider.lot.*
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -54,41 +37,42 @@ class LotService(
                 )
             ),
             pagination = PaginationRequest(
-                size = request.limit,
+                limit = request.limit,
                 cursor = null
             )
         )
         
-        val response: ResponseEntity<LotSearchResponse> = internalLotAPI.searchLots(advancedRequest)
-        val searchResult = response.body ?: throw RuntimeException("Failed to search lots")
+        val response: ResponseEntity<ApiResponse<LotSearchResponse>> = internalLotAPI.searchLots(advancedRequest)
+        val apiResponse = response.body ?: throw RuntimeException("Failed to search lots")
+        val searchResult = apiResponse.data ?: throw RuntimeException("Failed to get search data")
         
         // Convert internal response to gateway DTO
-        return searchResult.results.map { providerLot ->
+        return searchResult.results.map { vehicleLot ->
             LotSummary(
-                id = providerLot.id,
+                id = vehicleLot.id,
                 car = CarInfo(
-                    brandId = providerLot.vehicle.make,
-                    brandName = providerLot.vehicle.make,
-                    modelId = providerLot.vehicle.model,
-                    modelName = providerLot.vehicle.model,
-                    year = providerLot.vehicle.year,
-                    condition = mapCondition(providerLot.vehicle.condition),
-                    mileage = providerLot.vehicle.mileage,
-                    vin = providerLot.vehicle.vin,
-                    color = providerLot.vehicle.color,
-                    description = providerLot.description,
-                    images = providerLot.vehicle.images.filter { it.isPrimary }.map { it.url }
+                    brandId = vehicleLot.vehicle.make,
+                    brandName = vehicleLot.vehicle.make,
+                    modelId = vehicleLot.vehicle.model,
+                    modelName = vehicleLot.vehicle.model,
+                    year = vehicleLot.vehicle.year,
+                    condition = mapCondition(vehicleLot.vehicle.condition),
+                    mileage = vehicleLot.vehicle.mileage,
+                    vin = vehicleLot.vehicle.vin,
+                    color = vehicleLot.vehicle.color,
+                    description = vehicleLot.description,
+                    images = vehicleLot.vehicle.images.filter { it.isPrimary }.map { it.url }
                 ),
-                status = mapStatusToGateway(providerLot.status),
-                currentBid = providerLot.auction.currentBid,
-                startingBid = providerLot.auction.startingBid,
-                bidStep = providerLot.auction.bidIncrement,
-                bidsCount = providerLot.auction.totalBids,
-                startTime = providerLot.auction.startTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                endTime = providerLot.auction.endTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                status = mapStatusToGateway(vehicleLot.status),
+                currentBid = vehicleLot.auction.currentBid,
+                startingBid = vehicleLot.auction.startingBid,
+                bidStep = vehicleLot.auction.bidIncrement,
+                bidsCount = vehicleLot.auction.totalBids,
+                startTime = vehicleLot.auction.startTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                endTime = vehicleLot.auction.endTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 source = LotSource(
-                    name = providerLot.providerName,
-                    lotUrl = "https://example.com/lot/${providerLot.id}" // TODO: Generate proper URL
+                    name = vehicleLot.providerName,
+                    lotUrl = "https://example.com/lot/${vehicleLot.id}" // TODO: Generate proper URL
                 )
             )
         }
@@ -101,50 +85,51 @@ class LotService(
     }
 
     fun getLotDetail(lotId: String): LotDetail {
-        val response: ResponseEntity<ProviderLot> = internalLotAPI.getLotDetail(lotId)
-        val providerLot = response.body ?: throw RuntimeException("Failed to get lot detail")
+        val response: ResponseEntity<ApiResponse<VehicleLot>> = internalLotAPI.getLotDetail(lotId)
+        val apiResponse = response.body ?: throw RuntimeException("Failed to get lot detail")
+        val vehicleLot = apiResponse.data ?: throw RuntimeException("Failed to get lot detail data")
         
         // Convert internal response to gateway DTO
         return LotDetail(
-            id = providerLot.id,
+            id = vehicleLot.id,
             car = CarInfo(
-                brandId = providerLot.vehicle.make,
-                brandName = providerLot.vehicle.make,
-                modelId = providerLot.vehicle.model,
-                modelName = providerLot.vehicle.model,
-                year = providerLot.vehicle.year,
-                condition = mapCondition(providerLot.vehicle.condition),
-                mileage = providerLot.vehicle.mileage,
-                vin = providerLot.vehicle.vin,
-                color = providerLot.vehicle.color,
-                description = providerLot.description,
-                images = providerLot.vehicle.images.map { it.url },
+                brandId = vehicleLot.vehicle.make,
+                brandName = vehicleLot.vehicle.make,
+                modelId = vehicleLot.vehicle.model,
+                modelName = vehicleLot.vehicle.model,
+                year = vehicleLot.vehicle.year,
+                condition = mapCondition(vehicleLot.vehicle.condition),
+                mileage = vehicleLot.vehicle.mileage,
+                vin = vehicleLot.vehicle.vin,
+                color = vehicleLot.vehicle.color,
+                description = vehicleLot.description,
+                images = vehicleLot.vehicle.images.map { it.url },
                 documents = CarDocuments(
-                    hasTitle = providerLot.vehicle.documents.any { it.type == DocumentType.TITLE },
+                    hasTitle = vehicleLot.vehicle.documents.any { it.type == DocumentType.TITLE },
                     titleState = null // TODO: Extract from document data
                 )
             ),
-            status = mapStatusToGateway(providerLot.status),
-            currentBid = providerLot.auction.currentBid,
-            startingBid = providerLot.auction.startingBid,
-            bidStep = providerLot.auction.bidIncrement,
-            bidsCount = providerLot.auction.totalBids,
-            startTime = providerLot.auction.startTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            endTime = providerLot.auction.endTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            status = mapStatusToGateway(vehicleLot.status),
+            currentBid = vehicleLot.auction.currentBid,
+            startingBid = vehicleLot.auction.startingBid,
+            bidStep = vehicleLot.auction.bidIncrement,
+            bidsCount = vehicleLot.auction.totalBids,
+            startTime = vehicleLot.auction.startTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            endTime = vehicleLot.auction.endTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             source = LotSource(
-                name = providerLot.providerName,
-                lotUrl = "https://example.com/lot/${providerLot.id}" // TODO: Generate proper URL
+                name = vehicleLot.providerName,
+                lotUrl = "https://example.com/lot/${vehicleLot.id}" // TODO: Generate proper URL
             ),
             location = LotLocation(
-                city = providerLot.location.city,
-                state = providerLot.location.state,
-                country = providerLot.location.country
+                city = vehicleLot.location.city,
+                state = vehicleLot.location.state,
+                country = vehicleLot.location.country
             ),
             fees = LotFees(
-                buyerPremiumPercent = providerLot.metadata.fees
+                buyerPremiumPercent = vehicleLot.metadata.fees
                     .find { it.type == FeeType.BUYER_PREMIUM }
                     ?.amount,
-                documentationFee = providerLot.metadata.fees
+                documentationFee = vehicleLot.metadata.fees
                     .find { it.type == FeeType.DOCUMENTATION }
                     ?.amount
             ),

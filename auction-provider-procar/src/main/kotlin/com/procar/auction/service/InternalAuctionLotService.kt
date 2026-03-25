@@ -5,12 +5,10 @@ import com.procar.provider.admin.AdminPaginatedLotsResponse
 import com.procar.auction.document.LotDocument
 import com.procar.auction.repository.LotRepository
 import com.procar.provider.common.PaginationResponse
-import com.procar.provider.common.SortDirection
-import com.procar.provider.common.SortField
 import com.procar.provider.lot.AdvancedLotSearchRequest
 import com.procar.provider.lot.LotSearchResponse
 import com.procar.provider.lot.LotStatus
-import com.procar.provider.lot.ProviderLot
+import com.procar.provider.lot.VehicleLot
 import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -99,51 +97,24 @@ class InternalAuctionLotService(
             }
         }
 
-        // Apply sorting
-        val sortedLots = if (request.sorting.isNotEmpty()) {
-            val sortCriteria = request.sorting.first()
-            lots.sortedWith(compareBy<LotDocument> { lot ->
-                when (sortCriteria.field) {
-                    SortField.END_TIME -> lot.auction.endTime
-                    SortField.START_TIME -> lot.auction.startTime
-                    SortField.CURRENT_BID -> lot.auction.currentBid
-                    SortField.STARTING_BID -> lot.auction.startingBid
-                    SortField.MILEAGE -> lot.vehicle.mileage ?: 0
-                    SortField.YEAR -> lot.vehicle.year
-                    SortField.MAKE -> lot.vehicle.make
-                    SortField.MODEL -> lot.vehicle.model
-                    SortField.LOCATION -> lot.location.city
-                    else -> lot.auction.endTime
-                }
-            }.let { comparator ->
-                if (sortCriteria.direction == SortDirection.DESC) {
-                    comparator.reversed()
-                } else {
-                    comparator
-                }
-            })
-        } else {
-            lots
-        }
-
         // Apply pagination
         val startIndex = if (request.pagination.cursor != null) {
             // Simple cursor implementation - in production, use proper cursor-based pagination
-            (request.pagination.cursor.hashCode() % sortedLots.size).coerceAtLeast(0)
+            (request.pagination.cursor.hashCode() % lots.size).coerceAtLeast(0)
         } else {
             0
         }
         
-        val endIndex = (startIndex + request.pagination.size).coerceAtMost(sortedLots.size)
-        val paginatedLots = sortedLots.subList(startIndex, endIndex)
+        val endIndex = (startIndex + request.pagination.limit).coerceAtMost(lots.size)
+        val paginatedLots = lots.subList(startIndex, endIndex)
 
-        val providerLots = paginatedLots.mapNotNull { conversionService.convert(it, ProviderLot::class.java) }
+        val providerLots = paginatedLots.mapNotNull { conversionService.convert(it, VehicleLot::class.java) }
         
         return LotSearchResponse(
             results = providerLots,
             pagination = PaginationResponse(
-                hasNext = endIndex < sortedLots.size,
-                nextCursor = if (endIndex < sortedLots.size) "cursor-$endIndex" else null
+                hasNext = endIndex < lots.size,
+                nextCursor = if (endIndex < lots.size) "cursor-$endIndex" else null
             ),
             suggestions = null,
             correctedQuery = null

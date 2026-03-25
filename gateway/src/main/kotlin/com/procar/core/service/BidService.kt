@@ -3,6 +3,7 @@ package com.procar.core.service
 import com.procar.core.api.dto.*
 import com.procar.provider.InternalBidAPI
 import com.procar.provider.bid.*
+import com.procar.provider.common.ApiResponse
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -14,8 +15,9 @@ class BidService(
 ) {
 
     fun getBidHistory(lotId: String, page: Int, size: Int): BidPage {
-        val response: ResponseEntity<BidHistoryResponse> = internalBidAPI.getBidHistory(lotId, null)
-        val bidHistory = response.body ?: throw RuntimeException("Failed to get bid history")
+        val response: ResponseEntity<ApiResponse<BidHistoryResponse>> = internalBidAPI.getBidHistory(lotId, null)
+        val apiResponse = response.body ?: throw RuntimeException("Failed to get bid history")
+        val bidHistory = apiResponse.data ?: throw RuntimeException("Failed to get bid history data")
         
         // Convert internal response to gateway DTO
         return BidPage(
@@ -43,8 +45,9 @@ class BidService(
             amount = bidRequest.amount,
             bidderId = bidderId
         )
-        val validateResponse: ResponseEntity<ValidateBidResponse> = internalBidAPI.validateBid(validateRequest)
-        val validationResult = validateResponse.body ?: throw RuntimeException("Failed to validate bid")
+        val validateResponse: ResponseEntity<ApiResponse<ValidateBidResponse>> = internalBidAPI.validateBid(validateRequest)
+        val validateApiResult = validateResponse.body ?: throw RuntimeException("Failed to validate bid")
+        val validationResult = validateApiResult.data ?: throw RuntimeException("Failed to get validation data")
         
         if (!validationResult.isValid) {
             throw RuntimeException("Bid validation failed: ${validationResult.message}")
@@ -56,8 +59,9 @@ class BidService(
             amount = bidRequest.amount,
             bidderId = bidderId
         )
-        val placeResponse: ResponseEntity<PlaceBidResponse> = internalBidAPI.placeBid(placeRequest)
-        val placedBid = placeResponse.body ?: throw RuntimeException("Failed to place bid")
+        val placeResponse: ResponseEntity<ApiResponse<PlaceBidResponse>> = internalBidAPI.placeBid(placeRequest)
+        val placeApiResult = placeResponse.body ?: throw RuntimeException("Failed to place bid")
+        val placedBid = placeApiResult.data ?: throw RuntimeException("Failed to get placed bid data")
         
         return Bid(
             id = placedBid.bid.id,
@@ -75,7 +79,8 @@ class BidService(
             amount = amount,
             bidderId = bidderId
         )
-        val response: ResponseEntity<ValidateBidResponse> = internalBidAPI.validateBid(request)
-        return response.body?.isValid ?: false
+        val response: ResponseEntity<ApiResponse<ValidateBidResponse>> = internalBidAPI.validateBid(request)
+        val apiResult = response.body
+        return apiResult?.data?.isValid ?: false
     }
 }

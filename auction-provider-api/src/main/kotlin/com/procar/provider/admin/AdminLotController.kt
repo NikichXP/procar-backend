@@ -1,5 +1,6 @@
 package com.procar.provider.admin
 
+import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -16,36 +17,36 @@ import org.springframework.web.bind.annotation.RequestParam
 interface AdminLotController {
 
     @PostMapping
-    fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<AdminLotResponse>
+    fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @GetMapping("/{lotId}")
-    fun getLot(@PathVariable lotId: String): ResponseEntity<AdminLotResponse>
+    fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @PutMapping("/{lotId}")
     fun updateLot(
         @PathVariable lotId: String,
         @Valid @RequestBody request: AdminUpdateLotRequest
-    ): ResponseEntity<AdminLotResponse>
+    ): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @DeleteMapping("/{lotId}")
-    fun deleteLot(@PathVariable lotId: String): ResponseEntity<Void>
+    fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>>
 
     @PostMapping("/{lotId}/status")
     fun updateLotStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminUpdateStatusRequest
-    ): ResponseEntity<AdminLotResponse>
+    ): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @GetMapping
     fun getAllLots(
         @RequestParam cursor: String?,
         @RequestParam limit: Int,
         @RequestParam status: LotStatus?
-    ): ResponseEntity<AdminPaginatedLotsResponse>
+    ): ResponseEntity<ApiResponse<AdminPaginatedLotsResponse>>
 
     @PostMapping("/{lotId}/hidden")
     fun setHiddenStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminHiddenRequest
-    ): ResponseEntity<AdminLotResponse>
+    ): ResponseEntity<ApiResponse<AdminLotResponse>>
 }

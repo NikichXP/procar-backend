@@ -1,12 +1,10 @@
 package com.procar.provider.lot
 
 import com.procar.provider.common.*
-import java.time.LocalDateTime
 
 data class AdvancedLotSearchRequest(
     val query: String? = null,
     val filters: LotSearchFilters? = null,
-    val sorting: List<SortCriteria> = listOf(),
     val pagination: PaginationRequest = PaginationRequest()
 )
 

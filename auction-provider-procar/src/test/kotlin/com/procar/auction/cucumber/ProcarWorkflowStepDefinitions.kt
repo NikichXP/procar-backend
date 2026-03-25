@@ -18,9 +18,7 @@ import com.procar.provider.bid.BidType
 import com.procar.provider.bid.PlaceBidRequest
 import com.procar.provider.common.GeoCoordinates
 import com.procar.provider.common.PaginationRequest
-import com.procar.provider.common.SortCriteria
-import com.procar.provider.common.SortDirection
-import com.procar.provider.common.SortField
+import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.*
 import io.cucumber.java.en.And
 import io.cucumber.java.en.Given
@@ -29,6 +27,10 @@ import io.cucumber.java.en.When
 import org.junit.jupiter.api.Assertions.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.client.TestRestTemplate
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -39,6 +41,8 @@ class ProcarWorkflowStepDefinitions {
 
     @Autowired
     lateinit var restTemplate: TestRestTemplate
+    
+    private val objectMapper = ObjectMapper().registerKotlinModule().registerModule(JavaTimeModule())
 
     companion object {
         @JvmStatic
@@ -200,7 +204,7 @@ class ProcarWorkflowStepDefinitions {
         lastResponse = restTemplate.postForEntity(
             "/api/admin/lots",
             createLotRequest,
-            AdminLotResponse::class.java
+            String::class.java
         )
     }
 
@@ -303,7 +307,7 @@ class ProcarWorkflowStepDefinitions {
         lastResponse = restTemplate.postForEntity(
             "/api/admin/lots",
             createLotRequest,
-            AdminLotResponse::class.java
+            String::class.java
         )
     }
 
@@ -313,7 +317,9 @@ class ProcarWorkflowStepDefinitions {
         assertEquals(HttpStatus.OK, lastResponse!!.statusCode)
         assertNotNull(lastResponse!!.body)
         
-        val lotResponse = lastResponse!!.body as AdminLotResponse
+        val jsonResponse = lastResponse!!.body as String
+        val apiResponse = objectMapper.readValue<ApiResponse<AdminLotResponse>>(jsonResponse)
+        val lotResponse = apiResponse.data
         testLotId = lotResponse.id
         assertNotNull(testLotId)
         println("PASS: Lot created successfully with ID: $testLotId")
@@ -321,7 +327,9 @@ class ProcarWorkflowStepDefinitions {
 
     @And("the lot should have default auction settings")
     fun theLotShouldHaveDefaultAuctionSettings() {
-        val lotResponse = lastResponse!!.body as AdminLotResponse
+        val jsonResponse = lastResponse!!.body as String
+        val apiResponse = objectMapper.readValue<ApiResponse<AdminLotResponse>>(jsonResponse)
+        val lotResponse = apiResponse.data
         assertNotNull(lotResponse.auction)
         assertEquals(5000.0, lotResponse.auction.startingBid)
         assertEquals(10000.0, lotResponse.auction.reservePrice)
@@ -339,8 +347,7 @@ class ProcarWorkflowStepDefinitions {
                     models = listOf(createLotRequest!!.vehicle.model)
                 )
             ),
-            sorting = listOf(SortCriteria(SortField.PLACED_AT, SortDirection.DESC)),
-            pagination = PaginationRequest(size = 10, cursor = null)
+            pagination = PaginationRequest(limit = 10, cursor = null)
         )
 
         lastResponse = restTemplate.postForEntity(
@@ -445,7 +452,7 @@ class ProcarWorkflowStepDefinitions {
     @Then("all bids should be deleted")
     fun allBidsShouldBeDeleted() {
         assertNotNull(lastResponse)
-        assertEquals(HttpStatus.NO_CONTENT, lastResponse!!.statusCode)
+        assertEquals(HttpStatus.OK, lastResponse!!.statusCode)
         println("PASS: All bids removed successfully")
     }
 
@@ -463,7 +470,7 @@ class ProcarWorkflowStepDefinitions {
     @Then("the lot should be removed")
     fun theLotShouldBeRemoved() {
         assertNotNull(lastResponse)
-        assertEquals(HttpStatus.NO_CONTENT, lastResponse!!.statusCode)
+        assertEquals(HttpStatus.OK, lastResponse!!.statusCode)
         println("PASS: Lot deleted successfully")
     }
 
@@ -478,8 +485,7 @@ class ProcarWorkflowStepDefinitions {
                     models = listOf(createLotRequest!!.vehicle.model)
                 )
             ),
-            sorting = listOf(SortCriteria(SortField.PLACED_AT, SortDirection.DESC)),
-            pagination = PaginationRequest(size = 10, cursor = null)
+            pagination = PaginationRequest(limit = 10, cursor = null)
         )
 
         lastResponse = restTemplate.postForEntity(

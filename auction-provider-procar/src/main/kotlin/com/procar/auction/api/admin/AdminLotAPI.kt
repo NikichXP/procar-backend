@@ -2,13 +2,8 @@ package com.procar.auction.api.admin
 
 import com.procar.auction.document.LotDocument
 import com.procar.auction.service.InternalAuctionLotService
-import com.procar.provider.admin.AdminCreateLotRequest
-import com.procar.provider.admin.AdminLotController
-import com.procar.provider.admin.AdminLotResponse
-import com.procar.provider.admin.AdminPaginatedLotsResponse
-import com.procar.provider.admin.AdminUpdateLotRequest
-import com.procar.provider.admin.AdminHiddenRequest
-import com.procar.provider.admin.AdminUpdateStatusRequest
+import com.procar.provider.admin.*
+import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
 import org.springframework.core.convert.ConversionService
 import org.springframework.http.ResponseEntity
@@ -20,37 +15,37 @@ class AdminLotAPI(
     private val conversionService: ConversionService
 ) : AdminLotController {
 
-    override fun createLot(request: AdminCreateLotRequest): ResponseEntity<AdminLotResponse> {
+    override fun createLot(request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val lotDocument = conversionService.convert(request, LotDocument::class.java)!!
         val savedLot = lotService.createLot(lotDocument)
         val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
-        return ResponseEntity.ok(adminResponse)
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Lot created successfully"))
     }
 
-    override fun getLot(lotId: String): ResponseEntity<AdminLotResponse> {
+    override fun getLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val lot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
         val adminResponse = conversionService.convert(lot, AdminLotResponse::class.java)!!
-        return ResponseEntity.ok(adminResponse)
+        return ResponseEntity.ok(ApiResponse(adminResponse))
     }
 
     override fun updateLot(
         lotId: String,
         request: AdminUpdateLotRequest
-    ): ResponseEntity<AdminLotResponse> {
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val existingLot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
         
         val updatedLot = conversionService.convert(Pair(request, existingLot), LotDocument::class.java)!!
         val savedLot = lotService.updateLot(lotId, updatedLot)
         val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
-        return ResponseEntity.ok(adminResponse)
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Lot updated successfully"))
     }
 
-    override fun deleteLot(lotId: String): ResponseEntity<Void> {
+    override fun deleteLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
         val success = lotService.deleteLot(lotId)
         return if (success) {
-            ResponseEntity.noContent().build()
+            ResponseEntity.ok(ApiResponse(null as Void?, "Lot deleted successfully"))
         } else {
             ResponseEntity.notFound().build()
         }
@@ -59,26 +54,26 @@ class AdminLotAPI(
     override fun updateLotStatus(
         lotId: String,
         request: AdminUpdateStatusRequest
-    ): ResponseEntity<AdminLotResponse> {
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val updatedLot = lotService.updateLotStatus(lotId, request.status)
             ?: return ResponseEntity.notFound().build()
         val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
-        return ResponseEntity.ok(adminResponse)
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Lot status updated successfully"))
     }
 
     override fun getAllLots(
         cursor: String?,
         limit: Int,
         status: LotStatus?
-    ): ResponseEntity<AdminPaginatedLotsResponse> {
+    ): ResponseEntity<ApiResponse<AdminPaginatedLotsResponse>> {
         val lots = lotService.getAllLots(cursor, limit, status)
-        return ResponseEntity.ok(lots)
+        return ResponseEntity.ok(ApiResponse(lots))
     }
 
     override fun setHiddenStatus(
         lotId: String,
         request: AdminHiddenRequest
-    ): ResponseEntity<AdminLotResponse> {
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val updatedLot = if (request.hidden) {
             lotService.archiveLot(lotId)
         } else {
@@ -86,6 +81,7 @@ class AdminLotAPI(
         }
         updatedLot ?: return ResponseEntity.notFound().build()
         val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
-        return ResponseEntity.ok(adminResponse)
+        val message = if (request.hidden) "Lot hidden successfully" else "Lot unhidden successfully"
+        return ResponseEntity.ok(ApiResponse(adminResponse, message))
     }
 }

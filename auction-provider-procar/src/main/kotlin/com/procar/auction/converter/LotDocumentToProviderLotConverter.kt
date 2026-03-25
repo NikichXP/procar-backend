@@ -9,7 +9,7 @@ import com.procar.provider.lot.Fee
 import com.procar.provider.lot.InspectionInfo
 import com.procar.provider.lot.LocationInfo
 import com.procar.provider.lot.LotMetadata
-import com.procar.provider.lot.ProviderLot
+import com.procar.provider.lot.VehicleLot
 import com.procar.provider.lot.SellerInfo
 import com.procar.provider.lot.ShippingInfo
 import com.procar.provider.lot.VehicleHistory
@@ -19,10 +19,10 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
 @Component
-class LotDocumentToProviderLotConverter : Converter<LotDocument, ProviderLot> {
+class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
 
-    override fun convert(source: LotDocument): ProviderLot {
-        return ProviderLot(
+    override fun convert(source: LotDocument): VehicleLot {
+        return VehicleLot(
             id = source.id!!,
             providerId = source.providerId,
             providerName = source.providerName,

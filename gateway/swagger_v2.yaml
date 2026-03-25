@@ -1,0 +1,2898 @@
+openapi: 3.0.1
+info:
+  title: Procar API
+  description: Procar Backend API Documentation
+  version: '1.0'
+servers:
+  - url: http://localhost:8080
+    description: Local Development Server
+tags:
+  - name: Actuator
+    description: Monitor and interact
+    externalDocs:
+      description: Spring Boot Actuator Web API Documentation
+      url: https://docs.spring.io/spring-boot/docs/current/actuator-api/html/
+paths:
+  /users/me/watchlist/{lotId}:
+    put:
+      tags:
+        - user-api
+      operationId: addToWatchlist
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+    delete:
+      tags:
+        - user-api
+      operationId: removeFromWatchlist
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+  /lots/{lotId}/bids:
+    get:
+      tags:
+        - bid-api
+      operationId: getBidHistory
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/BidPage'
+    post:
+      tags:
+        - bid-api
+      operationId: placeBid
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BidRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Bid'
+  /auth/register:
+    post:
+      tags:
+        - auth-api
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+  /auth/logout:
+    post:
+      tags:
+        - auth-api
+      operationId: logout
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /auth/logout-all:
+    post:
+      tags:
+        - auth-api
+      operationId: logoutAllDevices
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+  /auth/login:
+    post:
+      tags:
+        - auth-api
+      operationId: login
+      parameters:
+        - name: username
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+  /auth/access:
+    post:
+      tags:
+        - auth-api
+      operationId: refreshAccess
+      parameters:
+        - name: refreshToken
+          in: query
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+  /users/me/watchlist:
+    get:
+      tags:
+        - user-api
+      operationId: getUserWatchlist
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LotSummary'
+  /users/me/bids:
+    get:
+      tags:
+        - user-api
+      operationId: getUserBids
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - WINNING
+              - OUTBID
+              - WON
+              - LOST
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserBidPage'
+  /lots:
+    get:
+      tags:
+        - lot-api
+      operationId: getLots
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - UPCOMING
+              - ACTIVE
+              - FINISHED
+              - CANCELLED
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: endsInMinutes
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: brandId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: modelId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: yearFrom
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: yearTo
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: priceFrom
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+        - name: priceTo
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+        - name: condition
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - NEW
+              - USED
+              - DAMAGED
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: endTime,asc
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LotPage'
+  /lots/{lotId}:
+    get:
+      tags:
+        - lot-api
+      operationId: getLotDetail
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LotDetail'
+  /catalog/brand:
+    get:
+      tags:
+        - car-catalog-api
+      operationId: getBrands
+      parameters:
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Brand'
+  /catalog/brand/{brandId}/models:
+    get:
+      tags:
+        - car-catalog-api
+      operationId: getBrandModels
+      parameters:
+        - name: brandId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Model'
+components:
+  schemas:
+    AdminAuctionInfoRequest:
+      required:
+        - auctionType
+        - bidIncrement
+        - currentBid
+        - endTime
+        - startTime
+        - startingBid
+      type: object
+      properties:
+        currentBid:
+          type: number
+          format: double
+        startingBid:
+          type: number
+          format: double
+        reservePrice:
+          type: number
+          format: double
+        bidIncrement:
+          type: number
+          format: double
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        timeRemaining:
+          type: integer
+          format: int64
+        auctionType:
+          type: string
+          enum:
+            - LIVE
+            - ONLINE
+            - SEALED_BID
+            - BUY_IT_NOW
+            - MAKE_OFFER
+        buyItNowPrice:
+          type: number
+          format: double
+    AdminDamageInfoRequest:
+      required:
+        - area
+        - description
+        - severity
+      type: object
+      properties:
+        area:
+          type: string
+        severity:
+          type: string
+          enum:
+            - MINOR
+            - MODERATE
+            - MAJOR
+            - SEVERE
+        description:
+          type: string
+        estimatedRepairCost:
+          type: number
+          format: double
+    AdminDocumentRequest:
+      required:
+        - type
+        - url
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - TITLE
+            - REGISTRATION
+            - INSPECTION_REPORT
+            - SERVICE_RECORDS
+            - WARRANTY
+            - OTHER
+        url:
+          type: string
+        description:
+          type: string
+    AdminEngineInfoRequest:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+        displacement:
+          type: number
+          format: double
+        cylinders:
+          type: integer
+          format: int32
+        horsepower:
+          type: integer
+          format: int32
+        torque:
+          type: integer
+          format: int32
+    AdminFeeRequest:
+      required:
+        - amount
+        - description
+        - mandatory
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - BUYER_PREMIUM
+            - DOCUMENTATION
+            - SHIPPING
+            - TAX
+            - OTHER
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+        mandatory:
+          type: boolean
+    AdminInspectionInfoRequest:
+      required:
+        - inspected
+        - keyFindings
+      type: object
+      properties:
+        inspected:
+          type: boolean
+        inspectionDate:
+          type: string
+          format: date-time
+        inspector:
+          type: string
+        reportUrl:
+          type: string
+        overallCondition:
+          type: string
+        keyFindings:
+          type: array
+          items:
+            type: string
+    AdminLocationInfoRequest:
+      required:
+        - address
+        - city
+        - country
+        - state
+        - timezone
+        - zipCode
+      type: object
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+        coordinates:
+          $ref: '#/components/schemas/GeoCoordinates'
+        timezone:
+          type: string
+    AdminLotMetadataRequest:
+      required:
+        - categories
+        - fees
+        - sellerInfo
+        - tags
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+        sellerInfo:
+          $ref: '#/components/schemas/AdminSellerInfoRequest'
+        inspection:
+          $ref: '#/components/schemas/AdminInspectionInfoRequest'
+        history:
+          $ref: '#/components/schemas/AdminVehicleHistoryRequest'
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminFeeRequest'
+        shipping:
+          $ref: '#/components/schemas/AdminShippingInfoRequest'
+    AdminSellerInfoRequest:
+      required:
+        - id
+        - name
+        - type
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - DEALER
+            - PRIVATE
+            - AUCTION_HOUSE
+            - LEASING_COMPANY
+            - INSURANCE
+        rating:
+          type: number
+          format: double
+        totalSales:
+          type: integer
+          format: int32
+        responseRate:
+          type: number
+          format: double
+    AdminShippingInfoRequest:
+      required:
+        - available
+        - methods
+        - restrictions
+      type: object
+      properties:
+        available:
+          type: boolean
+        estimatedCost:
+          type: number
+          format: double
+        methods:
+          type: array
+          items:
+            type: string
+            enum:
+              - PICKUP
+              - DELIVERY
+              - FREIGHT
+              - WHITE_GLOVE
+        restrictions:
+          type: array
+          items:
+            type: string
+    AdminUpdateLotRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        vehicle:
+          $ref: '#/components/schemas/AdminVehicleInfoRequest'
+        auction:
+          $ref: '#/components/schemas/AdminAuctionInfoRequest'
+        location:
+          $ref: '#/components/schemas/AdminLocationInfoRequest'
+        metadata:
+          $ref: '#/components/schemas/AdminLotMetadataRequest'
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - UPCOMING
+            - ACTIVE
+            - ENDED
+            - SOLD
+            - UNSOLD
+            - CANCELLED
+            - SUSPENDED
+    AdminVehicleHistoryRequest:
+      required:
+        - accidents
+        - owners
+        - serviceRecords
+        - titleStatus
+      type: object
+      properties:
+        accidents:
+          type: integer
+          format: int32
+        owners:
+          type: integer
+          format: int32
+        titleStatus:
+          type: string
+          enum:
+            - CLEAN
+            - SALVAGE
+            - REBUILT
+            - FLOOD
+            - LEMON
+            - PARTS_ONLY
+            - NONE
+        serviceRecords:
+          type: boolean
+        lastServiceDate:
+          type: string
+          format: date-time
+    AdminVehicleImageRequest:
+      required:
+        - isPrimary
+        - type
+        - url
+      type: object
+      properties:
+        url:
+          type: string
+        type:
+          type: string
+          enum:
+            - EXTERIOR
+            - INTERIOR
+            - ENGINE
+            - TRUNK
+            - DASHBOARD
+            - DAMAGE
+            - DOCUMENT
+            - OTHER
+        description:
+          type: string
+        isPrimary:
+          type: boolean
+    AdminVehicleInfoRequest:
+      required:
+        - bodyType
+        - condition
+        - documents
+        - drivetrain
+        - engine
+        - features
+        - fuelType
+        - images
+        - make
+        - model
+        - transmission
+        - year
+      type: object
+      properties:
+        vin:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+          format: int32
+        trim:
+          type: string
+        bodyType:
+          type: string
+        color:
+          type: string
+        interiorColor:
+          type: string
+        mileage:
+          type: integer
+          format: int32
+        engine:
+          $ref: '#/components/schemas/AdminEngineInfoRequest'
+        transmission:
+          type: string
+          enum:
+            - AUTOMATIC
+            - MANUAL
+            - CVT
+            - SEMI_AUTOMATIC
+            - DUAL_CLUTCH
+        drivetrain:
+          type: string
+          enum:
+            - FWD
+            - RWD
+            - AWD
+            - FOUR_WD
+        fuelType:
+          type: string
+          enum:
+            - GASOLINE
+            - DIESEL
+            - ELECTRIC
+            - HYBRID
+            - PLUGIN_HYBRID
+            - FLEX_FUEL
+            - OTHER
+        condition:
+          type: string
+          enum:
+            - EXCELLENT
+            - GOOD
+            - FAIR
+            - POOR
+            - DAMAGED
+            - SALVAGE
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminVehicleImageRequest'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminDocumentRequest'
+        damage:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminDamageInfoRequest'
+    GeoCoordinates:
+      required:
+        - latitude
+        - longitude
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+    AdminAuctionInfoResponse:
+      required:
+        - auctionType
+        - bidIncrement
+        - currentBid
+        - endTime
+        - startTime
+        - startingBid
+        - totalBids
+      type: object
+      properties:
+        currentBid:
+          type: number
+          format: double
+        startingBid:
+          type: number
+          format: double
+        reservePrice:
+          type: number
+          format: double
+        bidIncrement:
+          type: number
+          format: double
+        totalBids:
+          type: integer
+          format: int32
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        timeRemaining:
+          type: integer
+          format: int64
+        auctionType:
+          type: string
+          enum:
+            - LIVE
+            - ONLINE
+            - SEALED_BID
+            - BUY_IT_NOW
+            - MAKE_OFFER
+        buyItNowPrice:
+          type: number
+          format: double
+    AdminDamageInfoResponse:
+      required:
+        - area
+        - description
+        - severity
+      type: object
+      properties:
+        area:
+          type: string
+        severity:
+          type: string
+          enum:
+            - MINOR
+            - MODERATE
+            - MAJOR
+            - SEVERE
+        description:
+          type: string
+        estimatedRepairCost:
+          type: number
+          format: double
+    AdminDocumentResponse:
+      required:
+        - type
+        - url
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - TITLE
+            - REGISTRATION
+            - INSPECTION_REPORT
+            - SERVICE_RECORDS
+            - WARRANTY
+            - OTHER
+        url:
+          type: string
+        description:
+          type: string
+    AdminEngineInfoResponse:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+        displacement:
+          type: number
+          format: double
+        cylinders:
+          type: integer
+          format: int32
+        horsepower:
+          type: integer
+          format: int32
+        torque:
+          type: integer
+          format: int32
+    AdminFeeResponse:
+      required:
+        - amount
+        - description
+        - mandatory
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - BUYER_PREMIUM
+            - DOCUMENTATION
+            - SHIPPING
+            - TAX
+            - OTHER
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+        mandatory:
+          type: boolean
+    AdminInspectionInfoResponse:
+      required:
+        - inspected
+        - keyFindings
+      type: object
+      properties:
+        inspected:
+          type: boolean
+        inspectionDate:
+          type: string
+          format: date-time
+        inspector:
+          type: string
+        reportUrl:
+          type: string
+        overallCondition:
+          type: string
+        keyFindings:
+          type: array
+          items:
+            type: string
+    AdminLocationInfoResponse:
+      required:
+        - address
+        - city
+        - country
+        - state
+        - timezone
+        - zipCode
+      type: object
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+        coordinates:
+          $ref: '#/components/schemas/GeoCoordinates'
+        timezone:
+          type: string
+    AdminLotMetadataResponse:
+      required:
+        - categories
+        - fees
+        - sellerInfo
+        - tags
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+        sellerInfo:
+          $ref: '#/components/schemas/AdminSellerInfoResponse'
+        inspection:
+          $ref: '#/components/schemas/AdminInspectionInfoResponse'
+        history:
+          $ref: '#/components/schemas/AdminVehicleHistoryResponse'
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminFeeResponse'
+        shipping:
+          $ref: '#/components/schemas/AdminShippingInfoResponse'
+    AdminLotResponse:
+      required:
+        - auction
+        - createdAt
+        - description
+        - externalId
+        - id
+        - location
+        - metadata
+        - status
+        - title
+        - updatedAt
+        - vehicle
+      type: object
+      properties:
+        id:
+          type: string
+        externalId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        vehicle:
+          $ref: '#/components/schemas/AdminVehicleInfoResponse'
+        auction:
+          $ref: '#/components/schemas/AdminAuctionInfoResponse'
+        location:
+          $ref: '#/components/schemas/AdminLocationInfoResponse'
+        metadata:
+          $ref: '#/components/schemas/AdminLotMetadataResponse'
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - UPCOMING
+            - ACTIVE
+            - ENDED
+            - SOLD
+            - UNSOLD
+            - CANCELLED
+            - SUSPENDED
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    AdminSellerInfoResponse:
+      required:
+        - id
+        - name
+        - type
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - DEALER
+            - PRIVATE
+            - AUCTION_HOUSE
+            - LEASING_COMPANY
+            - INSURANCE
+        rating:
+          type: number
+          format: double
+        totalSales:
+          type: integer
+          format: int32
+        responseRate:
+          type: number
+          format: double
+    AdminShippingInfoResponse:
+      required:
+        - available
+        - methods
+        - restrictions
+      type: object
+      properties:
+        available:
+          type: boolean
+        estimatedCost:
+          type: number
+          format: double
+        methods:
+          type: array
+          items:
+            type: string
+            enum:
+              - PICKUP
+              - DELIVERY
+              - FREIGHT
+              - WHITE_GLOVE
+        restrictions:
+          type: array
+          items:
+            type: string
+    AdminVehicleHistoryResponse:
+      required:
+        - accidents
+        - owners
+        - serviceRecords
+        - titleStatus
+      type: object
+      properties:
+        accidents:
+          type: integer
+          format: int32
+        owners:
+          type: integer
+          format: int32
+        titleStatus:
+          type: string
+          enum:
+            - CLEAN
+            - SALVAGE
+            - REBUILT
+            - FLOOD
+            - LEMON
+            - PARTS_ONLY
+            - NONE
+        serviceRecords:
+          type: boolean
+        lastServiceDate:
+          type: string
+          format: date-time
+    AdminVehicleImageResponse:
+      required:
+        - isPrimary
+        - type
+        - url
+      type: object
+      properties:
+        url:
+          type: string
+        type:
+          type: string
+          enum:
+            - EXTERIOR
+            - INTERIOR
+            - ENGINE
+            - TRUNK
+            - DASHBOARD
+            - DAMAGE
+            - DOCUMENT
+            - OTHER
+        description:
+          type: string
+        isPrimary:
+          type: boolean
+    AdminVehicleInfoResponse:
+      required:
+        - bodyType
+        - condition
+        - documents
+        - drivetrain
+        - engine
+        - features
+        - fuelType
+        - images
+        - make
+        - model
+        - transmission
+        - year
+      type: object
+      properties:
+        vin:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+          format: int32
+        trim:
+          type: string
+        bodyType:
+          type: string
+        color:
+          type: string
+        interiorColor:
+          type: string
+        mileage:
+          type: integer
+          format: int32
+        engine:
+          $ref: '#/components/schemas/AdminEngineInfoResponse'
+        transmission:
+          type: string
+          enum:
+            - AUTOMATIC
+            - MANUAL
+            - CVT
+            - SEMI_AUTOMATIC
+            - DUAL_CLUTCH
+        drivetrain:
+          type: string
+          enum:
+            - FWD
+            - RWD
+            - AWD
+            - FOUR_WD
+        fuelType:
+          type: string
+          enum:
+            - GASOLINE
+            - DIESEL
+            - ELECTRIC
+            - HYBRID
+            - PLUGIN_HYBRID
+            - FLEX_FUEL
+            - OTHER
+        condition:
+          type: string
+          enum:
+            - EXCELLENT
+            - GOOD
+            - FAIR
+            - POOR
+            - DAMAGED
+            - SALVAGE
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminVehicleImageResponse'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminDocumentResponse'
+        damage:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminDamageInfoResponse'
+    ApiResponseAdminLotResponse:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AdminLotResponse'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    BidRequest:
+      required:
+        - amount
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+    Bid:
+      required:
+        - amount
+        - bidderId
+        - id
+        - isWinning
+        - lotId
+        - placedAt
+      type: object
+      properties:
+        id:
+          type: string
+        lotId:
+          type: string
+        amount:
+          type: number
+          format: double
+        bidderId:
+          type: string
+        placedAt:
+          type: string
+        isWinning:
+          type: boolean
+    AdvancedLotSearchRequest:
+      required:
+        - pagination
+        - sorting
+      type: object
+      properties:
+        query:
+          type: string
+        filters:
+          $ref: '#/components/schemas/LotSearchFilters'
+        sorting:
+          type: array
+          items:
+            $ref: '#/components/schemas/SortCriteria'
+        pagination:
+          $ref: '#/components/schemas/PaginationRequest'
+    IntRange:
+      required:
+        - end
+        - start
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        end:
+          type: integer
+          format: int32
+    LocationFilters:
+      type: object
+      properties:
+        states:
+          type: array
+          items:
+            type: string
+        cities:
+          type: array
+          items:
+            type: string
+        zipCodes:
+          type: array
+          items:
+            type: string
+    LotSearchFilters:
+      type: object
+      properties:
+        providers:
+          type: array
+          items:
+            type: string
+        status:
+          type: array
+          items:
+            type: string
+            enum:
+              - DRAFT
+              - UPCOMING
+              - ACTIVE
+              - ENDED
+              - SOLD
+              - UNSOLD
+              - CANCELLED
+              - SUSPENDED
+        priceRange:
+          $ref: '#/components/schemas/PriceRange'
+        yearRange:
+          $ref: '#/components/schemas/IntRange'
+        mileageRange:
+          $ref: '#/components/schemas/IntRange'
+        vehicle:
+          $ref: '#/components/schemas/VehicleFilters'
+        location:
+          $ref: '#/components/schemas/LocationFilters'
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+        conditions:
+          type: array
+          items:
+            type: string
+            enum:
+              - EXCELLENT
+              - GOOD
+              - FAIR
+              - POOR
+              - DAMAGED
+              - SALVAGE
+        titleStatus:
+          type: array
+          items:
+            type: string
+            enum:
+              - CLEAN
+              - SALVAGE
+              - REBUILT
+              - FLOOD
+              - LEMON
+              - PARTS_ONLY
+              - NONE
+    PaginationRequest:
+      required:
+        - limit
+      type: object
+      properties:
+        cursor:
+          type: string
+        limit:
+          type: integer
+          format: int32
+    PriceRange:
+      type: object
+      properties:
+        min:
+          type: number
+          format: double
+        max:
+          type: number
+          format: double
+    SortCriteria:
+      required:
+        - direction
+        - field
+      type: object
+      properties:
+        field:
+          type: string
+          enum:
+            - END_TIME
+            - START_TIME
+            - CURRENT_BID
+            - STARTING_BID
+            - MILEAGE
+            - YEAR
+            - MAKE
+            - MODEL
+            - LOCATION
+            - RATING
+            - AMOUNT
+            - PLACED_AT
+        direction:
+          type: string
+          enum:
+            - ASC
+            - DESC
+    VehicleFilters:
+      type: object
+      properties:
+        makes:
+          type: array
+          items:
+            type: string
+        models:
+          type: array
+          items:
+            type: string
+        bodyTypes:
+          type: array
+          items:
+            type: string
+        fuelTypes:
+          type: array
+          items:
+            type: string
+            enum:
+              - GASOLINE
+              - DIESEL
+              - ELECTRIC
+              - HYBRID
+              - PLUGIN_HYBRID
+              - FLEX_FUEL
+              - OTHER
+        transmissions:
+          type: array
+          items:
+            type: string
+            enum:
+              - AUTOMATIC
+              - MANUAL
+              - CVT
+              - SEMI_AUTOMATIC
+              - DUAL_CLUTCH
+        drivetrains:
+          type: array
+          items:
+            type: string
+            enum:
+              - FWD
+              - RWD
+              - AWD
+              - FOUR_WD
+        colors:
+          type: array
+          items:
+            type: string
+        features:
+          type: array
+          items:
+            type: string
+        hasDamage:
+          type: boolean
+        hasInspection:
+          type: boolean
+    ApiResponseLotSearchResponse:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LotSearchResponse'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    AuctionInfo:
+      required:
+        - auctionType
+        - bidIncrement
+        - currentBid
+        - endTime
+        - startTime
+        - startingBid
+        - totalBids
+      type: object
+      properties:
+        currentBid:
+          type: number
+          format: double
+        startingBid:
+          type: number
+          format: double
+        reservePrice:
+          type: number
+          format: double
+        bidIncrement:
+          type: number
+          format: double
+        totalBids:
+          type: integer
+          format: int32
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        timeRemaining:
+          type: integer
+          format: int64
+        auctionType:
+          type: string
+          enum:
+            - LIVE
+            - ONLINE
+            - SEALED_BID
+            - BUY_IT_NOW
+            - MAKE_OFFER
+        buyItNowPrice:
+          type: number
+          format: double
+    DamageInfo:
+      required:
+        - area
+        - description
+        - severity
+      type: object
+      properties:
+        area:
+          type: string
+        severity:
+          type: string
+          enum:
+            - MINOR
+            - MODERATE
+            - MAJOR
+            - SEVERE
+        description:
+          type: string
+        estimatedRepairCost:
+          type: number
+          format: double
+    Document:
+      required:
+        - type
+        - url
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - TITLE
+            - REGISTRATION
+            - INSPECTION_REPORT
+            - SERVICE_RECORDS
+            - WARRANTY
+            - OTHER
+        url:
+          type: string
+        description:
+          type: string
+    EngineInfo:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+        displacement:
+          type: number
+          format: double
+        cylinders:
+          type: integer
+          format: int32
+        horsepower:
+          type: integer
+          format: int32
+        torque:
+          type: integer
+          format: int32
+    Fee:
+      required:
+        - amount
+        - description
+        - mandatory
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - BUYER_PREMIUM
+            - DOCUMENTATION
+            - SHIPPING
+            - TAX
+            - OTHER
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+        mandatory:
+          type: boolean
+    InspectionInfo:
+      required:
+        - inspected
+        - keyFindings
+      type: object
+      properties:
+        inspected:
+          type: boolean
+        inspectionDate:
+          type: string
+          format: date-time
+        inspector:
+          type: string
+        reportUrl:
+          type: string
+        overallCondition:
+          type: string
+        keyFindings:
+          type: array
+          items:
+            type: string
+    LocationInfo:
+      required:
+        - address
+        - city
+        - country
+        - state
+        - timezone
+        - zipCode
+      type: object
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        country:
+          type: string
+        coordinates:
+          $ref: '#/components/schemas/GeoCoordinates'
+        timezone:
+          type: string
+    LotMetadata:
+      required:
+        - categories
+        - fees
+        - sellerInfo
+        - tags
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+        categories:
+          type: array
+          items:
+            type: string
+        sellerInfo:
+          $ref: '#/components/schemas/SellerInfo'
+        inspection:
+          $ref: '#/components/schemas/InspectionInfo'
+        history:
+          $ref: '#/components/schemas/VehicleHistory'
+        fees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fee'
+        shipping:
+          $ref: '#/components/schemas/ShippingInfo'
+    LotSearchResponse:
+      required:
+        - pagination
+        - results
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleLot'
+        pagination:
+          $ref: '#/components/schemas/PaginationResponse'
+        suggestions:
+          type: array
+          items:
+            type: string
+        correctedQuery:
+          type: string
+    PaginationResponse:
+      required:
+        - hasNext
+      type: object
+      properties:
+        hasNext:
+          type: boolean
+        nextCursor:
+          type: string
+    SellerInfo:
+      required:
+        - id
+        - name
+        - type
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - DEALER
+            - PRIVATE
+            - AUCTION_HOUSE
+            - LEASING_COMPANY
+            - INSURANCE
+        rating:
+          type: number
+          format: double
+        totalSales:
+          type: integer
+          format: int32
+        responseRate:
+          type: number
+          format: double
+    ShippingInfo:
+      required:
+        - available
+        - methods
+        - restrictions
+      type: object
+      properties:
+        available:
+          type: boolean
+        estimatedCost:
+          type: number
+          format: double
+        methods:
+          type: array
+          items:
+            type: string
+            enum:
+              - PICKUP
+              - DELIVERY
+              - FREIGHT
+              - WHITE_GLOVE
+        restrictions:
+          type: array
+          items:
+            type: string
+    VehicleHistory:
+      required:
+        - accidents
+        - owners
+        - serviceRecords
+        - titleStatus
+      type: object
+      properties:
+        accidents:
+          type: integer
+          format: int32
+        owners:
+          type: integer
+          format: int32
+        titleStatus:
+          type: string
+          enum:
+            - CLEAN
+            - SALVAGE
+            - REBUILT
+            - FLOOD
+            - LEMON
+            - PARTS_ONLY
+            - NONE
+        serviceRecords:
+          type: boolean
+        lastServiceDate:
+          type: string
+          format: date-time
+    VehicleImage:
+      required:
+        - isPrimary
+        - type
+        - url
+      type: object
+      properties:
+        url:
+          type: string
+        type:
+          type: string
+          enum:
+            - EXTERIOR
+            - INTERIOR
+            - ENGINE
+            - TRUNK
+            - DASHBOARD
+            - DAMAGE
+            - DOCUMENT
+            - OTHER
+        description:
+          type: string
+        isPrimary:
+          type: boolean
+    VehicleInfo:
+      required:
+        - bodyType
+        - condition
+        - documents
+        - drivetrain
+        - engine
+        - features
+        - fuelType
+        - images
+        - make
+        - model
+        - transmission
+        - year
+      type: object
+      properties:
+        vin:
+          type: string
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+          format: int32
+        trim:
+          type: string
+        bodyType:
+          type: string
+        color:
+          type: string
+        interiorColor:
+          type: string
+        mileage:
+          type: integer
+          format: int32
+        engine:
+          $ref: '#/components/schemas/EngineInfo'
+        transmission:
+          type: string
+          enum:
+            - AUTOMATIC
+            - MANUAL
+            - CVT
+            - SEMI_AUTOMATIC
+            - DUAL_CLUTCH
+        drivetrain:
+          type: string
+          enum:
+            - FWD
+            - RWD
+            - AWD
+            - FOUR_WD
+        fuelType:
+          type: string
+          enum:
+            - GASOLINE
+            - DIESEL
+            - ELECTRIC
+            - HYBRID
+            - PLUGIN_HYBRID
+            - FLEX_FUEL
+            - OTHER
+        condition:
+          type: string
+          enum:
+            - EXCELLENT
+            - GOOD
+            - FAIR
+            - POOR
+            - DAMAGED
+            - SALVAGE
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/VehicleImage'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        damage:
+          type: array
+          items:
+            $ref: '#/components/schemas/DamageInfo'
+    VehicleLot:
+      required:
+        - auction
+        - createdAt
+        - description
+        - externalId
+        - id
+        - location
+        - metadata
+        - providerId
+        - providerName
+        - status
+        - title
+        - updatedAt
+        - vehicle
+      type: object
+      properties:
+        id:
+          type: string
+        providerId:
+          type: string
+        providerName:
+          type: string
+        externalId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        vehicle:
+          $ref: '#/components/schemas/VehicleInfo'
+        auction:
+          $ref: '#/components/schemas/AuctionInfo'
+        location:
+          $ref: '#/components/schemas/LocationInfo'
+        metadata:
+          $ref: '#/components/schemas/LotMetadata'
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - UPCOMING
+            - ACTIVE
+            - ENDED
+            - SOLD
+            - UNSOLD
+            - CANCELLED
+            - SUSPENDED
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ValidateBidRequest:
+      required:
+        - amount
+        - bidType
+        - bidderId
+        - lotId
+      type: object
+      properties:
+        lotId:
+          type: string
+        bidderId:
+          type: string
+        amount:
+          type: number
+          format: double
+        bidType:
+          type: string
+          enum:
+            - MANUAL
+            - AUTO
+            - PROXY
+            - INSTANT_BUY
+    ApiResponseValidateBidResponse:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ValidateBidResponse'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    ValidateBidResponse:
+      required:
+        - bidIncrement
+        - isValid
+        - minimumBid
+        - warnings
+      type: object
+      properties:
+        isValid:
+          type: boolean
+        message:
+          type: string
+        minimumBid:
+          type: number
+          format: double
+        maximumBid:
+          type: number
+          format: double
+        bidIncrement:
+          type: number
+          format: double
+        warnings:
+          type: array
+          items:
+            type: string
+    PlaceBidRequest:
+      required:
+        - amount
+        - bidType
+        - bidderId
+        - lotId
+        - metadata
+      type: object
+      properties:
+        lotId:
+          type: string
+        bidderId:
+          type: string
+        amount:
+          type: number
+          format: double
+        bidType:
+          type: string
+          enum:
+            - MANUAL
+            - AUTO
+            - PROXY
+            - INSTANT_BUY
+        maxAutoBidAmount:
+          type: number
+          format: double
+        metadata:
+          type: object
+          additionalProperties:
+            type: object
+    ApiResponsePlaceBidResponse:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PlaceBidResponse'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    PlaceBidResponse:
+      required:
+        - bid
+        - isWinning
+        - nextMinimumBid
+        - status
+      type: object
+      properties:
+        bid:
+          $ref: '#/components/schemas/ProviderBid'
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+            - WINNING
+            - OUTBID
+            - WON
+            - LOST
+            - CANCELLED
+        message:
+          type: string
+        isWinning:
+          type: boolean
+        nextMinimumBid:
+          type: number
+          format: double
+    ProviderBid:
+      required:
+        - amount
+        - bidType
+        - bidderId
+        - id
+        - isAutoBid
+        - isWinning
+        - lotId
+        - placedAt
+        - providerId
+        - status
+      type: object
+      properties:
+        id:
+          type: string
+        lotId:
+          type: string
+        providerId:
+          type: string
+        externalId:
+          type: string
+        bidderId:
+          type: string
+        amount:
+          type: number
+          format: double
+        bidType:
+          type: string
+          enum:
+            - MANUAL
+            - AUTO
+            - PROXY
+            - INSTANT_BUY
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+            - WINNING
+            - OUTBID
+            - WON
+            - LOST
+            - CANCELLED
+        isWinning:
+          type: boolean
+        isAutoBid:
+          type: boolean
+        placedAt:
+          type: string
+          format: date-time
+    RegisterRequest:
+      required:
+        - password
+        - userId
+        - username
+      type: object
+      properties:
+        userId:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+    AccessToken:
+      required:
+        - token
+        - validUntil
+      type: object
+      properties:
+        token:
+          type: string
+        validUntil:
+          type: string
+          format: date-time
+    AuthResult:
+      required:
+        - success
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        accessToken:
+          $ref: '#/components/schemas/AccessToken'
+        refreshToken:
+          type: string
+    LoginRequest:
+      required:
+        - password
+        - username
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    RefreshRequest:
+      required:
+        - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    AdminCreateLotRequest:
+      required:
+        - auction
+        - description
+        - externalId
+        - location
+        - metadata
+        - status
+        - title
+        - vehicle
+      type: object
+      properties:
+        externalId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        vehicle:
+          $ref: '#/components/schemas/AdminVehicleInfoRequest'
+        auction:
+          $ref: '#/components/schemas/AdminAuctionInfoRequest'
+        location:
+          $ref: '#/components/schemas/AdminLocationInfoRequest'
+        metadata:
+          $ref: '#/components/schemas/AdminLotMetadataRequest'
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - UPCOMING
+            - ACTIVE
+            - ENDED
+            - SOLD
+            - UNSOLD
+            - CANCELLED
+            - SUSPENDED
+    AdminUpdateStatusRequest:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - DRAFT
+            - UPCOMING
+            - ACTIVE
+            - ENDED
+            - SOLD
+            - UNSOLD
+            - CANCELLED
+            - SUSPENDED
+    AdminHiddenRequest:
+      required:
+        - hidden
+      type: object
+      properties:
+        hidden:
+          type: boolean
+    CarDocuments:
+      required:
+        - hasTitle
+      type: object
+      properties:
+        hasTitle:
+          type: boolean
+        titleState:
+          type: string
+    CarInfo:
+      required:
+        - brandId
+        - brandName
+        - condition
+        - images
+        - modelId
+        - modelName
+        - year
+      type: object
+      properties:
+        brandId:
+          type: string
+        brandName:
+          type: string
+        modelId:
+          type: string
+        modelName:
+          type: string
+        year:
+          type: integer
+          format: int32
+        condition:
+          type: string
+          enum:
+            - NEW
+            - USED
+            - DAMAGED
+        mileage:
+          type: integer
+          format: int32
+        vin:
+          type: string
+        color:
+          type: string
+        engine:
+          type: string
+        transmission:
+          type: string
+          enum:
+            - AUTOMATIC
+            - MANUAL
+            - CVT
+        drivetrain:
+          type: string
+          enum:
+            - FWD
+            - RWD
+            - AWD
+            - FOUR_WD
+        description:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        documents:
+          $ref: '#/components/schemas/CarDocuments'
+    LotSource:
+      required:
+        - lotUrl
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+        lotUrl:
+          type: string
+    LotSummary:
+      required:
+        - bidStep
+        - bidsCount
+        - car
+        - currentBid
+        - endTime
+        - id
+        - source
+        - startTime
+        - startingBid
+        - status
+      type: object
+      properties:
+        id:
+          type: string
+        car:
+          $ref: '#/components/schemas/CarInfo'
+        status:
+          type: string
+          enum:
+            - UPCOMING
+            - ACTIVE
+            - FINISHED
+            - CANCELLED
+        currentBid:
+          type: number
+          format: double
+        startingBid:
+          type: number
+          format: double
+        bidStep:
+          type: number
+          format: double
+        bidsCount:
+          type: integer
+          format: int32
+        startTime:
+          type: string
+        endTime:
+          type: string
+        source:
+          $ref: '#/components/schemas/LotSource'
+    UserBid:
+      required:
+        - amount
+        - bidStatus
+        - bidderId
+        - id
+        - isWinning
+        - lot
+        - lotId
+        - placedAt
+      type: object
+      properties:
+        id:
+          type: string
+        lotId:
+          type: string
+        amount:
+          type: number
+          format: double
+        bidderId:
+          type: string
+        placedAt:
+          type: string
+        isWinning:
+          type: boolean
+        lot:
+          $ref: '#/components/schemas/LotSummary'
+        bidStatus:
+          type: string
+          enum:
+            - WINNING
+            - OUTBID
+            - WON
+            - LOST
+    UserBidPage:
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserBid'
+    LotPage:
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/LotSummary'
+    LotDetail:
+      required:
+        - bidStep
+        - bidsCount
+        - car
+        - currentBid
+        - endTime
+        - fees
+        - id
+        - location
+        - recentBids
+        - source
+        - startTime
+        - startingBid
+        - status
+      type: object
+      properties:
+        id:
+          type: string
+        car:
+          $ref: '#/components/schemas/CarInfo'
+        status:
+          type: string
+          enum:
+            - UPCOMING
+            - ACTIVE
+            - FINISHED
+            - CANCELLED
+        currentBid:
+          type: number
+          format: double
+        startingBid:
+          type: number
+          format: double
+        bidStep:
+          type: number
+          format: double
+        bidsCount:
+          type: integer
+          format: int32
+        startTime:
+          type: string
+        endTime:
+          type: string
+        source:
+          $ref: '#/components/schemas/LotSource'
+        location:
+          $ref: '#/components/schemas/LotLocation'
+        fees:
+          $ref: '#/components/schemas/LotFees'
+        recentBids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bid'
+    LotFees:
+      type: object
+      properties:
+        buyerPremiumPercent:
+          type: number
+          format: double
+        documentationFee:
+          type: number
+          format: double
+    LotLocation:
+      required:
+        - city
+        - country
+        - state
+      type: object
+      properties:
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+    BidPage:
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+        - totalPages
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bid'
+    ApiResponseVehicleLot:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/VehicleLot'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    ApiResponseBidHistoryResponse:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/BidHistoryResponse'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    BidHistoryResponse:
+      required:
+        - bids
+        - lotId
+        - pagination
+        - summary
+      type: object
+      properties:
+        lotId:
+          type: string
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderBid'
+        pagination:
+          $ref: '#/components/schemas/PaginationResponse'
+        summary:
+          $ref: '#/components/schemas/BidSummary'
+    BidSummary:
+      required:
+        - averageBid
+        - bidCount
+        - currentBid
+        - highestBid
+        - lowestBid
+        - totalBids
+      type: object
+      properties:
+        totalBids:
+          type: integer
+          format: int32
+        currentBid:
+          type: number
+          format: double
+        bidCount:
+          type: integer
+          format: int32
+        highestBid:
+          type: number
+          format: double
+        lowestBid:
+          type: number
+          format: double
+        averageBid:
+          type: number
+          format: double
+    ApiResponseBidAnalyticsResponse:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/BidAnalyticsResponse'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    BidAnalytics:
+      required:
+        - averageBidIncrement
+        - bidFrequency
+        - biddingPattern
+        - timeAnalytics
+        - totalBids
+        - uniqueBidders
+      type: object
+      properties:
+        totalBids:
+          type: integer
+          format: int32
+        uniqueBidders:
+          type: integer
+          format: int32
+        bidFrequency:
+          type: number
+          format: double
+        averageBidIncrement:
+          type: number
+          format: double
+        biddingPattern:
+          $ref: '#/components/schemas/BiddingPattern'
+        timeAnalytics:
+          $ref: '#/components/schemas/BidTimeAnalytics'
+    BidAnalyticsResponse:
+      required:
+        - isSupported
+        - lotId
+      type: object
+      properties:
+        lotId:
+          type: string
+        isSupported:
+          type: boolean
+        analytics:
+          $ref: '#/components/schemas/BidAnalytics'
+        message:
+          type: string
+    BidTimeAnalytics:
+      required:
+        - biddingDuration
+        - bidsByHour
+        - firstBidTime
+        - lastBidTime
+      type: object
+      properties:
+        firstBidTime:
+          type: string
+          format: date-time
+        lastBidTime:
+          type: string
+          format: date-time
+        biddingDuration:
+          type: integer
+          format: int64
+        bidsByHour:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+    BiddingPattern:
+      required:
+        - averageTimeBetweenBids
+        - lastMinuteBidding
+        - mostActiveHour
+        - peakBiddingPeriod
+      type: object
+      properties:
+        mostActiveHour:
+          type: integer
+          format: int32
+        peakBiddingPeriod:
+          type: string
+        averageTimeBetweenBids:
+          type: number
+          format: double
+        lastMinuteBidding:
+          type: boolean
+    Brand:
+      required:
+        - id
+        - lotsCount
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        logoUrl:
+          type: string
+        lotsCount:
+          type: integer
+          format: int32
+    Model:
+      required:
+        - brandId
+        - id
+        - lotsCount
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        brandId:
+          type: string
+        lotsCount:
+          type: integer
+          format: int32
+    AdminPaginatedLotsResponse:
+      required:
+        - lots
+        - pagination
+      type: object
+      properties:
+        lots:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminLotResponse'
+        pagination:
+          $ref: '#/components/schemas/PaginationResponse'
+    ApiResponseAdminPaginatedLotsResponse:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AdminPaginatedLotsResponse'
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    Link:
+      type: object
+      properties:
+        href:
+          type: string
+        templated:
+          type: boolean
+    ApiResponseVoid:
+      required:
+        - data
+        - success
+        - timestamp
+      type: object
+      properties:
+        data:
+          type: object
+        success:
+          type: boolean
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+

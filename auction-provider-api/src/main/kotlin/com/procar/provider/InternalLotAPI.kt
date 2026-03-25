@@ -1,8 +1,7 @@
 package com.procar.provider
 
-import com.procar.provider.lot.AdvancedLotSearchRequest
-import com.procar.provider.lot.LotSearchResponse
-import com.procar.provider.lot.ProviderLot
+import com.procar.provider.common.*
+import com.procar.provider.lot.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,10 +17,10 @@ interface InternalLotAPI {
     @PostMapping("/search")
     fun searchLots(
         @RequestBody request: AdvancedLotSearchRequest
-    ): ResponseEntity<LotSearchResponse>
+    ): ResponseEntity<ApiResponse<LotSearchResponse>>
     
     @GetMapping("/{lotId}")
     fun getLotDetail(
         @PathVariable lotId: String
-    ): ResponseEntity<ProviderLot>
+    ): ResponseEntity<ApiResponse<VehicleLot>>
 }
