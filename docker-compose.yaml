@@ -24,7 +24,7 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/?appName=${MONGO_APP_NAME}
+      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?appName=${MONGO_APP_NAME}
       REDIS_URI: redis://redis:6379
       AUCTION_PROVIDER_PROCAR_URL: http://auction-provider-procar:8083
       AUTH_URL: http://auth:8082
@@ -51,7 +51,7 @@ services:
       - "8082:8082"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/?appName=${MONGO_APP_NAME}
+      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?appName=${MONGO_APP_NAME}
       REDIS_URI: redis://redis:6379
     depends_on:
       - redis
@@ -74,7 +74,7 @@ services:
       - "8083:8083"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/?appName=${MONGO_APP_NAME}
+      MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?appName=${MONGO_APP_NAME}
       REDIS_URI: redis://redis:6379
     depends_on:
       - redis
