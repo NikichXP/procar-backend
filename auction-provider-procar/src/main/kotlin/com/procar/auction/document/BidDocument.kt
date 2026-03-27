@@ -6,11 +6,14 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.LocalDateTime
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Document(collection = "bids")
 data class BidDocument(
     @Id
-    val id: String? = null,
+    @OptIn(ExperimentalUuidApi::class)
+    val id: String = Uuid.generateV7().toString(),
     
     @Field("lot_id")
     val lotId: String,

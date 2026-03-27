@@ -18,45 +18,48 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import java.time.LocalDateTime
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Document(collection = "lots")
 data class LotDocument(
     @Id
-    val id: String? = null,
-    
+    @OptIn(ExperimentalUuidApi::class)
+    val id: String = Uuid.generateV7().toString(),
+
     @Field("provider_id")
     val providerId: String = "procar",
-    
+
     @Field("provider_name")
     val providerName: String = "Procar",
-    
+
     @Field("external_id")
     val externalId: String,
-    
+
     @Field("title")
     val title: String,
-    
+
     @Field("description")
     val description: String,
-    
+
     @Field("vehicle")
     val vehicle: VehicleInfoDocument,
-    
+
     @Field("auction")
     val auction: AuctionInfoDocument,
-    
+
     @Field("location")
     val location: LocationInfoDocument,
-    
+
     @Field("metadata")
     val metadata: LotMetadataDocument,
-    
+
     @Field("status")
     val status: LotStatus,
-    
+
     @Field("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
-    
+
     @Field("updated_at")
     val updatedAt: LocalDateTime = LocalDateTime.now()
 )
