@@ -15,6 +15,7 @@ import com.procar.provider.lot.ShippingInfo
 import com.procar.provider.lot.VehicleHistory
 import com.procar.provider.lot.VehicleImage
 import com.procar.provider.lot.VehicleInfo
+import com.procar.provider.lot.BodyType
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
@@ -46,7 +47,7 @@ class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
             model = vehicle.model,
             year = vehicle.year,
             trim = vehicle.trim,
-            bodyType = vehicle.bodyType,
+            bodyType = BodyType.valueOf(vehicle.bodyType),
             color = vehicle.color,
             interiorColor = vehicle.interiorColor,
             mileage = vehicle.mileage,

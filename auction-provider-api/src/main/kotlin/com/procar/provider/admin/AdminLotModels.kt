@@ -53,7 +53,7 @@ data class AdminVehicleInfoRequest(
     val model: String,
     @field:Positive val year: Int,
     val trim: String? = null,
-    val bodyType: String,
+    val bodyType: BodyType,
     val color: String? = null,
     val interiorColor: String? = null,
     val mileage: Int? = null,

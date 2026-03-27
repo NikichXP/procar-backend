@@ -24,7 +24,7 @@ data class VehicleInfo(
     val model: String,
     val year: Int,
     val trim: String?,
-    val bodyType: String,
+    val bodyType: BodyType,
     val color: String?,
     val interiorColor: String?,
     val mileage: Int?,
@@ -154,6 +154,10 @@ enum class DocumentType {
 
 enum class DamageSeverity {
     MINOR, MODERATE, MAJOR, SEVERE
+}
+
+enum class BodyType {
+    SEDAN, COUPE, HATCHBACK, CONVERTIBLE, SUV, TRUCK, VAN, WAGON, SPORTS_CAR, LUXURY, COMPACT, MIDSIZE, FULLSIZE, CROSSOVER, PICKUP, MINIVAN, ROADSTER, OTHER
 }
 
 enum class TransmissionType {
