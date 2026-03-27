@@ -12,15 +12,6 @@ import java.time.LocalDateTime
 @Repository
 interface LotRepository : MongoRepository<LotDocument, String> {
     
-    @Query("{ 'auction.end_time': { \$lte: ?0, 'status': { \$nin: ['ENDED', 'SOLD', 'UNSOLD', 'CANCELLED'] } }")
-    fun findLotsToBeUpdated(endTime: LocalDateTime): List<LotDocument>
-    
-    @Query("{ 'status': 'ACTIVE', 'auction.end_time': { \$gt: ?0 } }")
-    fun findActiveLots(currentTime: LocalDateTime): List<LotDocument>
-    
-    fun findByStatus(status: LotStatus, pageable: Pageable): Page<LotDocument>
-    
     fun findByStatus(status: LotStatus): List<LotDocument>
-    
-    fun countByStatus(status: LotStatus): Long
+
 }

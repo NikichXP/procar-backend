@@ -20,7 +20,9 @@ class LotAPI(
         return try {
             val response = lotService.searchLots(request)
             ResponseEntity.ok(ApiResponse(response))
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("Error in searchLots: ${e.message}")
+            e.printStackTrace()
             ResponseEntity.ok(ApiResponse(responseFactory.createEmptySearchResponse()))
         }
     }

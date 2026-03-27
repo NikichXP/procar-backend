@@ -5,28 +5,14 @@ import com.procar.auction.document.BidDocument
 import com.procar.auction.repository.BidRepository
 import com.procar.auction.repository.LotRepository
 import com.procar.auction.util.BidsFactory
-import com.procar.provider.bid.BidAnalytics
-import com.procar.provider.bid.BidAnalyticsResponse
-import com.procar.provider.bid.BidHistoryResponse
-import com.procar.provider.bid.BidStatus
-import com.procar.provider.bid.BidSummary
-import com.procar.provider.bid.BidTimeAnalytics
-import com.procar.provider.bid.BidType
-import com.procar.provider.bid.BiddingPattern
-import com.procar.provider.bid.PlaceBidRequest
-import com.procar.provider.bid.PlaceBidResponse
-import com.procar.provider.bid.ProviderBid
-import com.procar.provider.bid.ValidateBidRequest
-import com.procar.provider.bid.ValidateBidResponse
+import com.procar.provider.bid.*
 import com.procar.provider.lot.LotStatus
 import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
 
 @Service
-@Transactional
 class InternalAuctionBidService(
     private val bidRepository: BidRepository,
     private val lotRepository: LotRepository,

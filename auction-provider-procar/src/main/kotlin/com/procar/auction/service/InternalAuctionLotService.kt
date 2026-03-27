@@ -10,14 +10,16 @@ import com.procar.provider.lot.LotSearchResponse
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.VehicleLot
 import org.springframework.core.convert.ConversionService
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
-@Transactional
 class InternalAuctionLotService(
     private val lotRepository: LotRepository,
+    private val mongoTemplate: MongoTemplate,
     private val conversionService: ConversionService
 ) {
 
@@ -32,103 +34,83 @@ class InternalAuctionLotService(
     }
 
     fun searchLots(request: AdvancedLotSearchRequest): LotSearchResponse {
-        val lots = when {
-            !request.query.isNullOrBlank() -> {
-                // For text search, we'll use a simple implementation for now
-                lotRepository.findAll().filter { lot ->
-                    request.query?.let { query ->
-                        lot.title.contains(query, ignoreCase = true) ||
-                        lot.description.contains(query, ignoreCase = true)
-                    } ?: false
-                }
-            }
-            else -> {
-                // Apply filters
-                var filteredLots = lotRepository.findAll()
-                
-                request.filters?.let { filters ->
-                    filters.status?.let { statuses ->
-                        filteredLots = filteredLots.filter { lot ->
-                            lot.status in statuses
-                        }
-                    }
-                    
-                    filters.vehicle?.let { vehicle ->
-                        vehicle.makes?.let { makes ->
-                            filteredLots = filteredLots.filter { lot ->
-                                lot.vehicle.make in makes
-                            }
-                        }
-                        
-                        vehicle.models?.let { models ->
-                            filteredLots = filteredLots.filter { lot ->
-                                lot.vehicle.model in models
-                            }
-                        }
-                        
-                        vehicle.bodyTypes?.let { bodyTypes ->
-                            filteredLots = filteredLots.filter { lot ->
-                                lot.vehicle.bodyType in bodyTypes
-                            }
-                        }
-                    }
-                    
-                    filters.priceRange?.let { range ->
-                        filteredLots = filteredLots.filter { lot ->
-                            lot.auction.currentBid >= (range.min ?: 0.0) && 
-                            lot.auction.currentBid <= (range.max ?: Double.MAX_VALUE)
-                        }
-                    }
-                    
-                    filters.mileageRange?.let { range ->
-                        filteredLots = filteredLots.filter { lot ->
-                            (lot.vehicle.mileage ?: 0) >= range.first && 
-                            (lot.vehicle.mileage ?: Int.MAX_VALUE) <= range.last
-                        }
-                    }
-                    
-                    filters.location?.let { location ->
-                        filteredLots = filterByLocationField(filteredLots, location.cities) { lot -> lot.location.city }
-                        filteredLots = filterByLocationField(filteredLots, location.states) { lot -> lot.location.state }
-                    }
-                }
-                
-                filteredLots
-            }
+        val criteria = mutableListOf<Criteria>()
+
+        val query = request.query
+        if (!query.isNullOrBlank()) {
+            criteria.add(
+                Criteria().orOperator(
+                    Criteria.where("title").regex(query, "i"),
+                    Criteria.where("description").regex(query, "i")
+                )
+            )
         }
 
-        // Apply pagination
-        val startIndex = if (request.pagination.cursor != null) {
-            // Simple cursor implementation - in production, use proper cursor-based pagination
-            (request.pagination.cursor.hashCode() % lots.size).coerceAtLeast(0)
+        request.filters?.let { filters ->
+            filters.status?.let { statuses ->
+                criteria.add(Criteria.where("status").`in`(statuses.map { it.name }))
+            }
+            filters.priceRange?.let { range ->
+                val priceCriteria = Criteria.where("auction.current_bid")
+                range.min?.let { priceCriteria.gte(it) }
+                range.max?.let { priceCriteria.lte(it) }
+                criteria.add(priceCriteria)
+            }
+            filters.yearRange?.let { range ->
+                criteria.add(Criteria.where("vehicle.year").gte(range.first).lte(range.last))
+            }
+            filters.mileageRange?.let { range ->
+                criteria.add(Criteria.where("vehicle.mileage").gte(range.first).lte(range.last))
+            }
+            filters.vehicle?.let { v ->
+                v.makes?.let { criteria.add(Criteria.where("vehicle.make").`in`(it)) }
+                v.models?.let { criteria.add(Criteria.where("vehicle.model").`in`(it)) }
+                v.bodyTypes?.let { criteria.add(Criteria.where("vehicle.body_type").`in`(it)) }
+                v.fuelTypes?.let { criteria.add(Criteria.where("vehicle.fuel_type").`in`(it.map { t -> t.name })) }
+                v.transmissions?.let { criteria.add(Criteria.where("vehicle.transmission").`in`(it.map { t -> t.name })) }
+                v.drivetrains?.let { criteria.add(Criteria.where("vehicle.drivetrain").`in`(it.map { t -> t.name })) }
+                v.colors?.let { criteria.add(Criteria.where("vehicle.color").`in`(it)) }
+                v.hasDamage?.let { criteria.add(if (it) Criteria.where("vehicle.damage").exists(true).not().size(0) else Criteria.where("vehicle.damage").`is`(null).orOperator(Criteria.where("vehicle.damage").size(0))) }
+            }
+            filters.conditions?.let { criteria.add(Criteria.where("vehicle.condition").`in`(it.map { c -> c.name })) }
+            filters.location?.let { loc ->
+                loc.cities?.let { criteria.add(Criteria.where("location.city").`in`(it)) }
+                loc.states?.let { criteria.add(Criteria.where("location.state").`in`(it)) }
+                loc.zipCodes?.let { criteria.add(Criteria.where("location.zip_code").`in`(it)) }
+            }
+            filters.tags?.let { criteria.add(Criteria.where("metadata.tags").all(it)) }
+            filters.categories?.let { criteria.add(Criteria.where("metadata.categories").all(it)) }
+            filters.titleStatus?.let { criteria.add(Criteria.where("metadata.history.title_status").`in`(it.map { s -> s.name })) }
+        }
+
+        request.pagination.cursor?.let { cursor ->
+            criteria.add(Criteria.where("_id").gt(cursor))
+        }
+
+        val mongoQuery = if (criteria.isNotEmpty()) {
+            Query(Criteria().andOperator(*criteria.toTypedArray()))
         } else {
-            0
+            Query()
         }
-        
-        val endIndex = (startIndex + request.pagination.limit).coerceAtMost(lots.size)
-        val paginatedLots = lots.subList(startIndex, endIndex)
 
-        val providerLots = paginatedLots.mapNotNull { conversionService.convert(it, VehicleLot::class.java) }
-        
+        val limit = request.pagination.limit
+        mongoQuery.limit(limit + 1)
+        val lots = mongoTemplate.find(mongoQuery, LotDocument::class.java)
+
+        val hasNext = lots.size > limit
+        val page = if (hasNext) lots.dropLast(1) else lots
+
+        val providerLots = page.mapNotNull { conversionService.convert(it, VehicleLot::class.java) }
+
         return LotSearchResponse(
             results = providerLots,
             pagination = PaginationResponse(
-                hasNext = endIndex < lots.size,
-                nextCursor = if (endIndex < lots.size) "cursor-$endIndex" else null
+                hasNext = hasNext,
+                nextCursor = if (hasNext) page.last().id else null
             ),
             suggestions = null,
             correctedQuery = null
         )
-    }
-    
-    private fun filterByLocationField(
-        lots: List<LotDocument>, 
-        fieldValues: Collection<String>?, 
-        extractor: (LotDocument) -> String
-    ): List<LotDocument> {
-        return fieldValues?.let { values ->
-            lots.filter { lot -> extractor(lot) in values }
-        } ?: lots
     }
 
     fun updateLot(lotId: String, lotDocument: LotDocument): LotDocument {
