@@ -17,7 +17,7 @@ class BidService(
     fun getBidHistory(lotId: String, page: Int, size: Int): BidPage {
         val response: ResponseEntity<ApiResponse<BidHistoryResponse>> = internalBidAPI.getBidHistory(lotId, null)
         val apiResponse = response.body ?: throw RuntimeException("Failed to get bid history")
-        val bidHistory = apiResponse.data ?: throw RuntimeException("Failed to get bid history data")
+        val bidHistory = apiResponse.data
         
         // Convert internal response to gateway DTO
         return BidPage(
@@ -47,7 +47,7 @@ class BidService(
         )
         val validateResponse: ResponseEntity<ApiResponse<ValidateBidResponse>> = internalBidAPI.validateBid(validateRequest)
         val validateApiResult = validateResponse.body ?: throw RuntimeException("Failed to validate bid")
-        val validationResult = validateApiResult.data ?: throw RuntimeException("Failed to get validation data")
+        val validationResult = validateApiResult.data
         
         if (!validationResult.isValid) {
             throw RuntimeException("Bid validation failed: ${validationResult.message}")
@@ -61,7 +61,7 @@ class BidService(
         )
         val placeResponse: ResponseEntity<ApiResponse<PlaceBidResponse>> = internalBidAPI.placeBid(placeRequest)
         val placeApiResult = placeResponse.body ?: throw RuntimeException("Failed to place bid")
-        val placedBid = placeApiResult.data ?: throw RuntimeException("Failed to get placed bid data")
+        val placedBid = placeApiResult.data
         
         return Bid(
             id = placedBid.bid.id,

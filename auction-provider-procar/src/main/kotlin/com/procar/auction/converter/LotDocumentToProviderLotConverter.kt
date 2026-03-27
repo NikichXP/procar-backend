@@ -24,7 +24,7 @@ class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
 
     override fun convert(source: LotDocument): VehicleLot {
         return VehicleLot(
-            id = source.id!!,
+            id = source.id,
             providerId = source.providerId,
             providerName = source.providerName,
             externalId = source.externalId,

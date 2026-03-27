@@ -10,7 +10,7 @@ class BidDocumentToProviderBidConverter : Converter<BidDocument, ProviderBid> {
 
     override fun convert(source: BidDocument): ProviderBid {
         return ProviderBid(
-            id = source.id!!,
+            id = source.id,
             lotId = source.lotId,
             providerId = source.providerId,
             externalId = source.externalId,

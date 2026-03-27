@@ -23,7 +23,7 @@ class LotDocumentToAdminLotResponseConverter : Converter<LotDocument, AdminLotRe
     
     override fun convert(source: LotDocument): AdminLotResponse {
         return AdminLotResponse(
-            id = source.id!!,
+            id = source.id,
             externalId = source.externalId,
             title = source.title,
             description = source.description,

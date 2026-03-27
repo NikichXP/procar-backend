@@ -44,7 +44,7 @@ class LotService(
         
         val response: ResponseEntity<ApiResponse<LotSearchResponse>> = internalLotAPI.searchLots(advancedRequest)
         val apiResponse = response.body ?: throw RuntimeException("Failed to search lots")
-        val searchResult = apiResponse.data ?: throw RuntimeException("Failed to get search data")
+        val searchResult = apiResponse.data
         
         // Convert internal response to gateway DTO
         return searchResult.results.map { vehicleLot ->
@@ -87,7 +87,7 @@ class LotService(
     fun getLotDetail(lotId: String): LotDetail {
         val response: ResponseEntity<ApiResponse<VehicleLot>> = internalLotAPI.getLotDetail(lotId)
         val apiResponse = response.body ?: throw RuntimeException("Failed to get lot detail")
-        val vehicleLot = apiResponse.data ?: throw RuntimeException("Failed to get lot detail data")
+        val vehicleLot = apiResponse.data
         
         // Convert internal response to gateway DTO
         return LotDetail(
