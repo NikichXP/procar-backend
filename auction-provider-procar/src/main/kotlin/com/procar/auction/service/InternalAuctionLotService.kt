@@ -97,7 +97,7 @@ class InternalAuctionLotService(
 
         val limit = request.pagination.limit
         mongoQuery.limit(limit + 1)
-        val lots = mongoTemplate.find(mongoQuery, LotDocument::class.java)
+        val lots = mongoTemplate.find<LotDocument>(mongoQuery)
 
         val hasNext = lots.size > limit
         val page = if (hasNext) lots.dropLast(1) else lots
