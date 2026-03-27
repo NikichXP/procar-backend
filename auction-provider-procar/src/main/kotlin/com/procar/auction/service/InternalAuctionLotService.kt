@@ -10,7 +10,9 @@ import com.procar.provider.lot.LotSearchResponse
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.VehicleLot
 import org.springframework.core.convert.ConversionService
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
@@ -152,36 +154,31 @@ class InternalAuctionLotService(
     }
 
     fun getAllLots(cursor: String?, limit: Int, status: LotStatus?): AdminPaginatedLotsResponse {
-        // Parse cursor to get starting position (simple implementation)
-        val startPosition = cursor?.let { 
-            try {
-                it.substringAfter("cursor-").toInt()
-            } catch (e: Exception) {
-                0
-            }
-        } ?: 0
+        val criteria = mutableListOf<Criteria>()
         
-        // Get all lots (in production, use proper cursor-based query)
-        val allLots = when (status) {
-            null -> lotRepository.findAll()
-            else -> lotRepository.findByStatus(status)
+        status?.let { criteria.add(Criteria.where("status").`is`(it.name)) }
+        cursor?.let { criteria.add(Criteria.where("_id").lt(it)) }
+        
+        val mongoQuery = if (criteria.isNotEmpty()) {
+            Query(Criteria().andOperator(*criteria.toTypedArray()))
+        } else {
+            Query()
         }
         
-        // Sort by creation date for consistent pagination
-        val sortedLots = allLots.sortedByDescending { it.createdAt }
+        mongoQuery.with(Sort.by(Sort.Direction.DESC, "_id"))
+        mongoQuery.limit(limit + 1)
         
-        // Apply cursor and limit
-        val paginatedLots = sortedLots.drop(startPosition).take(limit + 1) // +1 to check if there are more
+        val lots = mongoTemplate.find<LotDocument>(mongoQuery)
         
-        val hasMore = paginatedLots.size > limit
-        val lotsToReturn = if (hasMore) paginatedLots.dropLast(1) else paginatedLots
+        val hasMore = lots.size > limit
+        val lotsToReturn = if (hasMore) lots.dropLast(1) else lots
         
         val adminLots = lotsToReturn.map { lot ->
             conversionService.convert(lot, AdminLotResponse::class.java)!!
         }
         
         val nextCursor = if (hasMore) {
-            "cursor-${startPosition + limit}"
+            lotsToReturn.last().id
         } else {
             null
         }
