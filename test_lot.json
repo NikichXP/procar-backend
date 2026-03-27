@@ -1,0 +1,42 @@
+{
+  "externalId": "toyota-gr-gt-001",
+  "title": "Toyota GR GT",
+  "description": "A very nice Toyota GR GT",
+  "vehicle": {
+    "make": "Toyota",
+    "model": "GR GT",
+    "year": 2026,
+    "bodyType": "COUPE",
+    "engine": {
+      "type": "V6"
+    },
+    "transmission": "AUTOMATIC",
+    "drivetrain": "RWD",
+    "fuelType": "GASOLINE",
+    "condition": "EXCELLENT"
+  },
+  "auction": {
+    "currentBid": 1000,
+    "startingBid": 1000,
+    "bidIncrement": 100,
+    "startTime": "2026-03-27T12:00:00",
+    "endTime": "2027-04-27T12:00:00",
+    "auctionType": "ONLINE"
+  },
+  "location": {
+    "address": "123 Main St",
+    "city": "Tokyo",
+    "state": "Tokyo",
+    "zipCode": "100-0001",
+    "country": "Japan",
+    "timezone": "Asia/Tokyo"
+  },
+  "metadata": {
+    "sellerInfo": {
+      "id": "seller-001",
+      "name": "Toyota Corp",
+      "type": "DEALER"
+    }
+  },
+  "status": "DRAFT"
+}
