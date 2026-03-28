@@ -75,8 +75,8 @@ class CreateLotForm : VerticalLayout() {
         configureComboBoxes()
         applyDefaults()
         add(
-            buildBasicInfoSection(),
             buildVehicleSection(),
+            buildBasicInfoSection(),
             buildAuctionSection(),
             buildLocationMetadataSection()
         )
