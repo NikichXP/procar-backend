@@ -15,7 +15,7 @@ class LotService(
     @Qualifier("internalLotHttpClient") private val internalLotAPI: InternalLotAPI
 ) {
 
-    fun getLots(request: LotSearchRequest): List<LotSummary> {
+    suspend fun getLots(request: LotSearchRequest): List<LotSummary> {
         val advancedRequest = AdvancedLotSearchRequest(
             query = null, // TODO: Map query if needed
             filters = LotSearchFilters(
@@ -77,13 +77,13 @@ class LotService(
         }
     }
 
-    fun countLots(request: LotSearchRequest): Int {
+    suspend fun countLots(request: LotSearchRequest): Int {
         // For now, return the size of the search results
         // TODO: Implement dedicated count endpoint when available in internal API
         return getLots(request).size
     }
 
-    fun getLotDetail(lotId: String): LotDetail {
+    suspend fun getLotDetail(lotId: String): LotDetail {
         val response: ResponseEntity<ApiResponse<VehicleLot>> = internalLotAPI.getLotDetail(lotId)
         val apiResponse = response.body ?: throw RuntimeException("Failed to get lot detail")
         val vehicleLot = apiResponse.data

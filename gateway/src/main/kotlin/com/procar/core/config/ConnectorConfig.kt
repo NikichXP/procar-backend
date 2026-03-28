@@ -19,7 +19,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 class ConnectorConfig {
 
     // TODO this one is bound to only one provider, to be refactored in the future
-    @Bean
+    @Bean("auctionProviderProcarWebClient")
     fun webClient(connectorProperties: ConnectorProperties): WebClient {
         return WebClient.builder()
             .baseUrl(connectorProperties.auctionProviderProcarUrl)
@@ -42,7 +42,7 @@ class ConnectorConfig {
     }
 
     @Bean("adminLotHttpClient")
-    fun adminLotController(webClient: WebClient): AdminLotController {
+    fun adminLotController(@Qualifier("auctionProviderProcarWebClient") webClient: WebClient): AdminLotController {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
@@ -50,7 +50,7 @@ class ConnectorConfig {
     }
 
     @Bean("adminBidHttpClient")
-    fun adminBidController(webClient: WebClient): AdminBidController {
+    fun adminBidController(@Qualifier("auctionProviderProcarWebClient") webClient: WebClient): AdminBidController {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
@@ -58,7 +58,7 @@ class ConnectorConfig {
     }
 
     @Bean("internalBidHttpClient")
-    fun internalBidAPI(webClient: WebClient): InternalBidAPI {
+    fun internalBidAPI(@Qualifier("auctionProviderProcarWebClient") webClient: WebClient): InternalBidAPI {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
@@ -66,7 +66,7 @@ class ConnectorConfig {
     }
 
     @Bean("internalLotHttpClient")
-    fun internalLotAPI(webClient: WebClient): InternalLotAPI {
+    fun internalLotAPI(@Qualifier("auctionProviderProcarWebClient") webClient: WebClient): InternalLotAPI {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()

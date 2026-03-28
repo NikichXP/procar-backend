@@ -13,12 +13,12 @@ import org.springframework.web.service.annotation.PostExchange
 interface InternalLotAPI {
     
     @PostExchange("/search")
-    fun searchLots(
+    suspend fun searchLots(
         @RequestBody request: AdvancedLotSearchRequest
     ): ResponseEntity<ApiResponse<LotSearchResponse>>
     
     @GetExchange("/{lotId}")
-    fun getLotDetail(
+    suspend fun getLotDetail(
         @PathVariable lotId: String
     ): ResponseEntity<ApiResponse<VehicleLot>>
 }

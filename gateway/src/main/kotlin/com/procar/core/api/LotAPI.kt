@@ -15,7 +15,7 @@ class LotAPI(
 ) {
 
     @GetMapping
-    fun getLots(
+    suspend fun getLots(
         @RequestParam(required = false) status: LotStatus?,
         @RequestParam(required = false) source: String?,
         @RequestParam(required = false) endsInMinutes: Int?,
@@ -60,7 +60,7 @@ class LotAPI(
     }
 
     @GetMapping("/{lotId}")
-    fun getLotDetail(@PathVariable lotId: String): LotDetail {
+    suspend fun getLotDetail(@PathVariable lotId: String): LotDetail {
         return lotService.getLotDetail(lotId)
     }
 }
