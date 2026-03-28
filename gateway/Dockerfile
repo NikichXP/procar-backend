@@ -15,7 +15,7 @@ COPY build.gradle.kts .
 COPY settings.gradle.kts .
 
 # Build the application
-RUN gradle gateway:bootJar --no-daemon
+RUN gradle gateway:bootJar -x test --no-daemon
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine
