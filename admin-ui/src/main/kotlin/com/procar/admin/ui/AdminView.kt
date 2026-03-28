@@ -4,11 +4,13 @@ import com.procar.admin.service.GatewayClientService
 import com.procar.provider.admin.AdminLotResponse
 import com.vaadin.flow.component.AttachEvent
 import com.vaadin.flow.component.UI
+import com.vaadin.flow.component.applayout.AppLayout
+import com.vaadin.flow.component.applayout.DrawerToggle
 import com.vaadin.flow.component.button.Button
+import com.vaadin.flow.component.button.ButtonVariant
 import com.vaadin.flow.component.html.H1
 import com.vaadin.flow.component.html.H2
 import com.vaadin.flow.component.notification.Notification
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.router.Route
@@ -16,27 +18,42 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @Route("")
 class AdminView(
     private val gatewayClientService: GatewayClientService
-) : VerticalLayout() {
+) : AppLayout() {
 
     private val lots = mutableListOf<AdminLotResponse>()
     private val lotGrid = LotGrid(lots)
     private var initialLotsLoaded = false
 
+    private val lotView = buildLotSection()
+    private val warehouseView = WarehouseView(gatewayClientService)
+
     init {
-        runBlocking {
-            gatewayClientService.getLots().collect { lots.add(it) }
-        }
+        val title = H1("Procar Admin")
+        title.style.set("font-size", "var(--lumo-font-size-l)")
+        title.style.set("margin", "0")
 
-        addClassName("admin-view")
-        defaultHorizontalComponentAlignment = Alignment.CENTER
+        addToNavbar(DrawerToggle(), title)
 
-        add(H1("Procar Lots"))
-        add(buildLotSection())
+        val lotsNavButton = Button("Lots") { showLots() }
+        lotsNavButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY)
+        lotsNavButton.style.set("width", "100%")
+        lotsNavButton.style.set("justify-content", "flex-start")
+
+        val warehousesNavButton = Button("Warehouses") { showWarehouses() }
+        warehousesNavButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY)
+        warehousesNavButton.style.set("width", "100%")
+        warehousesNavButton.style.set("justify-content", "flex-start")
+
+        val nav = VerticalLayout(lotsNavButton, warehousesNavButton)
+        nav.setPadding(false)
+        nav.setSpacing(false)
+        addToDrawer(nav)
+
+        setContent(lotView)
     }
 
     override fun onAttach(attachEvent: AttachEvent) {
@@ -45,6 +62,15 @@ class AdminView(
             initialLotsLoaded = true
             loadLots(attachEvent.ui)
         }
+    }
+
+    private fun showLots() {
+        setContent(lotView)
+    }
+
+    private fun showWarehouses() {
+        setContent(warehouseView)
+        warehouseView.loadWarehouses()
     }
 
     private fun buildLotSection(): VerticalLayout {

@@ -1,7 +1,21 @@
 package com.procar.admin.ui
 
-import com.procar.provider.admin.*
-import com.procar.provider.lot.*
+import com.procar.provider.admin.AdminAuctionInfoRequest
+import com.procar.provider.admin.AdminCreateLotRequest
+import com.procar.provider.admin.AdminEngineInfoRequest
+import com.procar.provider.admin.AdminLocationInfoRequest
+import com.procar.provider.admin.AdminLotMetadataRequest
+import com.procar.provider.admin.AdminSellerInfoRequest
+import com.procar.provider.admin.AdminVehicleInfoRequest
+import com.procar.provider.admin.AdminWarehouseResponse
+import com.procar.provider.lot.AuctionType
+import com.procar.provider.lot.BodyType
+import com.procar.provider.lot.DrivetrainType
+import com.procar.provider.lot.FuelType
+import com.procar.provider.lot.LotStatus
+import com.procar.provider.lot.SellerType
+import com.procar.provider.lot.TransmissionType
+import com.procar.provider.lot.VehicleCondition
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.combobox.ComboBox
 import com.vaadin.flow.component.datetimepicker.DateTimePicker
@@ -10,10 +24,13 @@ import com.vaadin.flow.component.html.H2
 import com.vaadin.flow.component.html.H3
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
+import com.vaadin.flow.component.radiobutton.RadioButtonGroup
 import com.vaadin.flow.component.textfield.NumberField
 import com.vaadin.flow.component.textfield.TextArea
 import com.vaadin.flow.component.textfield.TextField
 import java.time.LocalDateTime
+
+enum class LocationMode { MANUAL, WAREHOUSE }
 
 class CreateLotForm : VerticalLayout() {
 
@@ -53,13 +70,17 @@ class CreateLotForm : VerticalLayout() {
     val auctionTypeComboBox = ComboBox<AuctionType>("Auction Type *")
     val buyItNowPriceField = NumberField("Buy It Now Price")
 
-    // Location
+    // Location - manual fields
     val addressField = TextField("Address *")
     val cityField = TextField("City *")
     val stateField = TextField("State *")
     val zipCodeField = TextField("ZIP Code *")
     val countryField = TextField("Country *")
     val timezoneField = TextField("Timezone *")
+
+    // Location - warehouse selection
+    val locationModeGroup = RadioButtonGroup<LocationMode>("Location Type")
+    val warehouseComboBox = ComboBox<AdminWarehouseResponse>("Warehouse *")
 
     // Seller / Metadata
     val sellerIdField = TextField("Seller ID *")
@@ -80,6 +101,10 @@ class CreateLotForm : VerticalLayout() {
             buildAuctionSection(),
             buildLocationMetadataSection()
         )
+    }
+
+    fun setWarehouses(warehouses: List<AdminWarehouseResponse>) {
+        warehouseComboBox.setItems(warehouses)
     }
 
     private fun configureComboBoxes() {
@@ -106,6 +131,25 @@ class CreateLotForm : VerticalLayout() {
 
         sellerTypeComboBox.setItems(SellerType.entries)
         sellerTypeComboBox.isClearButtonVisible = false
+
+        locationModeGroup.setItems(LocationMode.entries)
+        locationModeGroup.value = LocationMode.MANUAL
+        locationModeGroup.setItemLabelGenerator { if (it == LocationMode.MANUAL) "Enter manually" else "Select warehouse" }
+
+        warehouseComboBox.setItemLabelGenerator { "${it.name} — ${it.city}, ${it.country}" }
+        warehouseComboBox.isVisible = false
+        warehouseComboBox.isClearButtonVisible = true
+
+        locationModeGroup.addValueChangeListener { event ->
+            val isWarehouse = event.value == LocationMode.WAREHOUSE
+            warehouseComboBox.isVisible = isWarehouse
+            addressField.isVisible = !isWarehouse
+            cityField.isVisible = !isWarehouse
+            stateField.isVisible = !isWarehouse
+            zipCodeField.isVisible = !isWarehouse
+            countryField.isVisible = !isWarehouse
+            timezoneField.isVisible = !isWarehouse
+        }
     }
 
     private fun applyDefaults() {
@@ -160,9 +204,9 @@ class CreateLotForm : VerticalLayout() {
         locationColumn.addClassName("form-column")
         val locationTitle = H3("Location")
         locationTitle.style.set("color", "var(--lumo-secondary-color)")
-        val locationForm = FormLayout(addressField, cityField, stateField, zipCodeField, countryField, timezoneField)
-        locationForm.width = "100%"
-        locationColumn.add(locationTitle, locationForm)
+        val manualLocationForm = FormLayout(addressField, cityField, stateField, zipCodeField, countryField, timezoneField)
+        manualLocationForm.width = "100%"
+        locationColumn.add(locationTitle, locationModeGroup, warehouseComboBox, manualLocationForm)
 
         val sellerColumn = VerticalLayout()
         sellerColumn.addClassName("form-column")
@@ -200,12 +244,16 @@ class CreateLotForm : VerticalLayout() {
         if (endTimePicker.value == null) errors.add("End Time is required")
         if (auctionTypeComboBox.value == null) errors.add("Auction Type is required")
 
-        if (addressField.value.isNullOrBlank()) errors.add("Address is required")
-        if (cityField.value.isNullOrBlank()) errors.add("City is required")
-        if (stateField.value.isNullOrBlank()) errors.add("State is required")
-        if (zipCodeField.value.isNullOrBlank()) errors.add("ZIP Code is required")
-        if (countryField.value.isNullOrBlank()) errors.add("Country is required")
-        if (timezoneField.value.isNullOrBlank()) errors.add("Timezone is required")
+        if (locationModeGroup.value == LocationMode.WAREHOUSE) {
+            if (warehouseComboBox.value == null) errors.add("Warehouse is required")
+        } else {
+            if (addressField.value.isNullOrBlank()) errors.add("Address is required")
+            if (cityField.value.isNullOrBlank()) errors.add("City is required")
+            if (stateField.value.isNullOrBlank()) errors.add("State is required")
+            if (zipCodeField.value.isNullOrBlank()) errors.add("ZIP Code is required")
+            if (countryField.value.isNullOrBlank()) errors.add("Country is required")
+            if (timezoneField.value.isNullOrBlank()) errors.add("Timezone is required")
+        }
 
         if (sellerIdField.value.isNullOrBlank()) errors.add("Seller ID is required")
         if (sellerNameField.value.isNullOrBlank()) errors.add("Seller Name is required")
@@ -268,14 +316,27 @@ class CreateLotForm : VerticalLayout() {
                 auctionType = auctionTypeComboBox.value!!,
                 buyItNowPrice = buyItNowPriceField.value
             ),
-            location = AdminLocationInfoRequest(
-                address = addressField.value,
-                city = cityField.value,
-                state = stateField.value,
-                zipCode = zipCodeField.value,
-                country = countryField.value,
-                timezone = timezoneField.value
-            ),
+            location = if (locationModeGroup.value == LocationMode.WAREHOUSE) {
+                val wh = warehouseComboBox.value!!
+                AdminLocationInfoRequest(
+                    address = wh.address,
+                    city = wh.city,
+                    state = wh.state,
+                    zipCode = wh.zipCode,
+                    country = wh.country,
+                    coordinates = wh.coordinates,
+                    timezone = wh.timezone
+                )
+            } else {
+                AdminLocationInfoRequest(
+                    address = addressField.value,
+                    city = cityField.value,
+                    state = stateField.value,
+                    zipCode = zipCodeField.value,
+                    country = countryField.value,
+                    timezone = timezoneField.value
+                )
+            },
             metadata = AdminLotMetadataRequest(
                 sellerInfo = AdminSellerInfoRequest(
                     id = sellerIdField.value,

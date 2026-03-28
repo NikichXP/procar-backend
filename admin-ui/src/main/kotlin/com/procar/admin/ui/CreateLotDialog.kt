@@ -6,9 +6,9 @@ import com.vaadin.flow.component.button.Button
 import com.vaadin.flow.component.dialog.Dialog
 import com.vaadin.flow.component.html.Span
 import com.vaadin.flow.component.notification.Notification
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,7 +45,24 @@ class CreateLotDialog(
     }
 
     fun open() {
+        loadWarehouses()
         dialog.open()
+    }
+
+    private fun loadWarehouses() {
+        val currentUI = UI.getCurrent()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val warehouses = gatewayClientService.getWarehouses()
+                currentUI?.access {
+                    form.setWarehouses(warehouses)
+                }
+            } catch (error: Exception) {
+                currentUI?.access {
+                    Notification.show("Warning: could not load warehouses: ${error.message}")
+                }
+            }
+        }
     }
 
     private fun onSave() {

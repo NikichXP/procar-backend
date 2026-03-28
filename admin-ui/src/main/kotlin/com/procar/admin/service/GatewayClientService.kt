@@ -1,17 +1,16 @@
 package com.procar.admin.service
 
 import com.procar.provider.admin.AdminCreateLotRequest
+import com.procar.provider.admin.AdminCreateWarehouseRequest
 import com.procar.provider.admin.AdminLotResponse
 import com.procar.provider.admin.AdminPaginatedLotsResponse
+import com.procar.provider.admin.AdminWarehouseResponse
 import com.procar.provider.bid.BidHistoryResponse
 import com.procar.provider.bid.ProviderBid
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.common.PaginationResponse
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -66,6 +65,31 @@ class GatewayClientService(
             .retrieve()
             .bodyToMono<AdminLotResponse>()
             .awaitFirst()
+    }
+
+    suspend fun getWarehouses(): List<AdminWarehouseResponse> {
+        return try {
+            webClient.get()
+                .uri("/api/admin/warehouses")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .awaitBody<ApiResponse<List<AdminWarehouseResponse>>>()
+                .data
+        } catch (e: Exception) {
+            logger.error("Failed to fetch warehouses: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun createWarehouse(request: AdminCreateWarehouseRequest): AdminWarehouseResponse {
+        return webClient.post()
+            .uri("/api/admin/warehouses")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .awaitBody<ApiResponse<AdminWarehouseResponse>>()
+            .data
     }
 
     suspend fun getBidsForLot(lotId: String): Flow<ProviderBid> = flow {

@@ -1,5 +1,6 @@
 package com.procar.provider.lot
 
+import com.procar.provider.common.GeoCoordinates
 import java.time.LocalDateTime
 
 data class VehicleLot(
@@ -86,7 +87,7 @@ data class LocationInfo(
     val state: String,
     val zipCode: String,
     val country: String,
-    val coordinates: com.procar.provider.common.GeoCoordinates?,
+    val coordinates: GeoCoordinates?,
     val timezone: String
 )
 
