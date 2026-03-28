@@ -16,7 +16,6 @@ class LotService(
 ) {
 
     fun getLots(request: LotSearchRequest): List<LotSummary> {
-        // Convert gateway search request to internal advanced search request
         val advancedRequest = AdvancedLotSearchRequest(
             query = null, // TODO: Map query if needed
             filters = LotSearchFilters(
