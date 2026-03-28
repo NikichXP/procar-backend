@@ -1,9 +1,9 @@
 package com.procar.auction.service
 
-import com.procar.provider.admin.AdminLotResponse
-import com.procar.provider.admin.AdminPaginatedLotsResponse
 import com.procar.auction.document.LotDocument
 import com.procar.auction.repository.LotRepository
+import com.procar.provider.admin.AdminLotResponse
+import com.procar.provider.admin.AdminPaginatedLotsResponse
 import com.procar.provider.common.PaginationResponse
 import com.procar.provider.lot.AdvancedLotSearchRequest
 import com.procar.provider.lot.LotSearchResponse

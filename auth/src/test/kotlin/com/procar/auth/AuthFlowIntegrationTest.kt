@@ -1,14 +1,7 @@
 package com.procar.auth
 
-import com.procar.auth.api.dto.AccessToken
-import com.procar.auth.api.dto.AuthResult
-import com.procar.auth.api.dto.LoginRequest
-import com.procar.auth.api.dto.RefreshRequest
-import com.procar.auth.api.dto.RegisterRequest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import com.procar.auth.api.dto.*
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

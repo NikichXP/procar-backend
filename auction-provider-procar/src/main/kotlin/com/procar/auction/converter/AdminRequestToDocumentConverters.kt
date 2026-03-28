@@ -1,21 +1,7 @@
 package com.procar.auction.converter
 
 import com.procar.auction.document.*
-import com.procar.provider.admin.AdminAuctionInfoRequest
-import com.procar.provider.admin.AdminCreateLotRequest
-import com.procar.provider.admin.AdminDamageInfoRequest
-import com.procar.provider.admin.AdminDocumentRequest
-import com.procar.provider.admin.AdminEngineInfoRequest
-import com.procar.provider.admin.AdminFeeRequest
-import com.procar.provider.admin.AdminInspectionInfoRequest
-import com.procar.provider.admin.AdminLocationInfoRequest
-import com.procar.provider.admin.AdminLotMetadataRequest
-import com.procar.provider.admin.AdminSellerInfoRequest
-import com.procar.provider.admin.AdminShippingInfoRequest
-import com.procar.provider.admin.AdminUpdateLotRequest
-import com.procar.provider.admin.AdminVehicleHistoryRequest
-import com.procar.provider.admin.AdminVehicleImageRequest
-import com.procar.provider.admin.AdminVehicleInfoRequest
+import com.procar.provider.admin.*
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime

@@ -1,19 +1,10 @@
 package com.procar.core.api
 
-import com.procar.auth.api.dto.AccessToken
-import com.procar.auth.api.dto.AuthResult
-import com.procar.auth.api.dto.LoginRequest
-import com.procar.auth.api.dto.RefreshRequest
-import com.procar.auth.api.dto.RegisterRequest
+import com.procar.auth.api.dto.*
 import com.procar.core.service.AuthService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/auth")

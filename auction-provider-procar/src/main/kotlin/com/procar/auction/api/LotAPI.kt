@@ -3,8 +3,10 @@ package com.procar.auction.api
 import com.procar.auction.factory.LotResponseFactory
 import com.procar.auction.service.InternalAuctionLotService
 import com.procar.provider.InternalLotAPI
-import com.procar.provider.lot.*
 import com.procar.provider.common.ApiResponse
+import com.procar.provider.lot.AdvancedLotSearchRequest
+import com.procar.provider.lot.LotSearchResponse
+import com.procar.provider.lot.VehicleLot
 import org.springframework.core.convert.ConversionService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController

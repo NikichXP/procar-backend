@@ -1,23 +1,9 @@
 package com.procar.admin.ui
 
 import com.procar.admin.service.GatewayClientService
-import com.procar.provider.admin.AdminAuctionInfoRequest
-import com.procar.provider.admin.AdminCreateLotRequest
-import com.procar.provider.admin.AdminEngineInfoRequest
-import com.procar.provider.admin.AdminLocationInfoRequest
-import com.procar.provider.admin.AdminLotMetadataRequest
-import com.procar.provider.admin.AdminLotResponse
-import com.procar.provider.admin.AdminSellerInfoRequest
-import com.procar.provider.admin.AdminVehicleInfoRequest
+import com.procar.provider.admin.*
 import com.procar.provider.bid.ProviderBid
-import com.procar.provider.lot.AuctionType
-import com.procar.provider.lot.BodyType
-import com.procar.provider.lot.DrivetrainType
-import com.procar.provider.lot.FuelType
-import com.procar.provider.lot.LotStatus
-import com.procar.provider.lot.SellerType
-import com.procar.provider.lot.TransmissionType
-import com.procar.provider.lot.VehicleCondition
+import com.procar.provider.lot.*
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.UI
 import com.vaadin.flow.component.button.Button

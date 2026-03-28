@@ -1,8 +1,11 @@
 package com.procar.core.service
 
 import com.procar.core.api.dto.*
+import com.procar.core.api.dto.LotStatus
 import com.procar.provider.InternalLotAPI
-import com.procar.provider.common.*
+import com.procar.provider.common.ApiResponse
+import com.procar.provider.common.PaginationRequest
+import com.procar.provider.common.PriceRange
 import com.procar.provider.lot.*
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity

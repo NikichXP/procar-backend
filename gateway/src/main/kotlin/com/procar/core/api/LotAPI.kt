@@ -1,10 +1,6 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.CarCondition
-import com.procar.core.api.dto.LotDetail
-import com.procar.core.api.dto.LotPage
-import com.procar.core.api.dto.LotSearchRequest
-import com.procar.core.api.dto.LotStatus
+import com.procar.core.api.dto.*
 import com.procar.core.service.LotService
 import org.springframework.web.bind.annotation.*
 

@@ -1,13 +1,7 @@
 package com.procar.auction.factory
 
 import com.procar.auction.util.BidsFactory
-import com.procar.provider.bid.BidAnalyticsResponse
-import com.procar.provider.bid.BidHistoryResponse
-import com.procar.provider.bid.BidStatus
-import com.procar.provider.bid.BidSummary
-import com.procar.provider.bid.PlaceBidRequest
-import com.procar.provider.bid.PlaceBidResponse
-import com.procar.provider.bid.ValidateBidResponse
+import com.procar.provider.bid.*
 import com.procar.provider.common.PaginationResponse
 import org.springframework.stereotype.Component
 

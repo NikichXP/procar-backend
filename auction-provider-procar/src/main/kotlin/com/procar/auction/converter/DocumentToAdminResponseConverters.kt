@@ -1,20 +1,7 @@
 package com.procar.auction.converter
 
 import com.procar.auction.document.*
-import com.procar.provider.admin.AdminAuctionInfoResponse
-import com.procar.provider.admin.AdminDamageInfoResponse
-import com.procar.provider.admin.AdminDocumentResponse
-import com.procar.provider.admin.AdminEngineInfoResponse
-import com.procar.provider.admin.AdminFeeResponse
-import com.procar.provider.admin.AdminInspectionInfoResponse
-import com.procar.provider.admin.AdminLocationInfoResponse
-import com.procar.provider.admin.AdminLotMetadataResponse
-import com.procar.provider.admin.AdminLotResponse
-import com.procar.provider.admin.AdminSellerInfoResponse
-import com.procar.provider.admin.AdminShippingInfoResponse
-import com.procar.provider.admin.AdminVehicleHistoryResponse
-import com.procar.provider.admin.AdminVehicleImageResponse
-import com.procar.provider.admin.AdminVehicleInfoResponse
+import com.procar.provider.admin.*
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 

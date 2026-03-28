@@ -1,12 +1,7 @@
 package com.procar.core.service
 
 import com.procar.auth.api.AuthController
-import com.procar.auth.api.dto.AccessToken
-import com.procar.auth.api.dto.AuthResult
-import com.procar.auth.api.dto.LoginRequest
-import com.procar.auth.api.dto.RefreshRequest
-import com.procar.auth.api.dto.RegisterRequest
-import com.procar.auth.api.dto.TokenValidationResult
+import com.procar.auth.api.dto.*
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service

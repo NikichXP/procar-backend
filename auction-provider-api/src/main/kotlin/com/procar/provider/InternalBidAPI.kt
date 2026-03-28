@@ -1,14 +1,14 @@
 package com.procar.provider
 
-import com.procar.provider.common.*
 import com.procar.provider.bid.*
+import com.procar.provider.common.ApiResponse
 import org.springframework.http.ResponseEntity
-import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.service.annotation.HttpExchange
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.service.annotation.PostExchange
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
+import org.springframework.web.service.annotation.PostExchange
 
 @HttpExchange("/internal/bids")
 interface InternalBidAPI {

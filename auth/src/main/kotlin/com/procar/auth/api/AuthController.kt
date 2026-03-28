@@ -1,11 +1,6 @@
 package com.procar.auth.api
 
-import com.procar.auth.api.dto.AccessToken
-import com.procar.auth.api.dto.AuthResult
-import com.procar.auth.api.dto.LoginRequest
-import com.procar.auth.api.dto.RefreshRequest
-import com.procar.auth.api.dto.RegisterRequest
-import com.procar.auth.api.dto.TokenValidationResult
+import com.procar.auth.api.dto.*
 import com.procar.auth.service.AuthService
 import com.procar.auth.service.PasswordAuthService
 import jakarta.validation.Valid

@@ -2,7 +2,8 @@ package com.procar.auction.api.admin
 
 import com.procar.auction.service.InternalAuctionBidService
 import com.procar.provider.admin.AdminBidController
-import com.procar.provider.bid.*
+import com.procar.provider.bid.BidAnalyticsResponse
+import com.procar.provider.bid.BidHistoryResponse
 import com.procar.provider.common.ApiResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController

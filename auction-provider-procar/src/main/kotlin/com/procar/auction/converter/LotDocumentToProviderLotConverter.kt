@@ -1,21 +1,7 @@
 package com.procar.auction.converter
 
 import com.procar.auction.document.LotDocument
-import com.procar.provider.lot.AuctionInfo
-import com.procar.provider.lot.DamageInfo
-import com.procar.provider.lot.Document
-import com.procar.provider.lot.EngineInfo
-import com.procar.provider.lot.Fee
-import com.procar.provider.lot.InspectionInfo
-import com.procar.provider.lot.LocationInfo
-import com.procar.provider.lot.LotMetadata
-import com.procar.provider.lot.VehicleLot
-import com.procar.provider.lot.SellerInfo
-import com.procar.provider.lot.ShippingInfo
-import com.procar.provider.lot.VehicleHistory
-import com.procar.provider.lot.VehicleImage
-import com.procar.provider.lot.VehicleInfo
-import com.procar.provider.lot.BodyType
+import com.procar.provider.lot.*
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 

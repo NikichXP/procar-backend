@@ -1,6 +1,6 @@
 package com.procar.provider.bid
 
-import com.procar.provider.common.*
+import com.procar.provider.common.PaginationResponse
 import java.time.LocalDateTime
 
 data class BidHistoryResponse(

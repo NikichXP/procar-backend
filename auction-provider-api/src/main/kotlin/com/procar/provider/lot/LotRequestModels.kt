@@ -1,6 +1,7 @@
 package com.procar.provider.lot
 
-import com.procar.provider.common.*
+import com.procar.provider.common.PaginationRequest
+import com.procar.provider.common.PriceRange
 
 data class AdvancedLotSearchRequest(
     val query: String? = null,

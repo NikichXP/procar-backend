@@ -1,6 +1,8 @@
 package com.procar.core.service
 
-import com.procar.core.api.dto.*
+import com.procar.core.api.dto.Bid
+import com.procar.core.api.dto.BidPage
+import com.procar.core.api.dto.BidRequest
 import com.procar.provider.InternalBidAPI
 import com.procar.provider.bid.*
 import com.procar.provider.common.ApiResponse

@@ -1,8 +1,5 @@
 package com.procar.auction.config
 
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties
-import org.springframework.boot.actuate.autoconfigure.health.HealthProperties
-import org.springframework.boot.actuate.endpoint.web.WebEndpointResponse
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.context.annotation.Bean

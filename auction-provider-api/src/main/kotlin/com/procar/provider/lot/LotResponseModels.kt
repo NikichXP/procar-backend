@@ -1,6 +1,6 @@
 package com.procar.provider.lot
 
-import com.procar.provider.common.*
+import com.procar.provider.common.PaginationResponse
 
 data class LotSearchResponse(
     val results: List<VehicleLot>,

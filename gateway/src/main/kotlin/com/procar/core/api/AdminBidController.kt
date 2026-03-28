@@ -2,7 +2,8 @@ package com.procar.core.api
 
 import com.procar.core.service.admin.AdminBidConnectorService
 import com.procar.provider.admin.AdminBidController
-import com.procar.provider.bid.*
+import com.procar.provider.bid.BidAnalyticsResponse
+import com.procar.provider.bid.BidHistoryResponse
 import com.procar.provider.common.ApiResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*

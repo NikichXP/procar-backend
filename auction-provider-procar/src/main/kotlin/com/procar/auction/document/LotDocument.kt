@@ -1,19 +1,7 @@
 package com.procar.auction.document
 
 import com.procar.provider.common.GeoCoordinates
-import com.procar.provider.lot.AuctionType
-import com.procar.provider.lot.DamageSeverity
-import com.procar.provider.lot.DocumentType
-import com.procar.provider.lot.DrivetrainType
-import com.procar.provider.lot.FeeType
-import com.procar.provider.lot.FuelType
-import com.procar.provider.lot.ImageType
-import com.procar.provider.lot.LotStatus
-import com.procar.provider.lot.SellerType
-import com.procar.provider.lot.ShippingMethod
-import com.procar.provider.lot.TitleStatus
-import com.procar.provider.lot.TransmissionType
-import com.procar.provider.lot.VehicleCondition
+import com.procar.provider.lot.*
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field

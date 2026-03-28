@@ -1,6 +1,5 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.BidStatus
 import com.procar.core.api.dto.UserBidPage
 import com.procar.core.config.SecurityConfig
 import com.procar.core.service.AuthService
@@ -11,8 +10,8 @@ import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
 import org.springframework.context.annotation.Import
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.mockUser
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(controllers = [UserAPI::class])

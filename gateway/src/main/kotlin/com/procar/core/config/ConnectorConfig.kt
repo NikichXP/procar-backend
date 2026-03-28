@@ -1,13 +1,13 @@
 package com.procar.core.config
 
 import com.procar.auth.api.AuthController
-import com.procar.provider.admin.AdminBidController
-import com.procar.provider.admin.AdminLotController
 import com.procar.provider.InternalBidAPI
 import com.procar.provider.InternalLotAPI
+import com.procar.provider.admin.AdminBidController
+import com.procar.provider.admin.AdminLotController
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
