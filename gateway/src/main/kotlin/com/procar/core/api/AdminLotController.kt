@@ -15,17 +15,17 @@ class GatewayAdminLotController(
 ) : AdminLotController {
 
     @PostMapping
-    override fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    override suspend fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.createLot(request)
     }
 
     @GetMapping("/{lotId}")
-    override fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    override suspend fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.getLot(lotId)
     }
 
     @PutMapping("/{lotId}")
-    override fun updateLot(
+    override suspend fun updateLot(
         @PathVariable lotId: String,
         @Valid @RequestBody request: AdminUpdateLotRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -33,12 +33,12 @@ class GatewayAdminLotController(
     }
 
     @DeleteMapping("/{lotId}")
-    override fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
+    override suspend fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminLotConnectorService.deleteLot(lotId)
     }
 
     @PostMapping("/{lotId}/status")
-    override fun updateLotStatus(
+    override suspend fun updateLotStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminUpdateStatusRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -46,7 +46,7 @@ class GatewayAdminLotController(
     }
 
     @GetMapping
-    override fun getAllLots(
+    override suspend fun getAllLots(
         @RequestParam cursor: String?,
         @RequestParam limit: Int,
         @RequestParam status: LotStatus?
@@ -55,7 +55,7 @@ class GatewayAdminLotController(
     }
 
     @PostMapping("/{lotId}/hidden")
-    override fun setHiddenStatus(
+    override suspend fun setHiddenStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminHiddenRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {

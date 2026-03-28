@@ -15,21 +15,21 @@ class AdminLotAPI(
     private val conversionService: ConversionService
 ) : AdminLotController {
 
-    override fun createLot(request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    override suspend fun createLot(request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val lotDocument = conversionService.convert(request, LotDocument::class.java)!!
         val savedLot = lotService.createLot(lotDocument)
         val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(ApiResponse(adminResponse, "Lot created successfully"))
     }
 
-    override fun getLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    override suspend fun getLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val lot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
         val adminResponse = conversionService.convert(lot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(ApiResponse(adminResponse))
     }
 
-    override fun updateLot(
+    override suspend fun updateLot(
         lotId: String,
         request: AdminUpdateLotRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -42,7 +42,7 @@ class AdminLotAPI(
         return ResponseEntity.ok(ApiResponse(adminResponse, "Lot updated successfully"))
     }
 
-    override fun deleteLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
+    override suspend fun deleteLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
         val success = lotService.deleteLot(lotId)
         return if (success) {
             ResponseEntity.ok(ApiResponse(null as Void?, "Lot deleted successfully"))
@@ -51,7 +51,7 @@ class AdminLotAPI(
         }
     }
 
-    override fun updateLotStatus(
+    override suspend fun updateLotStatus(
         lotId: String,
         request: AdminUpdateStatusRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -61,7 +61,7 @@ class AdminLotAPI(
         return ResponseEntity.ok(ApiResponse(adminResponse, "Lot status updated successfully"))
     }
 
-    override fun getAllLots(
+    override suspend fun getAllLots(
         cursor: String?,
         limit: Int,
         status: LotStatus?
@@ -70,7 +70,7 @@ class AdminLotAPI(
         return ResponseEntity.ok(ApiResponse(lots))
     }
 
-    override fun setHiddenStatus(
+    override suspend fun setHiddenStatus(
         lotId: String,
         request: AdminHiddenRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {

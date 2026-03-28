@@ -12,31 +12,31 @@ class AdminLotConnectorService(
     @Qualifier("adminLotHttpClient") private val adminLotController: AdminLotController
 ) {
 
-    fun createLot(request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    suspend fun createLot(request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotController.createLot(request)
     }
 
-    fun getLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    suspend fun getLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotController.getLot(lotId)
     }
 
-    fun updateLot(lotId: String, request: AdminUpdateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotController.updateLot(lotId, request)
     }
 
-    fun deleteLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
+    suspend fun deleteLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminLotController.deleteLot(lotId)
     }
 
-    fun updateLotStatus(lotId: String, request: AdminUpdateStatusRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    suspend fun updateLotStatus(lotId: String, request: AdminUpdateStatusRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotController.updateLotStatus(lotId, request)
     }
 
-    fun getAllLots(cursor: String?, limit: Int, status: LotStatus?): ResponseEntity<ApiResponse<AdminPaginatedLotsResponse>> {
+    suspend fun getAllLots(cursor: String?, limit: Int, status: LotStatus?): ResponseEntity<ApiResponse<AdminPaginatedLotsResponse>> {
         return adminLotController.getAllLots(cursor, limit, status)
     }
 
-    fun setHiddenStatus(lotId: String, request: AdminHiddenRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    suspend fun setHiddenStatus(lotId: String, request: AdminHiddenRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotController.setHiddenStatus(lotId, request)
     }
 }

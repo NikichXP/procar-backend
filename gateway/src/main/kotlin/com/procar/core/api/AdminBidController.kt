@@ -15,12 +15,12 @@ class AdminBidController(
 ) : AdminBidController {
 
     @GetMapping("/lot/{lotId}")
-    override fun getBidHistoryForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
+    override suspend fun getBidHistoryForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
         return adminBidConnectorService.getBidHistoryForLot(lotId)
     }
 
     @GetMapping("/lot/{lotId}/analytics")
-    override fun getBidAnalyticsForLot(
+    override suspend fun getBidAnalyticsForLot(
         @PathVariable lotId: String,
         @RequestParam timeRange: String?
     ): ResponseEntity<ApiResponse<BidAnalyticsResponse>> {
@@ -28,7 +28,7 @@ class AdminBidController(
     }
 
     @DeleteMapping("/lot/{lotId}")
-    override fun deleteAllBidsForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
+    override suspend fun deleteAllBidsForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminBidConnectorService.deleteAllBidsForLot(lotId)
     }
 }

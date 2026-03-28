@@ -43,7 +43,7 @@ class GatewayClientService(
             }
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(AdminPaginatedLotsResponse::class.java)
+            .bodyToMono<AdminPaginatedLotsResponse>()
             .awaitFirst()
         
         logger.info("Received ${response.lots.size} lots")

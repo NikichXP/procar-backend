@@ -14,14 +14,14 @@ import org.springframework.web.service.annotation.HttpExchange
 interface AdminBidController {
 
     @GetExchange("/lot/{lotId}")
-    fun getBidHistoryForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>>
+    suspend fun getBidHistoryForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>>
 
     @GetExchange("/lot/{lotId}/analytics")
-    fun getBidAnalyticsForLot(
+    suspend fun getBidAnalyticsForLot(
         @PathVariable lotId: String,
         @RequestParam timeRange: String?
     ): ResponseEntity<ApiResponse<BidAnalyticsResponse>>
 
     @DeleteExchange("/lot/{lotId}")
-    fun deleteAllBidsForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>>
+    suspend fun deleteAllBidsForLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>>
 }

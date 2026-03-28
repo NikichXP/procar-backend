@@ -13,12 +13,12 @@ class AdminBidAPI(
     private val bidService: InternalAuctionBidService
 ) : AdminBidController {
 
-    override fun getBidHistoryForLot(lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
+    override suspend fun getBidHistoryForLot(lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
         val response = bidService.getBidHistory(lotId, null)
         return ResponseEntity.ok(ApiResponse(response))
     }
 
-    override fun getBidAnalyticsForLot(
+    override suspend fun getBidAnalyticsForLot(
         lotId: String,
         timeRange: String?
     ): ResponseEntity<ApiResponse<BidAnalyticsResponse>> {
@@ -26,7 +26,7 @@ class AdminBidAPI(
         return ResponseEntity.ok(ApiResponse(response))
     }
 
-    override fun deleteAllBidsForLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
+    override suspend fun deleteAllBidsForLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
         bidService.deleteAllBidsForLot(lotId)
         return ResponseEntity.ok(ApiResponse(null as Void?, "All bids deleted successfully"))
     }

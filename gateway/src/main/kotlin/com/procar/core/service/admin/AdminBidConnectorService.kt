@@ -13,15 +13,15 @@ class AdminBidConnectorService(
     @Qualifier("adminBidHttpClient") private val adminBidController: AdminBidController
 ) {
 
-    fun getBidHistoryForLot(lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
+    suspend fun getBidHistoryForLot(lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
         return adminBidController.getBidHistoryForLot(lotId)
     }
 
-    fun getBidAnalyticsForLot(lotId: String, timeRange: String?): ResponseEntity<ApiResponse<BidAnalyticsResponse>> {
+    suspend fun getBidAnalyticsForLot(lotId: String, timeRange: String?): ResponseEntity<ApiResponse<BidAnalyticsResponse>> {
         return adminBidController.getBidAnalyticsForLot(lotId, timeRange)
     }
 
-    fun deleteAllBidsForLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
+    suspend fun deleteAllBidsForLot(lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminBidController.deleteAllBidsForLot(lotId)
     }
 }

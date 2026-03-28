@@ -13,35 +13,35 @@ import org.springframework.web.service.annotation.*
 interface AdminLotController {
 
     @PostExchange
-    fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>>
+    suspend fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @GetExchange("/{lotId}")
-    fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
+    suspend fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @PutExchange("/{lotId}")
-    fun updateLot(
+    suspend fun updateLot(
         @PathVariable lotId: String,
         @Valid @RequestBody request: AdminUpdateLotRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @DeleteExchange("/{lotId}")
-    fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>>
+    suspend fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>>
 
     @PostExchange("/{lotId}/status")
-    fun updateLotStatus(
+    suspend fun updateLotStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminUpdateStatusRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>>
 
     @GetExchange
-    fun getAllLots(
+    suspend fun getAllLots(
         @RequestParam cursor: String?,
         @RequestParam limit: Int,
         @RequestParam status: LotStatus?
     ): ResponseEntity<ApiResponse<AdminPaginatedLotsResponse>>
 
     @PostExchange("/{lotId}/hidden")
-    fun setHiddenStatus(
+    suspend fun setHiddenStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminHiddenRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>>
