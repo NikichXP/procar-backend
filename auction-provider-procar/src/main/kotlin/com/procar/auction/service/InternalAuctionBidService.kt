@@ -2,65 +2,53 @@ package com.procar.auction.service
 
 import com.procar.auction.config.AuctionProperties
 import com.procar.auction.document.BidDocument
+import com.procar.auction.document.LotDocument
 import com.procar.auction.repository.BidRepository
 import com.procar.auction.repository.LotRepository
 import com.procar.auction.util.BidsFactory
 import com.procar.provider.bid.*
 import com.procar.provider.lot.LotStatus
 import org.springframework.core.convert.ConversionService
+import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.*
 
+// TODO This service needs to be refactored - it's right now vibecoded
+//  idea for future: update if winning condition is met
+//  update set winning bid + winner id IF ( current bid + bid increment ) >= new bid
 @Service
 class InternalAuctionBidService(
     private val bidRepository: BidRepository,
     private val lotRepository: LotRepository,
     private val auctionProperties: AuctionProperties,
-    private val conversionService: ConversionService
+    private val conversionService: ConversionService,
+    private val mongoTemplate: MongoTemplate
 ) {
 
     fun placeBid(request: PlaceBidRequest): PlaceBidResponse {
-        val lot = lotRepository.findById(request.lotId).orElse(null)
-            ?: return PlaceBidResponse(
-                bid = createErrorBid(request),
-                status = BidStatus.REJECTED,
-                message = "Lot not found",
-                isWinning = false,
-                nextMinimumBid = 0.0
-            )
-
-        if (lot.status != LotStatus.ACTIVE) {
+        val query = Query.query(
+            Criteria.where("_id").isEqualTo(request.lotId)
+                .and("status").isEqualTo(LotStatus.ACTIVE)
+                .and("auction.endTime").gt(LocalDateTime.now())
+        )
+        
+        val minimumBid = calculateNextMinimumBidForLot(request.lotId)
+        
+        if (request.amount < minimumBid) {
             return PlaceBidResponse(
                 bid = createErrorBid(request),
                 status = BidStatus.REJECTED,
-                message = "Lot is not active for bidding",
+                message = "Bid amount is below minimum required bid",
                 isWinning = false,
-                nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+                nextMinimumBid = minimumBid
             )
         }
-
-        if (lot.auction.endTime.isBefore(LocalDateTime.now())) {
-            return PlaceBidResponse(
-                bid = createErrorBid(request),
-                status = BidStatus.REJECTED,
-                message = "Auction has ended",
-                isWinning = false,
-                nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
-            )
-        }
-
-        val validation = validateBid(request.lotId, request.bidderId, request.amount)
-        if (!validation.isValid) {
-            return PlaceBidResponse(
-                bid = createErrorBid(request),
-                status = BidStatus.REJECTED,
-                message = validation.message,
-                isWinning = false,
-                nextMinimumBid = validation.minimumBid
-            )
-        }
-
+        
         // Check if bidder already has a higher bid
         val existingHigherBid = bidRepository.findByLotIdAndBidderIdAndStatus(
             request.lotId, 
@@ -76,6 +64,49 @@ class InternalAuctionBidService(
                 isWinning = false,
                 nextMinimumBid = calculateNextMinimumBid(existingHigherBid.amount)
             )
+        }
+
+        // Atomic update of lot's current bid and total bids
+        val update = Update()
+            .inc("auction.totalBids", 1)
+            .set("auction.currentBid", request.amount)
+            .set("updatedAt", LocalDateTime.now())
+
+        val updatedLot: LotDocument? = mongoTemplate.findAndModify(query, update, LotDocument::class.java)
+        
+        if (updatedLot == null) {
+            // Lot not found or not in valid state (inactive/ended)
+            val lot = lotRepository.findById(request.lotId).orElse(null)
+            return when {
+                lot == null -> PlaceBidResponse(
+                    bid = createErrorBid(request),
+                    status = BidStatus.REJECTED,
+                    message = "Lot not found",
+                    isWinning = false,
+                    nextMinimumBid = 0.0
+                )
+                lot.status != LotStatus.ACTIVE -> PlaceBidResponse(
+                    bid = createErrorBid(request),
+                    status = BidStatus.REJECTED,
+                    message = "Lot is not active for bidding",
+                    isWinning = false,
+                    nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+                )
+                lot.auction.endTime.isBefore(LocalDateTime.now()) -> PlaceBidResponse(
+                    bid = createErrorBid(request),
+                    status = BidStatus.REJECTED,
+                    message = "Auction has ended",
+                    isWinning = false,
+                    nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+                )
+                else -> PlaceBidResponse(
+                    bid = createErrorBid(request),
+                    status = BidStatus.REJECTED,
+                    message = "Bid validation failed",
+                    isWinning = false,
+                    nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+                )
+            }
         }
 
         // Create and save the bid
@@ -94,16 +125,6 @@ class InternalAuctionBidService(
 
         // Update other bids' winning status
         updateWinningBids(request.lotId, savedBid.amount)
-
-        // Update lot's current bid and total bids
-        val updatedLot = lot.copy(
-            auction = lot.auction.copy(
-                currentBid = request.amount,
-                totalBids = lot.auction.totalBids + 1
-            ),
-            updatedAt = LocalDateTime.now()
-        )
-        lotRepository.save(updatedLot)
 
         return PlaceBidResponse(
             bid = conversionService.convert(savedBid, ProviderBid::class.java)!!,
@@ -239,6 +260,12 @@ class InternalAuctionBidService(
             else -> auctionProperties.bid.maximumIncrement
         }
         return currentBid + increment
+    }
+
+    private fun calculateNextMinimumBidForLot(lotId: String): Double {
+        val lot = lotRepository.findById(lotId).orElse(null)
+            ?: return 0.0
+        return calculateNextMinimumBid(lot.auction.currentBid)
     }
 
     private fun calculateBidSummary(bids: List<ProviderBid>): BidSummary {
