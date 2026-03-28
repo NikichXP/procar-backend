@@ -76,6 +76,6 @@ class ConnectorConfig {
 
 @ConfigurationProperties(prefix = "connector")
 data class ConnectorProperties(
-    val auctionProviderProcarUrl: String = "http://localhost:8081",
+    val auctionProviderProcarUrl: String = "http://localhost:8083",
     val authUrl: String = "http://localhost:8082"
 )

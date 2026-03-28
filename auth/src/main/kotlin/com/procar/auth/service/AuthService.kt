@@ -19,7 +19,7 @@ class AuthService(
         val tokenEntity = refreshTokenRepository.findByToken(refreshToken)
         
         return when {
-            tokenEntity != null -> {
+            tokenEntity != null && !tokenEntity.isExpired() -> {
                 generateAccessToken()
             }
             else -> {
@@ -38,9 +38,11 @@ class AuthService(
 
     fun generateRefreshToken(authReason: AuthReason): String {
         val token = UUID.randomUUID().toString()
+        val expiresAt = Instant.now().plusSeconds(2592000) // 30 days
         val refreshTokenEntity = RefreshTokenEntity(
             token = token,
-            userId = authReason.userId
+            userId = authReason.userId,
+            expiresAt = expiresAt
         )
         refreshTokenRepository.save(refreshTokenEntity)
         return token

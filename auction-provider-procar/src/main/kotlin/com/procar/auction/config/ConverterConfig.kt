@@ -6,13 +6,19 @@ import org.springframework.format.FormatterRegistry
 import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
-class ConverterConfig : WebFluxConfigurer {
+class ConverterConfig(
+    private val lotDocumentToProviderLotConverter: LotDocumentToProviderLotConverter,
+    private val bidDocumentToProviderBidConverter: BidDocumentToProviderBidConverter,
+    private val adminCreateLotRequestToLotDocumentConverter: AdminCreateLotRequestToLotDocumentConverter,
+    private val adminUpdateLotRequestToLotDocumentConverter: AdminUpdateLotRequestToLotDocumentConverter,
+    private val lotDocumentToAdminLotResponseConverter: LotDocumentToAdminLotResponseConverter
+) : WebFluxConfigurer {
 
     override fun addFormatters(registry: FormatterRegistry) {
-        registry.addConverter(LotDocumentToProviderLotConverter())
-        registry.addConverter(BidDocumentToProviderBidConverter())
-        registry.addConverter(AdminCreateLotRequestToLotDocumentConverter())
-        registry.addConverter(AdminUpdateLotRequestToLotDocumentConverter())
-        registry.addConverter(LotDocumentToAdminLotResponseConverter())
+        registry.addConverter(lotDocumentToProviderLotConverter)
+        registry.addConverter(bidDocumentToProviderBidConverter)
+        registry.addConverter(adminCreateLotRequestToLotDocumentConverter)
+        registry.addConverter(adminUpdateLotRequestToLotDocumentConverter)
+        registry.addConverter(lotDocumentToAdminLotResponseConverter)
     }
 }

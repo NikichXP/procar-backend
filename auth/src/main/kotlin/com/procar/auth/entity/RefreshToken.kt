@@ -9,5 +9,8 @@ data class RefreshToken(
     @Id
     val token: String,
     val userId: String,
-    val createdAt: Instant = Instant.now()
-)
+    val createdAt: Instant = Instant.now(),
+    val expiresAt: Instant
+) {
+    fun isExpired(): Boolean = Instant.now().isAfter(expiresAt)
+}
