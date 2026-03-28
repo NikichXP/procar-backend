@@ -1,10 +1,10 @@
 package com.procar.core.api
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.procar.core.api.dto.LotSearchRequest
 import com.procar.core.config.SecurityConfig
 import com.procar.core.service.AuthService
 import com.procar.core.service.LotService
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
@@ -12,8 +12,8 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(controllers = [LotAPI::class])
@@ -23,10 +23,10 @@ class LotAPITest {
     @Autowired
     private lateinit var webTestClient: WebTestClient
 
-    @MockBean
+    @MockitoBean
     private lateinit var lotService: LotService
 
-    @MockBean
+    @MockitoBean
     private lateinit var authService: AuthService
 
     @Test
@@ -34,9 +34,11 @@ class LotAPITest {
         // Given
         val mockLots = emptyList<com.procar.core.api.dto.LotSummary>()
         val totalCount = 100
-        
-        whenever(lotService.getLots(any<LotSearchRequest>())).thenReturn(mockLots)
-        whenever(lotService.countLots(any<LotSearchRequest>())).thenReturn(totalCount)
+
+        runBlocking {
+            whenever(lotService.getLots(any<LotSearchRequest>())).thenReturn(mockLots)
+            whenever(lotService.countLots(any<LotSearchRequest>())).thenReturn(totalCount)
+        }
 
         // When
         webTestClient.get().uri("/lots")
@@ -44,12 +46,14 @@ class LotAPITest {
             .expectStatus().isOk
 
         // Then
-        verify(lotService).getLots(argThat<LotSearchRequest> { request ->
-            request.offset == 0 && // default page 0 * size 20
-            request.limit == 20 &&
-            request.sort == "endTime,asc"
-        })
-        verify(lotService).countLots(any<LotSearchRequest>())
+        runBlocking {
+            verify(lotService).getLots(argThat<LotSearchRequest> { request ->
+                request.offset == 0 && // default page 0 * size 20
+                        request.limit == 20 &&
+                        request.sort == "endTime,asc"
+            })
+            verify(lotService).countLots(any<LotSearchRequest>())
+        }
     }
 
     @Test
@@ -57,9 +61,11 @@ class LotAPITest {
         // Given
         val mockLots = emptyList<com.procar.core.api.dto.LotSummary>()
         val totalCount = 0
-        
-        whenever(lotService.getLots(any<LotSearchRequest>())).thenReturn(mockLots)
-        whenever(lotService.countLots(any<LotSearchRequest>())).thenReturn(totalCount)
+
+        runBlocking {
+            whenever(lotService.getLots(any<LotSearchRequest>())).thenReturn(mockLots)
+            whenever(lotService.countLots(any<LotSearchRequest>())).thenReturn(totalCount)
+        }
 
         // When
         webTestClient.get().uri("/lots")
@@ -67,19 +73,23 @@ class LotAPITest {
             .expectStatus().isOk
 
         // Then
-        verify(lotService).getLots(argThat<LotSearchRequest> { request ->
-            request.offset == 0 && // default page 0 * size 20
-            request.limit == 20 &&
-            request.sort == "endTime,asc"
-        })
+        runBlocking {
+            verify(lotService).getLots(argThat<LotSearchRequest> { request ->
+                request.offset == 0 && // default page 0 * size 20
+                        request.limit == 20 &&
+                        request.sort == "endTime,asc"
+            })
+        }
     }
 
     @Test
     fun `getLotDetail should call service with correct lotId`() {
         // Given
         val lotId = "test-lot-id"
-        
-        whenever(lotService.getLotDetail(lotId)).thenReturn(null)
+
+        runBlocking {
+            whenever(lotService.getLotDetail(lotId)).thenReturn(null)
+        }
 
         // When
         webTestClient.get().uri("/lots/{lotId}", lotId)
@@ -87,6 +97,8 @@ class LotAPITest {
             .expectStatus().isOk
 
         // Then
-        verify(lotService).getLotDetail(lotId)
+        runBlocking {
+            verify(lotService).getLotDetail(lotId)
+        }
     }
 }

@@ -16,7 +16,7 @@ class LotAPI(
     private val conversionService: ConversionService
 ) : InternalLotAPI {
 
-    override fun searchLots(request: AdvancedLotSearchRequest): ResponseEntity<ApiResponse<LotSearchResponse>> {
+    override suspend fun searchLots(request: AdvancedLotSearchRequest): ResponseEntity<ApiResponse<LotSearchResponse>> {
         return try {
             val response = lotService.searchLots(request)
             ResponseEntity.ok(ApiResponse(response))
@@ -27,7 +27,7 @@ class LotAPI(
         }
     }
 
-    override fun getLotDetail(lotId: String): ResponseEntity<ApiResponse<VehicleLot>> {
+    override suspend fun getLotDetail(lotId: String): ResponseEntity<ApiResponse<VehicleLot>> {
         val lot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
 
