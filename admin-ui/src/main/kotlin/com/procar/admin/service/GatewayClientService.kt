@@ -18,11 +18,12 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBody
 import org.springframework.web.reactive.function.client.bodyToMono
 
 @Service
 class GatewayClientService(
-    @Value("\${gateway.base-url:http://localhost:8080}") private val gatewayBaseUrl: String
+    @Value($$"${gateway.base-url:http://localhost:8080}") private val gatewayBaseUrl: String
 ) {
 
     private val logger = LoggerFactory.getLogger(GatewayClientService::class.java)
@@ -30,11 +31,6 @@ class GatewayClientService(
     private val webClient = WebClient.builder()
         .baseUrl(gatewayBaseUrl)
         .build()
-
-    suspend fun getUsers(): Flow<String> {
-        // TODO: Implement when admin user API is available
-        return flowOf()
-    }
 
     suspend fun getLots(status: String? = null): Flow<AdminLotResponse> = flow {
         logger.info("Fetching lots with status: $status")
@@ -48,18 +44,17 @@ class GatewayClientService(
                 }
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono<ApiResponse<AdminPaginatedLotsResponse>>()
-                .awaitFirst()
-                ?.data
+                .awaitBody<ApiResponse<AdminPaginatedLotsResponse>>()
+                .data
         } catch (e: Exception) {
             logger.error("Failed to fetch lots: ${e.message}")
             AdminPaginatedLotsResponse(listOf(), PaginationResponse(false))
         }
 
-        logger.info("Received ${response?.lots?.size ?: -1} lots")
+        logger.info("Received ${response.lots?.size ?: -1} lots")
 
         // TODO WHAT THE HELL IS THIS, it is emitting, why can't I see that in UI?
-        response?.lots?.forEach { emit(it) }
+        response.lots.forEach { emit(it) }
     }
 
     suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse {
