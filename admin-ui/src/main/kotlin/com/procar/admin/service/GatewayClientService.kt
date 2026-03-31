@@ -9,6 +9,11 @@ import com.procar.provider.bid.BidHistoryResponse
 import com.procar.provider.bid.ProviderBid
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.common.PaginationResponse
+import com.procar.auth.api.dto.AuthResult
+import com.procar.auth.api.dto.LoginRequest
+import com.procar.auth.api.dto.RegisterRequest
+import com.procar.auth.api.dto.AccessToken
+import com.procar.auth.api.dto.RefreshRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -103,5 +108,79 @@ class GatewayClientService(
 
         logger.info("Received ${response.bids.size} bids for lot $lotId")
         response.bids.forEach { emit(it) }
+    }
+
+    // Auth management methods
+    suspend fun login(loginRequest: LoginRequest): AuthResult {
+        return try {
+            webClient.post()
+                .uri("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(loginRequest)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .awaitBody<AuthResult>()
+        } catch (e: Exception) {
+            logger.error("Failed to login: ${e.message}")
+            AuthResult(success = false, message = "Login failed: ${e.message}")
+        }
+    }
+
+    suspend fun register(registerRequest: RegisterRequest): AuthResult {
+        return try {
+            webClient.post()
+                .uri("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(registerRequest)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .awaitBody<AuthResult>()
+        } catch (e: Exception) {
+            logger.error("Failed to register: ${e.message}")
+            AuthResult(success = false, message = "Registration failed: ${e.message}")
+        }
+    }
+
+    suspend fun refreshAccess(refreshRequest: RefreshRequest): AccessToken {
+        return try {
+            webClient.post()
+                .uri("/auth/access")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(refreshRequest)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .awaitBody<AccessToken>()
+        } catch (e: Exception) {
+            logger.error("Failed to refresh access token: ${e.message}")
+            throw e
+        }
+    }
+
+    suspend fun logout(authorization: String) {
+        try {
+            webClient.post()
+                .uri("/auth/logout")
+                .header("Authorization", authorization)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .awaitBody<Void>()
+        } catch (e: Exception) {
+            logger.error("Failed to logout: ${e.message}")
+            throw e
+        }
+    }
+
+    suspend fun logoutAllDevices(authorization: String): Map<String, Any> {
+        return try {
+            webClient.post()
+                .uri("/auth/logout-all")
+                .header("Authorization", authorization)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .awaitBody<Map<String, Any>>()
+        } catch (e: Exception) {
+            logger.error("Failed to logout all devices: ${e.message}")
+            throw e
+        }
     }
 }

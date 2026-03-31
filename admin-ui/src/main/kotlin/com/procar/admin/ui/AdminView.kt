@@ -27,13 +27,18 @@ class AdminView(
 ) : AppLayout() {
 
     private val lots = mutableListOf<AdminLotResponse>()
-    private val lotGrid = LotGrid(lots)
+    private val lotGrid = LotGrid(lots) { lot ->
+        LotOptionsDialog(lot, onLotUpdated = { updatedLot ->
+            //TODO: Handle lot updates if needed
+        }).open()
+    }
     private var initialLotsLoaded = false
     
     private val componentScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val lotView = buildLotSection()
     private val warehouseView = WarehouseView(gatewayClientService)
+    private val authView = AuthView(gatewayClientService)
 
     init {
         val title = H1("Procar Admin")
@@ -52,7 +57,12 @@ class AdminView(
         warehousesNavButton.style.set("width", "100%")
         warehousesNavButton.style.set("justify-content", "flex-start")
 
-        val nav = VerticalLayout(lotsNavButton, warehousesNavButton)
+        val authNavButton = Button("Users") { showAuth() }
+        authNavButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY)
+        authNavButton.style.set("width", "100%")
+        authNavButton.style.set("justify-content", "flex-start")
+
+        val nav = VerticalLayout(lotsNavButton, warehousesNavButton, authNavButton)
         nav.setPadding(false)
         nav.setSpacing(false)
         addToDrawer(nav)
@@ -80,6 +90,10 @@ class AdminView(
     private fun showWarehouses() {
         setContent(warehouseView)
         warehouseView.loadWarehouses()
+    }
+
+    private fun showAuth() {
+        setContent(authView)
     }
 
     private fun buildLotSection(): VerticalLayout {
