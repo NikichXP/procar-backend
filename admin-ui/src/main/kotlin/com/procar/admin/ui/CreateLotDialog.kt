@@ -11,6 +11,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class CreateLotDialog(
@@ -20,6 +22,7 @@ class CreateLotDialog(
 
     private val dialog = Dialog()
     private val form = CreateLotForm()
+    private val componentScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         dialog.headerTitle = "Add New Lot"
@@ -46,12 +49,13 @@ class CreateLotDialog(
 
     fun open() {
         loadWarehouses()
+        dialog.addDetachListener { componentScope.cancel() }
         dialog.open()
     }
 
     private fun loadWarehouses() {
         val currentUI = UI.getCurrent()
-        CoroutineScope(Dispatchers.IO).launch {
+        componentScope.launch {
             try {
                 val warehouses = gatewayClientService.getWarehouses()
                 currentUI?.access {
@@ -67,17 +71,14 @@ class CreateLotDialog(
 
     private fun onSave() {
         val errors = form.validate()
-        if (errors.isNotEmpty()) {
-            val message = if (errors.size == 1) errors.first()
-            else "Please fix the following issues:\n${errors.joinToString("\n") { "• $it" }}"
-            Notification.show(message)
+        if (!FormValidationUtils.validateAndShowErrors(errors)) {
             return
         }
 
         val request = form.buildRequest()
         val currentUI = UI.getCurrent()
 
-        CoroutineScope(Dispatchers.IO).launch {
+        componentScope.launch {
             try {
                 val createdLot = gatewayClientService.createLot(request)
                 currentUI.access {

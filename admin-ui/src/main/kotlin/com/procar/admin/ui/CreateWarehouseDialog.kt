@@ -9,6 +9,8 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class CreateWarehouseDialog(
@@ -18,6 +20,7 @@ class CreateWarehouseDialog(
 
     private val dialog = Dialog()
     private val form = CreateWarehouseForm()
+    private val componentScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         dialog.headerTitle = "Add New Warehouse"
@@ -33,31 +36,29 @@ class CreateWarehouseDialog(
     }
 
     fun open() {
+        dialog.addDetachListener { componentScope.cancel() }
         dialog.open()
     }
 
     private fun onSave() {
         val errors = form.validate()
-        if (errors.isNotEmpty()) {
-            val message = if (errors.size == 1) errors.first()
-            else "Please fix the following issues:\n${errors.joinToString("\n") { "• $it" }}"
-            Notification.show(message)
+        if (!FormValidationUtils.validateAndShowErrors(errors)) {
             return
         }
 
         val request = form.buildRequest()
         val currentUI = UI.getCurrent()
 
-        CoroutineScope(Dispatchers.IO).launch {
+        componentScope.launch {
             try {
                 gatewayClientService.createWarehouse(request)
-                currentUI?.access {
+                currentUI.access {
                     Notification.show("Warehouse created successfully")
                     dialog.close()
                     onWarehouseCreated()
                 }
             } catch (error: Exception) {
-                currentUI?.access {
+                currentUI.access {
                     Notification.show("Error creating warehouse: ${error.message}")
                 }
             }

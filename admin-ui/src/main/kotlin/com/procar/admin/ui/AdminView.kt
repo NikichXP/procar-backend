@@ -16,6 +16,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.router.Route
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
@@ -27,6 +29,8 @@ class AdminView(
     private val lots = mutableListOf<AdminLotResponse>()
     private val lotGrid = LotGrid(lots)
     private var initialLotsLoaded = false
+    
+    private val componentScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val lotView = buildLotSection()
     private val warehouseView = WarehouseView(gatewayClientService)
@@ -63,6 +67,11 @@ class AdminView(
             loadLots(attachEvent.ui)
         }
     }
+    
+    override fun onDetach(detachEvent: com.vaadin.flow.component.DetachEvent) {
+        super.onDetach(detachEvent)
+        componentScope.cancel()
+    }
 
     private fun showLots() {
         setContent(lotView)
@@ -94,7 +103,7 @@ class AdminView(
     private fun loadLots(currentUI: UI? = UI.getCurrent()) {
         if (currentUI == null) return
 
-        CoroutineScope(Dispatchers.IO).launch {
+        componentScope.launch {
             try {
                 val lotList = gatewayClientService.getLots().toList()
                 currentUI.access {

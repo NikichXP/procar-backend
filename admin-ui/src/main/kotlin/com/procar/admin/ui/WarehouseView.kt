@@ -11,6 +11,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class WarehouseView(
@@ -20,6 +22,8 @@ class WarehouseView(
     private val warehouses = mutableListOf<AdminWarehouseResponse>()
     private val warehouseGrid = WarehouseGrid(warehouses)
     private var initialLoaded = false
+    
+    private val componentScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     init {
         setPadding(false)
@@ -44,10 +48,15 @@ class WarehouseView(
             loadWarehouses(attachEvent.ui)
         }
     }
+    
+    override fun onDetach(detachEvent: com.vaadin.flow.component.DetachEvent) {
+        super.onDetach(detachEvent)
+        componentScope.cancel()
+    }
 
     fun loadWarehouses(currentUI: UI? = UI.getCurrent()) {
         if (currentUI == null) return
-        CoroutineScope(Dispatchers.IO).launch {
+        componentScope.launch {
             try {
                 val list = gatewayClientService.getWarehouses()
                 currentUI.access {
