@@ -12,15 +12,21 @@ enum class Screen { LOTS, WAREHOUSES, USERS }
 
 @Composable
 fun AdminApp() {
+    var isAuthenticated by remember { mutableStateOf(false) }
+    
     MaterialTheme {
-        Row(modifier = Modifier.fillMaxSize()) {
-            var currentScreen by remember { mutableStateOf(Screen.LOTS) }
-            NavSidebar(currentScreen = currentScreen, onNavigate = { currentScreen = it })
-            Box(modifier = Modifier.fillMaxSize()) {
-                when (currentScreen) {
-                    Screen.LOTS -> LotsScreen()
-                    Screen.WAREHOUSES -> WarehousesScreen()
-                    Screen.USERS -> UsersScreen()
+        if (!isAuthenticated) {
+            LoginScreen(onLoginSuccess = { isAuthenticated = true })
+        } else {
+            Row(modifier = Modifier.fillMaxSize()) {
+                var currentScreen by remember { mutableStateOf(Screen.LOTS) }
+                NavSidebar(currentScreen = currentScreen, onNavigate = { currentScreen = it }, onLogout = { isAuthenticated = false })
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when (currentScreen) {
+                        Screen.LOTS -> LotsScreen()
+                        Screen.WAREHOUSES -> WarehousesScreen()
+                        Screen.USERS -> UsersScreen()
+                    }
                 }
             }
         }
@@ -28,7 +34,7 @@ fun AdminApp() {
 }
 
 @Composable
-fun NavSidebar(currentScreen: Screen, onNavigate: (Screen) -> Unit) {
+fun NavSidebar(currentScreen: Screen, onNavigate: (Screen) -> Unit, onLogout: () -> Unit) {
     Column(
         modifier = Modifier
             .width(200.dp)
@@ -46,6 +52,17 @@ fun NavSidebar(currentScreen: Screen, onNavigate: (Screen) -> Unit) {
         NavItem("Lots", currentScreen == Screen.LOTS) { onNavigate(Screen.LOTS) }
         NavItem("Warehouses", currentScreen == Screen.WAREHOUSES) { onNavigate(Screen.WAREHOUSES) }
         NavItem("Users", currentScreen == Screen.USERS) { onNavigate(Screen.USERS) }
+        
+        Spacer(modifier = Modifier.weight(1f))
+        
+        Button(
+            onClick = onLogout,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Text("Logout")
+        }
     }
 }
 
