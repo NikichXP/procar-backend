@@ -3,6 +3,9 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.7" apply false
 	kotlin("jvm") version "2.3.20" apply false
 	kotlin("plugin.spring") version "2.3.20" apply false
+	kotlin("multiplatform") version "2.1.21" apply false
+	id("org.jetbrains.compose") version "1.8.0" apply false
+	id("org.jetbrains.kotlin.plugin.compose") version "2.1.21" apply false
 }
 
 group = "com.procar"
@@ -14,6 +17,8 @@ repositories {
 }
 
 subprojects {
+	if (name == "admin-jetpack") return@subprojects
+
 	apply(plugin = "java")
 	apply(plugin = "org.jetbrains.kotlin.jvm")
 	apply(plugin = "org.jetbrains.kotlin.plugin.spring")
@@ -48,3 +53,4 @@ subprojects {
 		useJUnitPlatform()
 	}
 }
+

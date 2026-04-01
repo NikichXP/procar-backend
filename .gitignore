@@ -20,3 +20,5 @@ auction-provider-procar/target/
 
 # Environment files
 .env
+
+kotlin-js-store/
