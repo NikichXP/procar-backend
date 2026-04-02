@@ -15,6 +15,10 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 class UserControllerImpl(private val userService: UserService) : UserController {
 
+    override suspend fun getUsers(): List<UserDto> {
+        return userService.getUsers()
+    }
+
     override suspend fun getUser(@PathVariable id: String): UserDto {
         return userService.getUser(id)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")

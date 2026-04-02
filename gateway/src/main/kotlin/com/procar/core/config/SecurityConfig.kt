@@ -39,6 +39,7 @@ class SecurityConfig(
                     .pathMatchers("/api-docs").permitAll() // TODO disable some day
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
+                    .pathMatchers("/api/admin/users/**").permitAll() // TODO: require admin auth
                     .pathMatchers("/api/admin/**").permitAll() // temporary that
                     .anyExchange().authenticated()
             }

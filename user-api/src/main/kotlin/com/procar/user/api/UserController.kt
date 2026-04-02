@@ -12,6 +12,9 @@ import org.springframework.web.service.annotation.PostExchange
 @HttpExchange("/api")
 interface UserController {
 
+    @GetExchange("/users")
+    suspend fun getUsers(): List<UserDto>
+
     @GetExchange("/users/{id}")
     suspend fun getUser(@PathVariable id: String): UserDto
 

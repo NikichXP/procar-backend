@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service
 @Service
 class UserService(private val userRepository: UserRepository) {
 
+    suspend fun getUsers(): List<UserDto> {
+        return userRepository.findAll()
+            .map { UserDto(id = it.id, username = it.username, blocked = it.blocked) }
+    }
+
     suspend fun createUser(request: CreateUserRequest): UserDto {
         val userEntity = UserEntity(username = request.username)
         val savedUser = userRepository.save(userEntity)
