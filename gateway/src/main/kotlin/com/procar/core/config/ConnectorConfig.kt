@@ -6,6 +6,7 @@ import com.procar.provider.InternalLotAPI
 import com.procar.provider.admin.AdminBidController
 import com.procar.provider.admin.AdminLotController
 import com.procar.provider.admin.AdminWarehouseController
+import com.procar.user.api.UserController
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpServiceProxyFactory
+import org.springframework.web.service.invoker.createClient
 
 @Configuration
 @EnableConfigurationProperties(ConnectorProperties::class)
@@ -39,7 +41,7 @@ class ConnectorConfig {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
-        return factory.createClient(AuthController::class.java)
+        return factory.createClient<AuthController>()
     }
 
     @Bean("adminLotHttpClient")
@@ -47,7 +49,7 @@ class ConnectorConfig {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
-        return factory.createClient(AdminLotController::class.java)
+        return factory.createClient<AdminLotController>()
     }
 
     @Bean("adminBidHttpClient")
@@ -55,7 +57,7 @@ class ConnectorConfig {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
-        return factory.createClient(AdminBidController::class.java)
+        return factory.createClient<AdminBidController>()
     }
 
     @Bean("internalBidHttpClient")
@@ -63,7 +65,7 @@ class ConnectorConfig {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
-        return factory.createClient(InternalBidAPI::class.java)
+        return factory.createClient<InternalBidAPI>()
     }
 
     @Bean("internalLotHttpClient")
@@ -71,7 +73,7 @@ class ConnectorConfig {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
-        return factory.createClient(InternalLotAPI::class.java)
+        return factory.createClient<InternalLotAPI>()
     }
 
     @Bean("adminWarehouseHttpClient")
@@ -79,12 +81,28 @@ class ConnectorConfig {
         val factory = HttpServiceProxyFactory
             .builderFor(WebClientAdapter.create(webClient))
             .build()
-        return factory.createClient(AdminWarehouseController::class.java)
+        return factory.createClient<AdminWarehouseController>()
+    }
+
+    @Bean("userWebClient")
+    fun userWebClient(connectorProperties: ConnectorProperties): WebClient {
+        return WebClient.builder()
+            .baseUrl(connectorProperties.userUrl)
+            .build()
+    }
+
+    @Bean("userHttpClient")
+    fun userController(@Qualifier("userWebClient") webClient: WebClient): UserController {
+        val factory = HttpServiceProxyFactory
+            .builderFor(WebClientAdapter.create(webClient))
+            .build()
+        return factory.createClient<UserController>()
     }
 }
 
 @ConfigurationProperties(prefix = "connector")
 data class ConnectorProperties(
     val auctionProviderProcarUrl: String = "http://localhost:8083",
-    val authUrl: String = "http://localhost:8082"
+    val authUrl: String = "http://localhost:8082",
+    val userUrl: String = "http://localhost:8084"
 )
