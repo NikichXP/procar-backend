@@ -8,38 +8,38 @@ import com.procar.auth.api.dto.RegisterRequest
 import com.procar.auth.api.dto.TokenValidationResult
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
+import org.springframework.web.service.annotation.PostExchange
 
-@RequestMapping("/auth")
+@HttpExchange("/auth")
 interface AuthController {
 
-    @PostMapping("/login")
+    @PostExchange("/login")
     fun login(
         @Valid @RequestBody(required = false) loginRequest: LoginRequest?,
         @RequestParam(required = false) username: String?,
         @RequestParam(required = false) password: String?
     ): ResponseEntity<AuthResult>
 
-    @PostMapping("/access")
+    @PostExchange("/access")
     fun refreshAccess(
         @Valid @RequestBody(required = false) refreshRequest: RefreshRequest?,
         @RequestParam(required = false) refreshToken: String?
     ): ResponseEntity<AccessToken>
 
-    @PostMapping("/logout")
+    @PostExchange("/logout")
     fun logout(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Void>
 
-    @PostMapping("/logout-all")
+    @PostExchange("/logout-all")
     fun logoutAllDevices(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Map<String, Any>>
 
-    @PostMapping("/register")
+    @PostExchange("/register")
     fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResult>
 
-    @GetMapping("/validate")
+    @GetExchange("/validate")
     fun validateToken(@RequestHeader("Authorization") authorization: String): ResponseEntity<TokenValidationResult>
 }

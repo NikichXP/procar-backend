@@ -22,3 +22,4 @@ auction-provider-procar/target/
 .env
 
 kotlin-js-store/
+.documents/
