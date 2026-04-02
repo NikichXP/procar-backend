@@ -13,11 +13,11 @@ import org.springframework.web.service.annotation.PostExchange
 interface UserController {
 
     @GetExchange("/users/{id}")
-    fun getUser(@PathVariable id: String): UserDto
+    suspend fun getUser(@PathVariable id: String): UserDto
 
     @PostExchange("/users")
-    fun createUser(@Valid @RequestBody request: CreateUserRequest): UserDto
+    suspend fun createUser(@Valid @RequestBody request: CreateUserRequest): UserDto
 
     @PostExchange("/users/{id}/block")
-    fun blockUser(@PathVariable id: String, @Valid @RequestBody request: BlockUserRequest): UserDto
+    suspend fun blockUser(@PathVariable id: String, @Valid @RequestBody request: BlockUserRequest): UserDto
 }
