@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 class AuthControllerImpl(
@@ -104,6 +105,23 @@ class AuthControllerImpl(
             ResponseEntity.ok(TokenValidationResult(valid = true, userId = tokenData.authReason?.userId))
         else
             ResponseEntity.ok(TokenValidationResult(valid = false, userId = null))
+    }
+
+    override fun changePassword(@Valid @RequestBody request: ChangePasswordRequest): ResponseEntity<Void> {
+        val authResult = passwordAuthService.authenticate(request.username, request.oldPassword)
+        if (!authResult.success) {
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials")
+        }
+        
+        val userId = authResult.accessToken?.token?.let { authService.getAccessTokenData(it)?.authReason?.userId }
+            ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to extract user ID")
+        
+        val updated = passwordAuthService.updatePassword(userId, request.username, request.oldPassword, request.newPassword)
+        return if (updated) {
+            ResponseEntity.ok().build()
+        } else {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).build()
+        }
     }
 
     private fun extractLoginRequest(

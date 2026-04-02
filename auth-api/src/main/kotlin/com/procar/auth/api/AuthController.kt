@@ -2,6 +2,7 @@ package com.procar.auth.api
 
 import com.procar.auth.api.dto.AccessToken
 import com.procar.auth.api.dto.AuthResult
+import com.procar.auth.api.dto.ChangePasswordRequest
 import com.procar.auth.api.dto.LoginRequest
 import com.procar.auth.api.dto.RefreshRequest
 import com.procar.auth.api.dto.RegisterRequest
@@ -42,4 +43,7 @@ interface AuthController {
 
     @GetExchange("/validate")
     fun validateToken(@RequestHeader("Authorization") authorization: String): ResponseEntity<TokenValidationResult>
+
+    @PostExchange("/password")
+    fun changePassword(@Valid @RequestBody request: ChangePasswordRequest): ResponseEntity<Void>
 }

@@ -45,8 +45,7 @@ class PasswordAuthService(
     }
 
     fun registerUser(userId: String, username: String, password: String): PasswordAuthReason {
-        val salt = Base64.getEncoder().encodeToString(generateSalt())
-        val passwordHash = hashPassword(password, salt)
+        val (salt, passwordHash) = createPasswordHash(password)
         val authReason = PasswordAuthReason(
             id = username, // Use username as ID for lookup
             userId = userId,
@@ -61,8 +60,7 @@ class PasswordAuthService(
         
         return if (existingAuth != null && existingAuth.userId == userId && 
                    verifyPassword(oldPassword, existingAuth.salt, existingAuth.passwordHash)) {
-            val newSalt = Base64.getEncoder().encodeToString(generateSalt())
-            val newPasswordHash = hashPassword(newPassword, newSalt)
+            val (newSalt, newPasswordHash) = createPasswordHash(newPassword)
             val updatedAuth = existingAuth.copy(
                 salt = newSalt,
                 passwordHash = newPasswordHash
@@ -72,6 +70,12 @@ class PasswordAuthService(
         } else {
             false
         }
+    }
+
+    private fun createPasswordHash(password: String): Pair<String, String> {
+        val salt = Base64.getEncoder().encodeToString(generateSalt())
+        val passwordHash = hashPassword(password, salt)
+        return Pair(salt, passwordHash)
     }
 
     private fun generateSalt(): ByteArray {
