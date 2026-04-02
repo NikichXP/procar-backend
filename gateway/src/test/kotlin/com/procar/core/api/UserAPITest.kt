@@ -2,6 +2,7 @@ package com.procar.core.api
 
 import com.procar.core.api.dto.UserBidPage
 import com.procar.core.config.SecurityConfig
+import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
 import com.procar.core.service.UserService
 import org.junit.jupiter.api.Test
@@ -15,7 +16,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(controllers = [UserAPI::class])
-@Import(SecurityConfig::class)
+@Import(SecurityConfig::class, TestSecurityConfig::class)
 class UserAPITest {
 
     @Autowired

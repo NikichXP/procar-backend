@@ -3,6 +3,7 @@ package com.procar.core.api
 import com.procar.core.api.dto.Brand
 import com.procar.core.api.dto.Model
 import com.procar.core.config.SecurityConfig
+import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
 import com.procar.core.service.CatalogService
 import org.junit.jupiter.api.Test
@@ -16,7 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(controllers = [CarCatalogAPI::class])
-@Import(SecurityConfig::class)
+@Import(SecurityConfig::class, TestSecurityConfig::class)
 class CarCatalogAPITest {
 
     @Autowired

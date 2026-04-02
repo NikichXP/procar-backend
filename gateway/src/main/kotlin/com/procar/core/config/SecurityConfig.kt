@@ -1,10 +1,12 @@
 package com.procar.core.config
 
 import com.procar.core.service.AuthService
+import com.procar.core.service.TokenValidationCache
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -17,13 +19,15 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableScheduling
 class SecurityConfig(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val tokenValidationCache: TokenValidationCache
 ) {
 
     @Bean
     fun securityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-        val authFilter = AuthenticationWebFilter(TokenValidationAuthenticationManager(authService))
+        val authFilter = AuthenticationWebFilter(TokenValidationAuthenticationManager(authService, tokenValidationCache))
         authFilter.setServerAuthenticationConverter(BearerTokenServerAuthenticationConverter())
 
         return http

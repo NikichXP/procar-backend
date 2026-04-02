@@ -102,7 +102,7 @@ class AuthControllerImpl(
         val token = authorization.removePrefix("Bearer ").trim()
         val tokenData = authService.getAccessTokenData(token)
         return if (tokenData != null && !tokenData.isExpired())
-            ResponseEntity.ok(TokenValidationResult(valid = true, userId = tokenData.authReason?.userId))
+            ResponseEntity.ok(TokenValidationResult(valid = true, userId = tokenData.authReason?.userId, expiresAt = tokenData.expiresAt))
         else
             ResponseEntity.ok(TokenValidationResult(valid = false, userId = null))
     }
