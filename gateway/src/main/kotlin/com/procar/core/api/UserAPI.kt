@@ -4,6 +4,7 @@ import com.procar.core.api.dto.BidStatus
 import com.procar.core.api.dto.LotSummary
 import com.procar.core.api.dto.UserBidPage
 import com.procar.core.service.UserService
+import com.procar.user.api.dto.UserInfoDto
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -13,6 +14,13 @@ import org.springframework.web.bind.annotation.*
 class UserAPI(
     private val userService: UserService
 ) {
+
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    suspend fun getCurrentUser(): UserInfoDto {
+        val username = userService.getCurrentUsername()
+        return userService.getUserInfo(username)
+    }
 
     @GetMapping("/bids")
     @PreAuthorize("isAuthenticated()")

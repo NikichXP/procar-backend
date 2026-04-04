@@ -9,18 +9,18 @@ import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.annotation.HttpExchange
 import org.springframework.web.service.annotation.PostExchange
 
-@HttpExchange("/api")
-interface UserController {
+@HttpExchange("/api/admin/users")
+interface UserAdminAPI {
 
-    @GetExchange("/users")
+    @GetExchange
     suspend fun getUsers(): List<UserDto>
 
-    @GetExchange("/users/{id}")
+    @GetExchange("/{id}")
     suspend fun getUser(@PathVariable id: String): UserDto
 
-    @PostExchange("/users")
+    @PostExchange
     suspend fun createUser(@Valid @RequestBody request: CreateUserRequest): UserDto
 
-    @PostExchange("/users/{id}/block")
+    @PostExchange("/{id}/block")
     suspend fun blockUser(@PathVariable id: String, @Valid @RequestBody request: BlockUserRequest): UserDto
 }

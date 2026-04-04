@@ -5,35 +5,38 @@ import com.procar.user.api.dto.CreateUserRequest
 import com.procar.user.api.dto.UserDto
 import com.procar.user.entity.UserEntity
 import com.procar.user.repo.UserRepository
+import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
 
 @Service
-class UserService(private val userRepository: UserRepository) {
+class UserService(
+    private val userRepository: UserRepository,
+    private val conversionService: ConversionService
+) {
+
+    private fun UserEntity.toDto(): UserDto =
+        conversionService.convert(this, UserDto::class.java)!!
 
     suspend fun getUsers(): List<UserDto> {
-        return userRepository.findAll()
-            .map { UserDto(id = it.id, username = it.username, blocked = it.blocked) }
+        return userRepository.findAll().map { it.toDto() }
     }
 
     suspend fun createUser(request: CreateUserRequest): UserDto {
-        val userEntity = UserEntity(username = request.username)
-        val savedUser = userRepository.save(userEntity)
-        return UserDto(id = savedUser.id, username = savedUser.username, blocked = savedUser.blocked)
+        val userEntity = UserEntity(username = request.username, roles = request.roles ?: listOf("USER"))
+        return userRepository.save(userEntity).toDto()
     }
 
     suspend fun getUser(id: String): UserDto? {
-        val user = userRepository.findById(id)
-        return user?.let { UserDto(id = it.id, username = it.username, blocked = it.blocked) }
+        return userRepository.findById(id)?.toDto()
     }
 
     suspend fun blockUser(id: String, request: BlockUserRequest): UserDto? {
-        val user = userRepository.findById(id)
-        return if (user != null) {
-            val updatedUser = user.copy(blocked = request.blocked)
-            val savedUser = userRepository.save(updatedUser)
-            UserDto(id = savedUser.id, username = savedUser.username, blocked = savedUser.blocked)
-        } else {
-            null
-        }
+        val user = userRepository.findById(id) ?: return null
+        val updatedUser = user.copy(blocked = request.blocked)
+        return userRepository.save(updatedUser).toDto()
+    }
+
+    suspend fun getUserByUsername(username: String): UserDto? {
+        return userRepository.findByUsername(username)?.toDto()
     }
 }

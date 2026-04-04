@@ -1,16 +1,15 @@
 package com.procar.core.service.admin
 
-import com.procar.user.api.UserController
+import com.procar.user.api.UserAdminAPI
 import com.procar.user.api.dto.BlockUserRequest
 import com.procar.user.api.dto.CreateUserRequest
 import com.procar.user.api.dto.UserDto
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
 class AdminUserConnectorService(
-    @Qualifier("userHttpClient") private val userController: UserController
+    @Qualifier("userHttpClient") private val userController: UserAdminAPI
 ) {
 
     suspend fun getUsers(): List<UserDto> {

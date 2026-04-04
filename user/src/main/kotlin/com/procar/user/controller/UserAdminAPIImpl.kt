@@ -3,7 +3,7 @@ package com.procar.user.controller
 import com.procar.user.api.dto.BlockUserRequest
 import com.procar.user.api.dto.CreateUserRequest
 import com.procar.user.api.dto.UserDto
-import com.procar.user.api.UserController
+import com.procar.user.api.UserAdminAPI
 import com.procar.user.service.UserService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-class UserControllerImpl(private val userService: UserService) : UserController {
+class UserAdminAPIImpl(private val userService: UserService) : UserAdminAPI {
 
     override suspend fun getUsers(): List<UserDto> {
         return userService.getUsers()
