@@ -16,7 +16,9 @@ class TokenValidationAuthenticationManager(
 ) : ReactiveAuthenticationManager {
 
     override fun authenticate(authentication: Authentication): Mono<Authentication> = mono {
-        val authorizationHeader = authentication.credentials as String
+        val authorizationHeader =
+            authentication.credentials as String? ?: throw BadCredentialsException("No authorization token provided")
+
         val token = authorizationHeader.removePrefix("Bearer ").trim()
         
         // Check cache first
@@ -29,11 +31,12 @@ class TokenValidationAuthenticationManager(
             authResult
         }
         
-        if (result != null && result.valid) {
+        if (result.valid) {
             UsernamePasswordAuthenticationToken(
                 result.userId ?: "unknown",
                 null,
                 listOf(SimpleGrantedAuthority("ROLE_USER"))
+                // TODO: fetch user roles from user-service and set as authorities
             ) as Authentication
         } else {
             throw BadCredentialsException("Invalid or expired token")

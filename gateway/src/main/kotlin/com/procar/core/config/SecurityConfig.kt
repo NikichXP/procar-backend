@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.web.server.ResponseStatusException
+import reactor.core.publisher.Mono
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -22,7 +24,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @EnableScheduling
 class SecurityConfig(
     private val authService: AuthService,
-    private val tokenValidationCache: TokenValidationCache
+    private val tokenValidationCache: TokenValidationCache,
+    private val authorizationEnforcementFilter: AuthorizationEnforcementFilter
 ) {
 
     @Bean
@@ -35,6 +38,8 @@ class SecurityConfig(
             .cors { it.configurationSource(corsConfigurationSource()) }
             .httpBasic { it.disable() }
             .formLogin { it.disable() }
+            .logout { it.disable() }
+            .anonymous { it.disable() }
             .authorizeExchange { exchanges ->
                 exchanges
                     .pathMatchers("/actuator/health").permitAll()
@@ -43,13 +48,17 @@ class SecurityConfig(
                     .pathMatchers("/api-docs").permitAll() // TODO disable some day
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
-                    .pathMatchers("/api/admin/users/**").permitAll() // TODO: require admin auth
-                    .pathMatchers("/api/admin/**").permitAll() // temporary that
+                    .pathMatchers("/api/admin/users/**").authenticated() // TODO: restrict to ROLE_ADMIN once user roles are implemented
+                    .pathMatchers("/api/admin/**").authenticated() // TODO: restrict to ROLE_ADMIN once user roles are implemented
                     .anyExchange().authenticated()
             }
-            .addFilterAt(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterBefore(authorizationEnforcementFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+            .addFilterBefore(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .exceptionHandling {
                 it.authenticationEntryPoint(HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED))
+                it.accessDeniedHandler { _, _ -> 
+                    Mono.error(ResponseStatusException(HttpStatus.UNAUTHORIZED, "Access denied"))
+                }
             }
             .build()
     }

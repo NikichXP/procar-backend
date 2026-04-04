@@ -55,7 +55,7 @@ class GatewayClientService(
             AdminPaginatedLotsResponse(listOf(), PaginationResponse(false))
         }
 
-        logger.info("Received ${response.lots?.size ?: -1} lots")
+        logger.info("Received ${response.lots.size} lots")
 
         // TODO WHAT THE HELL IS THIS, it is emitting, why can't I see that in UI?
         response.lots.forEach { emit(it) }
