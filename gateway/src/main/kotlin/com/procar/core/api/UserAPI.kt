@@ -18,8 +18,8 @@ class UserAPI(
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     suspend fun getCurrentUser(): UserInfoDto {
-        val username = userService.getCurrentUsername()
-        return userService.getUserInfo(username)
+        val userId = userService.getCurrentUserId()
+        return userService.getUserInfo(userId)
     }
 
     @GetMapping("/bids")

@@ -3,7 +3,6 @@ package com.procar.core.service
 import com.procar.auth.api.AuthController
 import com.procar.auth.api.dto.*
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 
 @Service
@@ -11,21 +10,21 @@ class AuthService(
     @Qualifier("authHttpClient") private val authClient: AuthController
 ) {
 
-    fun login(loginRequest: LoginRequest?, username: String?, password: String?): ResponseEntity<AuthResult> =
+    suspend fun login(loginRequest: LoginRequest?, username: String?, password: String?): AuthResult =
         authClient.login(loginRequest, username, password)
 
-    fun refreshAccess(refreshRequest: RefreshRequest?, refreshToken: String?): ResponseEntity<AccessToken> =
+    suspend fun refreshAccess(refreshRequest: RefreshRequest?, refreshToken: String?): AccessToken =
         authClient.refreshAccess(refreshRequest, refreshToken)
 
-    fun logout(authorization: String?): ResponseEntity<Void> =
+    suspend fun logout(authorization: String?) =
         authClient.logout(authorization)
 
-    fun logoutAllDevices(authorization: String?): ResponseEntity<Map<String, Any>> =
+    suspend fun logoutAllDevices(authorization: String?): Map<String, Any> =
         authClient.logoutAllDevices(authorization)
 
-    fun register(request: RegisterRequest): ResponseEntity<AuthResult> =
+    suspend fun register(request: RegisterRequest): AuthResult =
         authClient.register(request)
 
-    fun validateToken(authorization: String): ResponseEntity<TokenValidationResult> =
+    suspend fun validateToken(authorization: String): TokenValidationResult =
         authClient.validateToken(authorization)
 }

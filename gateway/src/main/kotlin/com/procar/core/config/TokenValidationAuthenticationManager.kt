@@ -2,9 +2,7 @@ package com.procar.core.config
 
 import com.procar.core.service.AuthService
 import com.procar.core.service.TokenValidationCache
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.reactor.mono
-import kotlinx.coroutines.withContext
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.ReactiveAuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -25,12 +23,9 @@ class TokenValidationAuthenticationManager(
         val cachedResult = tokenValidationCache.get(token)
         val result = cachedResult ?: run {
             // Cache miss - call auth service
-            val response = withContext(Dispatchers.IO) { authService.validateToken(authorizationHeader) }
-            val authResult = response.body
+            val authResult = authService.validateToken(authorizationHeader)
             // Cache the result (even if invalid, to avoid repeated calls for bad tokens)
-            if (authResult != null) {
-                tokenValidationCache.put(token, authResult)
-            }
+            tokenValidationCache.put(token, authResult)
             authResult
         }
         
