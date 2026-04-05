@@ -3,6 +3,7 @@ package com.procar.user.service
 import com.procar.user.api.dto.BlockUserRequest
 import com.procar.user.api.dto.CreateUserRequest
 import com.procar.user.api.dto.UserDto
+import com.procar.user.api.dto.UserRole
 import com.procar.user.entity.UserEntity
 import com.procar.user.repo.UserRepository
 import org.springframework.core.convert.ConversionService
@@ -22,7 +23,7 @@ class UserService(
     }
 
     suspend fun createUser(request: CreateUserRequest): UserDto {
-        val userEntity = UserEntity(username = request.username, roles = request.roles ?: listOf("USER"))
+        val userEntity = UserEntity(username = request.username, roles = request.roles ?: listOf(UserRole.USER))
         return userRepository.save(userEntity).toDto()
     }
 

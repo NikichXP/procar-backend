@@ -1,6 +1,7 @@
 package com.procar.core.api
 
 import com.procar.auth.api.dto.*
+import com.procar.core.api.dto.GatewayUserRegisterRequest
 import com.procar.core.service.AuthService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
@@ -36,6 +37,6 @@ class AuthAPI(
 
     @PostMapping("/register")
     suspend fun register(
-        @Valid @RequestBody request: RegisterRequest
+        @Valid @RequestBody request: GatewayUserRegisterRequest
     ): AuthResult = authService.register(request)
 }
