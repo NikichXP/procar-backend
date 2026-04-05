@@ -4,7 +4,9 @@ import com.procar.auth.entity.PasswordAuthReason
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 
 @Repository
 class PasswordAuthRepository(private val mongoTemplate: MongoTemplate) {
@@ -28,5 +30,12 @@ class PasswordAuthRepository(private val mongoTemplate: MongoTemplate) {
         val query = Query(Criteria.where(PasswordAuthReason::userId.name).`is`(userId))
         val result = mongoTemplate.remove(query, PasswordAuthReason::class.java)
         return result.deletedCount > 0
+    }
+
+    fun updateLastLogin(userId: String): Boolean {
+        val query = Query(Criteria.where(PasswordAuthReason::userId.name).`is`(userId))
+        val update = Update.update(PasswordAuthReason::lastLogin.name, LocalDateTime.now())
+        val result = mongoTemplate.updateFirst(query, update, PasswordAuthReason::class.java)
+        return result.modifiedCount > 0
     }
 }

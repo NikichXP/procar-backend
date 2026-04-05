@@ -3,6 +3,9 @@ package com.procar.auth.service
 import com.procar.auth.api.dto.AuthResult
 import com.procar.auth.entity.PasswordAuthReason
 import com.procar.auth.repo.PasswordAuthRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.security.spec.KeySpec
@@ -13,7 +16,8 @@ import javax.crypto.spec.PBEKeySpec
 @Service
 class PasswordAuthService(
     private val authService: AuthService,
-    private val passwordAuthRepository: PasswordAuthRepository
+    private val passwordAuthRepository: PasswordAuthRepository,
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO)
 ) {
 
     private val secureRandom = SecureRandom()
@@ -26,6 +30,11 @@ class PasswordAuthService(
 
         return when {
             authReason != null && verifyPassword(password, authReason.salt, authReason.passwordHash) -> {
+                // Update lastLogin asynchronously
+                coroutineScope.launch {
+                    passwordAuthRepository.updateLastLogin(authReason.userId)
+                }
+                
                 val refreshToken = authService.generateRefreshToken(authReason)
                 val accessToken = authService.generateAccessToken(authReason)
                 AuthResult(
