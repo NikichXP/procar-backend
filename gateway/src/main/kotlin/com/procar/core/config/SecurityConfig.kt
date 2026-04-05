@@ -2,13 +2,12 @@ package com.procar.core.config
 
 import com.procar.core.service.AuthService
 import com.procar.core.service.TokenValidationCache
+import kotlinx.coroutines.reactor.mono
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.web.server.ResponseStatusException
-import reactor.core.publisher.Mono
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder
 import org.springframework.security.config.web.server.ServerHttpSecurity
@@ -18,6 +17,7 @@ import org.springframework.security.web.server.authentication.HttpStatusServerEn
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+import org.springframework.web.server.ResponseStatusException
 
 @Configuration
 @EnableWebFluxSecurity
@@ -54,7 +54,7 @@ class SecurityConfig(
             .exceptionHandling {
                 it.authenticationEntryPoint(HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED))
                 it.accessDeniedHandler { _, _ -> 
-                    Mono.error(ResponseStatusException(HttpStatus.UNAUTHORIZED, "#A/401 - Access Denied"))
+                    mono { throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "#A/401 - Access Denied") }
                 }
             }
             .build()
