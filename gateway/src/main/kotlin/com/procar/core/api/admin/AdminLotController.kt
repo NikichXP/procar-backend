@@ -1,7 +1,8 @@
-package com.procar.core.api
+package com.procar.core.api.admin
 
 import com.procar.core.service.admin.AdminLotConnectorService
 import com.procar.provider.admin.*
+import com.procar.provider.admin.AdminLotController
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
 import jakarta.validation.Valid
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/admin/lots")
-class GatewayAdminLotController(
+class AdminLotController(
     private val adminLotConnectorService: AdminLotConnectorService
 ) : AdminLotController {
 

@@ -1,4 +1,4 @@
-package com.procar.core.api
+package com.procar.core.api.admin
 
 import com.procar.core.service.admin.AdminBidConnectorService
 import com.procar.provider.admin.AdminBidController

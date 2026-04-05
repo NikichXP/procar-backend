@@ -24,8 +24,7 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @EnableScheduling
 class SecurityConfig(
     private val authService: AuthService,
-    private val tokenValidationCache: TokenValidationCache,
-    private val authorizationEnforcementFilter: AuthorizationEnforcementFilter
+    private val tokenValidationCache: TokenValidationCache
 ) {
 
     @Bean
@@ -48,16 +47,14 @@ class SecurityConfig(
                     .pathMatchers("/api-docs").permitAll() // TODO disable some day
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
-                    .pathMatchers("/api/admin/users/**").authenticated() // TODO: restrict to ROLE_ADMIN once user roles are implemented
-                    .pathMatchers("/api/admin/**").authenticated() // TODO: restrict to ROLE_ADMIN once user roles are implemented
+                    .pathMatchers("/api/admin/**").authenticated() // TODO with role ADMIN
                     .anyExchange().authenticated()
             }
-            .addFilterBefore(authorizationEnforcementFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .addFilterBefore(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .exceptionHandling {
                 it.authenticationEntryPoint(HttpStatusServerEntryPoint(HttpStatus.UNAUTHORIZED))
                 it.accessDeniedHandler { _, _ -> 
-                    Mono.error(ResponseStatusException(HttpStatus.UNAUTHORIZED, "Access denied"))
+                    Mono.error(ResponseStatusException(HttpStatus.UNAUTHORIZED, "#A/401 - Access Denied"))
                 }
             }
             .build()

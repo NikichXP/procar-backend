@@ -1,4 +1,4 @@
-package com.procar.core.api
+package com.procar.core.api.admin
 
 import com.procar.core.service.admin.AdminUserConnectorService
 import com.procar.user.api.dto.BlockUserRequest

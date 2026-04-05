@@ -21,12 +21,9 @@ class TokenValidationAuthenticationManager(
 
         val token = authorizationHeader.removePrefix("Bearer ").trim()
         
-        // Check cache first
         val cachedResult = tokenValidationCache.get(token)
         val result = cachedResult ?: run {
-            // Cache miss - call auth service
             val authResult = authService.validateToken(authorizationHeader)
-            // Cache the result (even if invalid, to avoid repeated calls for bad tokens)
             tokenValidationCache.put(token, authResult)
             authResult
         }
