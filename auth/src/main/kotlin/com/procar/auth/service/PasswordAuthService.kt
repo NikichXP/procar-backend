@@ -22,7 +22,7 @@ class PasswordAuthService(
     private val algorithm = "PBKDF2WithHmacSHA256"
 
     fun authenticate(username: String, password: String): AuthResult {
-        val authReason = passwordAuthRepository.findByUserId(username)
+        val authReason = passwordAuthRepository.findByUsername(username)
 
         return when {
             authReason != null && verifyPassword(password, authReason.salt, authReason.passwordHash) -> {
@@ -47,8 +47,8 @@ class PasswordAuthService(
     fun registerUser(userId: String, username: String, password: String): PasswordAuthReason {
         val (salt, passwordHash) = createPasswordHash(password)
         val authReason = PasswordAuthReason(
-            id = username, // Use username as ID for lookup
             userId = userId,
+            username = username,
             salt = salt,
             passwordHash = passwordHash
         )
@@ -56,7 +56,7 @@ class PasswordAuthService(
     }
 
     fun updatePassword(userId: String, username: String, oldPassword: String, newPassword: String): Boolean {
-        val existingAuth = passwordAuthRepository.findByUserId(username)
+        val existingAuth = passwordAuthRepository.findByUsername(username)
         
         return if (existingAuth != null && existingAuth.userId == userId && 
                    verifyPassword(oldPassword, existingAuth.salt, existingAuth.passwordHash)) {

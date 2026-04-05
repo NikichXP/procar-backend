@@ -10,7 +10,12 @@ import org.springframework.stereotype.Repository
 class PasswordAuthRepository(private val mongoTemplate: MongoTemplate) {
 
     fun findByUserId(userId: String): PasswordAuthReason? {
-        val query = Query(Criteria.where("id").`is`(userId)) // Use username as ID
+        val query = Query(Criteria.where("_id").`is`(userId))
+        return mongoTemplate.findOne(query, PasswordAuthReason::class.java)
+    }
+
+    fun findByUsername(username: String): PasswordAuthReason? {
+        val query = Query(Criteria.where("username").`is`(username))
         return mongoTemplate.findOne(query, PasswordAuthReason::class.java)
     }
 
@@ -20,7 +25,7 @@ class PasswordAuthRepository(private val mongoTemplate: MongoTemplate) {
     }
 
     fun deleteByUserId(userId: String): Boolean {
-        val query = Query(Criteria.where("userId").`is`(userId))
+        val query = Query(Criteria.where("_id").`is`(userId))
         val result = mongoTemplate.remove(query, PasswordAuthReason::class.java)
         return result.deletedCount > 0
     }

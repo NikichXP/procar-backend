@@ -6,6 +6,7 @@ spring:
   data:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/procar-auth}
+      database: procar-auth
     redis:
       uri: ${REDIS_URI:redis://localhost:6379}
 
