@@ -71,10 +71,10 @@ class AuthControllerImpl(
         return try {
             passwordAuthService.registerUser(
                 userId = request.userId,
-                username = request.username,
+                login = request.login,
                 password = request.password
             )
-            passwordAuthService.authenticate(request.username, request.password)
+            passwordAuthService.authenticate(request.login, request.password)
         } catch (e: Exception) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Registration failed: ${e.message}")
         }

@@ -38,7 +38,7 @@ class AuthService(
         
         val authRegisterRequest = RegisterRequest(
             userId = userId,
-            username = request.username,
+            login = request.username,
             password = request.password
         )
         

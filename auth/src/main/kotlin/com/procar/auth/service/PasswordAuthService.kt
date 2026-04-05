@@ -53,11 +53,11 @@ class PasswordAuthService(
         }
     }
 
-    fun registerUser(userId: String, username: String, password: String): PasswordAuthReason {
+    fun registerUser(userId: String, login: String, password: String): PasswordAuthReason {
         val (salt, passwordHash) = createPasswordHash(password)
         val authReason = PasswordAuthReason(
             userId = userId,
-            username = username,
+            login = login,
             salt = salt,
             passwordHash = passwordHash
         )

@@ -17,7 +17,7 @@ class PasswordAuthRepository(private val mongoTemplate: MongoTemplate) {
     }
 
     fun findByUsername(username: String): PasswordAuthReason? {
-        val query = Query(Criteria.where(PasswordAuthReason::username.name).`is`(username))
+        val query = Query(Criteria.where(PasswordAuthReason::login.name).`is`(username))
         return mongoTemplate.findOne(query, PasswordAuthReason::class.java)
     }
 
