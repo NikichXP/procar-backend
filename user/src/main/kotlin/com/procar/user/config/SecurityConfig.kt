@@ -17,6 +17,7 @@ class SecurityConfig {
             .authorizeExchange { exchanges ->
                 exchanges
                     .pathMatchers("/actuator/**").permitAll()
+                    .pathMatchers("/api/admin/**").permitAll() // TODO I will remove that later
                     .anyExchange().authenticated()
             }
             .build()
