@@ -13,6 +13,8 @@ spec:
       labels:
         app: gateway
     spec:
+      imagePullSecrets:
+        - name: registry-pull-secret
       containers:
         - name: gateway
           image: registry.pc-dev.nikichxp.xyz/procar/gateway:latest

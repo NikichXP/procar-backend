@@ -13,6 +13,8 @@ spec:
       labels:
         app: auction-provider-procar
     spec:
+      imagePullSecrets:
+        - name: registry-pull-secret
       containers:
         - name: auction-provider-procar
           image: registry.pc-dev.nikichxp.xyz/procar/auction-provider-procar:latest

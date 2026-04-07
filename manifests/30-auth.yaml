@@ -13,6 +13,8 @@ spec:
       labels:
         app: auth
     spec:
+      imagePullSecrets:
+        - name: registry-pull-secret
       containers:
         - name: auth
           image: registry.pc-dev.nikichxp.xyz/procar/auth:latest
