@@ -17,6 +17,7 @@ variables:
     - name: docker:24-dind
       alias: docker
   before_script:
+    - until docker info; do echo "Waiting for Docker daemon..."; sleep 2; done
     - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "$REGISTRY"
   only:
     - main
