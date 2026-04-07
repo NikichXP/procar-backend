@@ -56,9 +56,9 @@ deploy:
     - kubectl rollout restart deployment/auth -n procar
     - kubectl rollout restart deployment/user -n procar
     - kubectl rollout restart deployment/auction-provider-procar -n procar
-    - kubectl rollout status deployment/gateway -n procar --timeout=120s
-    - kubectl rollout status deployment/auth -n procar --timeout=120s
-    - kubectl rollout status deployment/user -n procar --timeout=120s
-    - kubectl rollout status deployment/auction-provider-procar -n procar --timeout=120s
+    - kubectl rollout status deployment/gateway -n procar --timeout=300s
+    - kubectl rollout status deployment/auth -n procar --timeout=300s
+    - kubectl rollout status deployment/user -n procar --timeout=300s
+    - kubectl rollout status deployment/auction-provider-procar -n procar --timeout=300s
   only:
     - main
