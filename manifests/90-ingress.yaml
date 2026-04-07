@@ -28,6 +28,33 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: admin-jetpack-ingress
+  namespace: procar
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: admin.pc-dev.nikichxp.xyz
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-jetpack
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - admin.pc-dev.nikichxp.xyz
+      secretName: admin-jetpack-tls
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
   name: registry-ingress
   namespace: registry
   annotations:

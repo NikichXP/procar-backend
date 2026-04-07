@@ -48,6 +48,13 @@ build-auction-provider:
     - docker push $IMAGE_PREFIX/auction-provider-procar:latest
     - docker push $IMAGE_PREFIX/auction-provider-procar:$CI_COMMIT_SHORT_SHA
 
+build-admin-jetpack:
+  <<: *build_template
+  script:
+    - docker build -f admin-jetpack/Dockerfile -t $IMAGE_PREFIX/admin-jetpack:latest -t $IMAGE_PREFIX/admin-jetpack:$CI_COMMIT_SHORT_SHA .
+    - docker push $IMAGE_PREFIX/admin-jetpack:latest
+    - docker push $IMAGE_PREFIX/admin-jetpack:$CI_COMMIT_SHORT_SHA
+
 deploy:
   stage: deploy
   image: bitnami/kubectl:latest
@@ -56,9 +63,11 @@ deploy:
     - kubectl rollout restart deployment/auth -n procar
     - kubectl rollout restart deployment/user -n procar
     - kubectl rollout restart deployment/auction-provider-procar -n procar
+    - kubectl rollout restart deployment/admin-jetpack -n procar
     - kubectl rollout status deployment/gateway -n procar --timeout=300s
     - kubectl rollout status deployment/auth -n procar --timeout=300s
     - kubectl rollout status deployment/user -n procar --timeout=300s
     - kubectl rollout status deployment/auction-provider-procar -n procar --timeout=300s
+    - kubectl rollout status deployment/admin-jetpack -n procar --timeout=300s
   only:
     - main
