@@ -1,0 +1,62 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  REGISTRY: registry.pc-dev.nikichxp.xyz
+  IMAGE_PREFIX: $REGISTRY/procar
+  DOCKER_TLS_CERTDIR: "/certs"
+
+.build_template: &build_template
+  stage: build
+  image: docker:24
+  services:
+    - name: docker:24-dind
+      alias: docker
+  before_script:
+    - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASSWORD" "$REGISTRY"
+  only:
+    - main
+
+build-gateway:
+  <<: *build_template
+  script:
+    - docker build -f gateway/Dockerfile -t $IMAGE_PREFIX/gateway:latest -t $IMAGE_PREFIX/gateway:$CI_COMMIT_SHORT_SHA .
+    - docker push $IMAGE_PREFIX/gateway:latest
+    - docker push $IMAGE_PREFIX/gateway:$CI_COMMIT_SHORT_SHA
+
+build-auth:
+  <<: *build_template
+  script:
+    - docker build -f auth/Dockerfile -t $IMAGE_PREFIX/auth:latest -t $IMAGE_PREFIX/auth:$CI_COMMIT_SHORT_SHA .
+    - docker push $IMAGE_PREFIX/auth:latest
+    - docker push $IMAGE_PREFIX/auth:$CI_COMMIT_SHORT_SHA
+
+build-user:
+  <<: *build_template
+  script:
+    - docker build -f user/Dockerfile -t $IMAGE_PREFIX/user:latest -t $IMAGE_PREFIX/user:$CI_COMMIT_SHORT_SHA .
+    - docker push $IMAGE_PREFIX/user:latest
+    - docker push $IMAGE_PREFIX/user:$CI_COMMIT_SHORT_SHA
+
+build-auction-provider:
+  <<: *build_template
+  script:
+    - docker build -f auction-provider-procar/Dockerfile -t $IMAGE_PREFIX/auction-provider-procar:latest -t $IMAGE_PREFIX/auction-provider-procar:$CI_COMMIT_SHORT_SHA .
+    - docker push $IMAGE_PREFIX/auction-provider-procar:latest
+    - docker push $IMAGE_PREFIX/auction-provider-procar:$CI_COMMIT_SHORT_SHA
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - kubectl rollout restart deployment/gateway -n procar
+    - kubectl rollout restart deployment/auth -n procar
+    - kubectl rollout restart deployment/user -n procar
+    - kubectl rollout restart deployment/auction-provider-procar -n procar
+    - kubectl rollout status deployment/gateway -n procar --timeout=120s
+    - kubectl rollout status deployment/auth -n procar --timeout=120s
+    - kubectl rollout status deployment/user -n procar --timeout=120s
+    - kubectl rollout status deployment/auction-provider-procar -n procar --timeout=120s
+  only:
+    - main
