@@ -8,6 +8,9 @@ COPY admin-ui ./admin-ui
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
 
+ARG GATEWAY_BASE_URL=http://localhost:8080
+ENV GATEWAY_BASE_URL=$GATEWAY_BASE_URL
+
 RUN gradle admin-jetpack:wasmJsBrowserDistribution --no-daemon
 
 # Stage 2: Runtime stage - serve static files with nginx

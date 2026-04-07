@@ -21,7 +21,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-const val GATEWAY_BASE_URL = "http://localhost:8080"
+val GATEWAY_BASE_URL: String = js("(typeof GATEWAY_BASE_URL !== 'undefined') ? GATEWAY_BASE_URL : 'http://localhost:8080'")
 
 object AuthState {
     var accessToken: String = ""

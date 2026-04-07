@@ -51,7 +51,7 @@ build-auction-provider:
 build-admin-jetpack:
   <<: *build_template
   script:
-    - docker build -f admin-jetpack/Dockerfile -t $IMAGE_PREFIX/admin-jetpack:latest -t $IMAGE_PREFIX/admin-jetpack:$CI_COMMIT_SHORT_SHA .
+    - docker build -f admin-jetpack/Dockerfile --build-arg GATEWAY_BASE_URL=$GATEWAY_BASE_URL -t $IMAGE_PREFIX/admin-jetpack:latest -t $IMAGE_PREFIX/admin-jetpack:$CI_COMMIT_SHORT_SHA .
     - docker push $IMAGE_PREFIX/admin-jetpack:latest
     - docker push $IMAGE_PREFIX/admin-jetpack:$CI_COMMIT_SHORT_SHA
 
