@@ -64,11 +64,6 @@ data:
         pull_policy = "if-not-present"
         privileged = true
 
-        [runners.kubernetes.volumes]
-          [[runners.kubernetes.volumes.empty_dir]]
-            name = "docker-certs"
-            mount_path = "/certs/client"
-            medium = "Memory"
 
 ---
 

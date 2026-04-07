@@ -5,10 +5,8 @@ stages:
 variables:
   REGISTRY: registry.pc-dev.nikichxp.xyz
   IMAGE_PREFIX: $REGISTRY/procar
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_HOST: tcp://docker:2376
-  DOCKER_TLS_VERIFY: 1
-  DOCKER_CERT_PATH: "/certs/client"
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_HOST: tcp://docker:2375
 
 .build_template: &build_template
   stage: build
