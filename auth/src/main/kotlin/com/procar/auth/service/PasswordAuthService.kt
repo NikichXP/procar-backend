@@ -3,6 +3,7 @@ package com.procar.auth.service
 import com.procar.auth.api.dto.AuthResult
 import com.procar.auth.entity.PasswordAuthReason
 import com.procar.auth.repo.PasswordAuthRepository
+import com.procar.auth.api.exception.UserAlreadyExistsException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,6 +55,11 @@ class PasswordAuthService(
     }
 
     fun registerUser(userId: String, login: String, password: String): PasswordAuthReason {
+        val existingUser = passwordAuthRepository.findByUsername(login)
+        if (existingUser != null) {
+            throw UserAlreadyExistsException(login)
+        }
+
         val (salt, passwordHash) = createPasswordHash(password)
         val authReason = PasswordAuthReason(
             userId = userId,
