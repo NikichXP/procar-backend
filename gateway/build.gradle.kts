@@ -23,6 +23,7 @@ tasks.named<Jar>("jar") {
 dependencies {
 	implementation(project(":auction-provider-api"))
 	implementation(project(":auth-api"))
+	implementation(project(":user-api"))
 
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")

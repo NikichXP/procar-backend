@@ -1,4 +1,4 @@
-package com.procar.core.api
+package com.procar.core.api.admin
 
 import com.procar.core.service.admin.AdminWarehouseConnectorService
 import com.procar.provider.admin.AdminCreateWarehouseRequest
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/admin/warehouses")
-class GatewayAdminWarehouseController(
+class AdminWarehouseController(
     private val adminWarehouseConnectorService: AdminWarehouseConnectorService
 ) : AdminWarehouseController {
 

@@ -9,6 +9,8 @@ COPY auth ./auth
 COPY auth-api ./auth-api
 COPY auction-provider-api ./auction-provider-api
 COPY auction-provider-procar ./auction-provider-procar
+COPY user ./user
+COPY user-api ./user-api
 
 # Copy build configuration
 COPY build.gradle.kts .

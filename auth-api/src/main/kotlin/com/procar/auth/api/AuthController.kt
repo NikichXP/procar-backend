@@ -2,44 +2,47 @@ package com.procar.auth.api
 
 import com.procar.auth.api.dto.AccessToken
 import com.procar.auth.api.dto.AuthResult
+import com.procar.auth.api.dto.ChangePasswordRequest
 import com.procar.auth.api.dto.LoginRequest
 import com.procar.auth.api.dto.RefreshRequest
 import com.procar.auth.api.dto.RegisterRequest
 import com.procar.auth.api.dto.TokenValidationResult
 import jakarta.validation.Valid
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
+import org.springframework.web.service.annotation.PostExchange
 
-@RequestMapping("/auth")
+@HttpExchange("/auth")
 interface AuthController {
 
-    @PostMapping("/login")
-    fun login(
+    @PostExchange("/login")
+    suspend fun login(
         @Valid @RequestBody(required = false) loginRequest: LoginRequest?,
         @RequestParam(required = false) username: String?,
         @RequestParam(required = false) password: String?
-    ): ResponseEntity<AuthResult>
+    ): AuthResult
 
-    @PostMapping("/access")
-    fun refreshAccess(
+    @PostExchange("/access")
+    suspend fun refreshAccess(
         @Valid @RequestBody(required = false) refreshRequest: RefreshRequest?,
         @RequestParam(required = false) refreshToken: String?
-    ): ResponseEntity<AccessToken>
+    ): AccessToken
 
-    @PostMapping("/logout")
-    fun logout(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Void>
+    @PostExchange("/logout")
+    suspend fun logout(@RequestHeader("Authorization") authorization: String?)
 
-    @PostMapping("/logout-all")
-    fun logoutAllDevices(@RequestHeader("Authorization") authorization: String?): ResponseEntity<Map<String, Any>>
+    @PostExchange("/logout-all")
+    suspend fun logoutAllDevices(@RequestHeader("Authorization") authorization: String?): Map<String, Any>
 
-    @PostMapping("/register")
-    fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResult>
+    @PostExchange("/register")
+    suspend fun register(@Valid @RequestBody request: RegisterRequest): AuthResult
 
-    @GetMapping("/validate")
-    fun validateToken(@RequestHeader("Authorization") authorization: String): ResponseEntity<TokenValidationResult>
+    @GetExchange("/validate")
+    suspend fun validateToken(@RequestHeader("Authorization") authorization: String): TokenValidationResult
+
+    @PostExchange("/password")
+    suspend fun changePassword(@Valid @RequestBody request: ChangePasswordRequest)
 }

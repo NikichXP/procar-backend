@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.procar.api.AuthState
 
 enum class Screen { LOTS, WAREHOUSES, USERS }
 
@@ -16,7 +17,7 @@ fun AdminApp() {
     
     MaterialTheme {
         if (!isAuthenticated) {
-            LoginScreen(onLoginSuccess = { isAuthenticated = true })
+            LoginScreen(onLoginSuccess = { token -> AuthState.accessToken = token; isAuthenticated = true })
         } else {
             Row(modifier = Modifier.fillMaxSize()) {
                 var currentScreen by remember { mutableStateOf(Screen.LOTS) }

@@ -23,7 +23,6 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.awaitBody
-import org.springframework.web.reactive.function.client.bodyToMono
 
 @Service
 class GatewayClientService(
@@ -55,7 +54,7 @@ class GatewayClientService(
             AdminPaginatedLotsResponse(listOf(), PaginationResponse(false))
         }
 
-        logger.info("Received ${response.lots?.size ?: -1} lots")
+        logger.info("Received ${response.lots.size} lots")
 
         // TODO WHAT THE HELL IS THIS, it is emitting, why can't I see that in UI?
         response.lots.forEach { emit(it) }
@@ -68,8 +67,7 @@ class GatewayClientService(
             .bodyValue(request)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono<AdminLotResponse>()
-            .awaitFirst()
+            .awaitBody()
     }
 
     suspend fun getWarehouses(): List<AdminWarehouseResponse> {
@@ -103,8 +101,7 @@ class GatewayClientService(
             .uri("/api/admin/bids/lot/{lotId}", lotId)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono<BidHistoryResponse>()
-            .awaitFirst()
+            .awaitBody<BidHistoryResponse>()
 
         logger.info("Received ${response.bids.size} bids for lot $lotId")
         response.bids.forEach { emit(it) }

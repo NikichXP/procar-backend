@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --from=builder /app/auth/build/libs/procar-auth-*.jar app.jar
 
 # Expose port
-EXPOSE 8081
+EXPOSE 8082
 
 # Run the application
 ENTRYPOINT ["java", "-Xmx512m", "-jar", "app.jar"]

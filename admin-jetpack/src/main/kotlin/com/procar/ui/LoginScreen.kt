@@ -9,12 +9,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.procar.api.login
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     MaterialTheme {
         Box(
@@ -40,31 +44,33 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     
                     OutlinedTextField(
                         value = username,
-                        onValueChange = { 
+                        onValueChange = {
                             username = it
-                            showError = false
+                            errorMessage = null
                         },
                         label = { Text("Username") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = true,
+                        enabled = !isLoading
                     )
                     
                     OutlinedTextField(
                         value = password,
-                        onValueChange = { 
+                        onValueChange = {
                             password = it
-                            showError = false
+                            errorMessage = null
                         },
                         label = { Text("Password") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        enabled = !isLoading
                     )
                     
-                    if (showError) {
+                    if (errorMessage != null) {
                         Text(
-                            "Invalid credentials. Use admin/admin",
+                            errorMessage!!,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -72,15 +78,34 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                     
                     Button(
                         onClick = {
-                            if (username == "admin" && password == "admin") {
-                                onLoginSuccess()
-                            } else {
-                                showError = true
+                            scope.launch {
+                                isLoading = true
+                                errorMessage = null
+                                try {
+                                    val result = login(username, password)
+                                    if (result.success && result.accessToken != null) {
+                                        onLoginSuccess(result.accessToken.token)
+                                    } else {
+                                        errorMessage = result.message ?: "Login failed"
+                                    }
+                                } catch (e: Exception) {
+                                    errorMessage = "Connection error: ${e.message}"
+                                } finally {
+                                    isLoading = false
+                                }
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading
                     ) {
-                        Text("Login")
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.padding(4.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Login")
+                        }
                     }
                 }
             }

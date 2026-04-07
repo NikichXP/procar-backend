@@ -5,6 +5,7 @@ import com.procar.core.api.dto.Bid
 import com.procar.core.api.dto.BidPage
 import com.procar.core.api.dto.BidRequest
 import com.procar.core.config.SecurityConfig
+import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
 import com.procar.core.service.BidService
 import org.junit.jupiter.api.Test
@@ -20,7 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(controllers = [BidAPI::class])
-@Import(SecurityConfig::class)
+@Import(SecurityConfig::class, TestSecurityConfig::class)
 class BidAPITest {
 
     @Autowired
