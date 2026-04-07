@@ -8,7 +8,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: pc-dev.nikichxp.xyz
+    - host: api.pc-dev.nikichxp.xyz
       http:
         paths:
           - path: /
@@ -20,7 +20,7 @@ spec:
                   number: 8080
   tls:
     - hosts:
-        - pc-dev.nikichxp.xyz
+        - api.pc-dev.nikichxp.xyz
       secretName: gateway-tls
 
 ---
