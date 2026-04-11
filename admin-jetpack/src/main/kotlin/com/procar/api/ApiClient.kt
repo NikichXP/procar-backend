@@ -9,6 +9,15 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+
+external interface Storage {
+    fun getItem(key: String): String?
+    fun setItem(key: String, value: String)
+    fun removeItem(key: String)
+}
+
+external val localStorage: Storage
+
 object GatewayConfig {
     var baseUrl: String = "http://localhost:8080"
         set(value) {
@@ -21,7 +30,19 @@ val GATEWAY_BASE_URL: String
 
 object AuthState {
     var accessToken: String = ""
-    var refreshToken: String = ""
+        set(value) {
+            field = value
+        }
+
+    var refreshToken: String
+        get() = localStorage.getItem("refreshToken") ?: ""
+        set(value) {
+            if (value.isEmpty()) {
+                localStorage.removeItem("refreshToken")
+            } else {
+                localStorage.setItem("refreshToken", value)
+            }
+        }
 }
 
 val httpClient = HttpClient {
@@ -51,6 +72,18 @@ suspend fun login(username: String, password: String): AuthResult {
     return response.body()
 }
 
+suspend fun getAccessToken(refreshToken: String): AccessToken {
+    val response = httpClient.post("$GATEWAY_BASE_URL/auth/access") {
+        parameter("refreshToken", refreshToken)
+    }
+
+    if (response.status != HttpStatusCode.OK) {
+        throw Exception("Failed to refresh access token")
+    }
+
+    return response.body()
+}
+
 suspend fun fetchLots(): List<AdminLotResponse> {
     return try {
         val response: ApiResponse<AdminPaginatedLotsResponse> =
@@ -73,7 +106,7 @@ suspend fun fetchWarehouses(): List<AdminWarehouseResponse> {
         val response: ApiResponse<List<AdminWarehouseResponse>> =
             httpClient.get("$GATEWAY_BASE_URL/api/admin/warehouses").body()
         response.data
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         emptyList()
     }
 }

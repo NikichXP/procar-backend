@@ -26,7 +26,7 @@ interface AuthController {
     ): AuthResult
 
     @PostExchange("/access")
-    suspend fun refreshAccess(
+    suspend fun getAccessToken(
         @Valid @RequestBody(required = false) refreshRequest: RefreshRequest?,
         @RequestParam(required = false) refreshToken: String?
     ): AccessToken

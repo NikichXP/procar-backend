@@ -5,23 +5,48 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.api.AuthState
+import com.procar.api.getAccessToken
 
 enum class Screen { LOTS, WAREHOUSES, USERS }
 
 @Composable
 fun AdminApp() {
     var isAuthenticated by remember { mutableStateOf(false) }
-    
+    var isCheckingAuth by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        if (AuthState.refreshToken.isNotEmpty()) {
+            try {
+                val accessToken = getAccessToken(AuthState.refreshToken)
+                AuthState.accessToken = accessToken.token
+                isAuthenticated = true
+            } catch (e: Exception) {
+                // Refresh token is invalid or expired, clear it and show login
+                AuthState.refreshToken = ""
+            }
+        }
+        isCheckingAuth = false
+    }
+
     MaterialTheme {
-        if (!isAuthenticated) {
+        if (isCheckingAuth) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (!isAuthenticated) {
             LoginScreen(onLoginSuccess = { token -> AuthState.accessToken = token; isAuthenticated = true })
         } else {
             Row(modifier = Modifier.fillMaxSize()) {
                 var currentScreen by remember { mutableStateOf(Screen.LOTS) }
-                NavSidebar(currentScreen = currentScreen, onNavigate = { currentScreen = it }, onLogout = { isAuthenticated = false })
+                NavSidebar(currentScreen = currentScreen, onNavigate = { currentScreen = it }, onLogout = { isAuthenticated = false; AuthState.refreshToken = "" })
                 Box(modifier = Modifier.fillMaxSize()) {
                     when (currentScreen) {
                         Screen.LOTS -> LotsScreen()

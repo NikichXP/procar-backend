@@ -15,7 +15,7 @@ class AuthService(
     private val accessTokenService: AccessTokenService
 ) {
 
-    fun refreshAccessToken(refreshToken: String): AccessToken? {
+    fun getAccessToken(refreshToken: String): AccessToken? {
         val tokenEntity = refreshTokenRepository.findByToken(refreshToken)
         
         return when {

@@ -30,14 +30,14 @@ class AuthControllerImpl(
         return result
     }
 
-    override suspend fun refreshAccess(
+    override suspend fun getAccessToken(
         @Valid @RequestBody(required = false) refreshRequest: RefreshRequest?,
         @RequestParam(required = false) refreshToken: String?
     ): AccessToken {
         val token = refreshToken ?: refreshRequest?.refreshToken
             ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token required")
 
-        return authService.refreshAccessToken(token)
+        return authService.getAccessToken(token)
             ?: throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired refresh token")
     }
 

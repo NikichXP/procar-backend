@@ -19,7 +19,7 @@ class AuthService(
         authClient.login(loginRequest, username, password)
 
     suspend fun refreshAccess(refreshRequest: RefreshRequest?, refreshToken: String?): AccessToken =
-        authClient.refreshAccess(refreshRequest, refreshToken)
+        authClient.getAccessToken(refreshRequest, refreshToken)
 
     suspend fun logout(authorization: String?) =
         authClient.logout(authorization)
