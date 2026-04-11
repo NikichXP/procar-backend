@@ -1,5 +1,7 @@
 package com.procar.api
 
+import com.procar.TokenStorage
+import com.procar.createHttpClient
 import com.procar.model.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -10,19 +12,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-external interface Storage {
-    fun getItem(key: String): String?
-    fun setItem(key: String, value: String)
-    fun removeItem(key: String)
-}
-
-external val localStorage: Storage
-
 object GatewayConfig {
     var baseUrl: String = "http://localhost:8080"
-        set(value) {
-            field = value
-        }
 }
 
 val GATEWAY_BASE_URL: String
@@ -30,31 +21,30 @@ val GATEWAY_BASE_URL: String
 
 object AuthState {
     var accessToken: String = ""
-        set(value) {
-            field = value
-        }
 
     var refreshToken: String
-        get() = localStorage.getItem("refreshToken") ?: ""
+        get() = TokenStorage.getItem("refreshToken") ?: ""
         set(value) {
             if (value.isEmpty()) {
-                localStorage.removeItem("refreshToken")
+                TokenStorage.removeItem("refreshToken")
             } else {
-                localStorage.setItem("refreshToken", value)
+                TokenStorage.setItem("refreshToken", value)
             }
         }
 }
 
-val httpClient = HttpClient {
-    install(ContentNegotiation) {
-        json(Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        })
-    }
-    defaultRequest {
-        if (AuthState.accessToken.isNotEmpty()) {
-            header(HttpHeaders.Authorization, "Bearer ${AuthState.accessToken}")
+val httpClient: HttpClient by lazy {
+    createHttpClient().config {
+        install(ContentNegotiation) {
+            json(Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            })
+        }
+        defaultRequest {
+            if (AuthState.accessToken.isNotEmpty()) {
+                header(HttpHeaders.Authorization, "Bearer ${AuthState.accessToken}")
+            }
         }
     }
 }

@@ -17,6 +17,12 @@ repositories {
 }
 
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
+    jvmToolchain(21)
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         outputModuleName = "admin-jetpack"
@@ -35,10 +41,10 @@ kotlin {
         binaries.executable()
     }
 
+    jvm("desktop")
+
     sourceSets {
-        wasmJsMain {
-            kotlin.srcDirs("src/main/kotlin")
-            resources.srcDirs("src/main/resources")
+        commonMain {
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -46,12 +52,31 @@ kotlin {
                 implementation(compose.ui)
                 implementation(compose.components.resources)
                 implementation("io.ktor:ktor-client-core:3.1.3")
-                implementation("io.ktor:ktor-client-js:3.1.3")
                 implementation("io.ktor:ktor-client-content-negotiation:3.1.3")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
         }
+
+        wasmJsMain {
+            dependencies {
+                implementation("io.ktor:ktor-client-js:3.1.3")
+            }
+        }
+
+        val desktopMain by getting {
+            dependencies {
+                implementation(compose.desktop.currentOs)
+                implementation("io.ktor:ktor-client-cio:3.1.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
+            }
+        }
+    }
+}
+
+compose.desktop {
+    application {
+        mainClass = "com.procar.MainKt"
     }
 }
