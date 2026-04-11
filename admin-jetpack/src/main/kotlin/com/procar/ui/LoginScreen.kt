@@ -9,7 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.procar.api.GatewayConfig
 import com.procar.api.login
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.launch
 
 @Composable
@@ -18,7 +21,16 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var useRemoteBackend by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(useRemoteBackend) {
+        GatewayConfig.baseUrl = if (useRemoteBackend) {
+            "https://api.pc-dev.nikichxp.xyz"
+        } else {
+            "http://localhost:8080"
+        }
+    }
 
     MaterialTheme {
         Box(
@@ -41,7 +53,23 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            if (useRemoteBackend) "Remote API (api.pc-dev.nikichxp.xyz)" else "Localhost (8080)",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Switch(
+                            checked = useRemoteBackend,
+                            onCheckedChange = { useRemoteBackend = it },
+                            enabled = !isLoading
+                        )
+                    }
+
                     OutlinedTextField(
                         value = username,
                         onValueChange = {
@@ -87,6 +115,12 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
                                         onLoginSuccess(result.accessToken.token)
                                     } else {
                                         errorMessage = result.message ?: "Login failed"
+                                    }
+                                } catch (e: ClientRequestException) {
+                                    errorMessage = if (e.response.status == HttpStatusCode.Unauthorized) {
+                                        "Invalid username or password"
+                                    } else {
+                                        "Server error: ${e.response.status.description}"
                                     }
                                 } catch (e: Exception) {
                                     errorMessage = "Connection error: ${e.message}"

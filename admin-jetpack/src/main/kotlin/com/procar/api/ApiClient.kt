@@ -1,27 +1,23 @@
 package com.procar.api
 
-import com.procar.model.AdminCreateLotRequest
-import com.procar.model.AdminCreateWarehouseRequest
-import com.procar.model.AdminLotResponse
-import com.procar.model.AdminPaginatedLotsResponse
-import com.procar.model.AdminWarehouseResponse
-import com.procar.model.ApiResponse
-import com.procar.model.AuthResult
-import com.procar.model.LoginRequest
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.request.header
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.serialization.kotlinx.json.json
+import com.procar.model.*
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+object GatewayConfig {
+    var baseUrl: String = "http://localhost:8080"
+        set(value) {
+            field = value
+        }
+}
 
-val GATEWAY_BASE_URL: String = js("(typeof GATEWAY_BASE_URL !== 'undefined') ? GATEWAY_BASE_URL : 'http://localhost:8080'")
+val GATEWAY_BASE_URL: String
+    get() = GatewayConfig.baseUrl
 
 object AuthState {
     var accessToken: String = ""
@@ -43,10 +39,16 @@ val httpClient = HttpClient {
 }
 
 suspend fun login(username: String, password: String): AuthResult {
-    return httpClient.post("$GATEWAY_BASE_URL/auth/login") {
+    val response = httpClient.post("$GATEWAY_BASE_URL/auth/login") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         setBody(LoginRequest(username, password))
-    }.body()
+    }
+
+    if (response.status == HttpStatusCode.Unauthorized) {
+        throw Exception("Invalid username or password")
+    }
+
+    return response.body()
 }
 
 suspend fun fetchLots(): List<AdminLotResponse> {
