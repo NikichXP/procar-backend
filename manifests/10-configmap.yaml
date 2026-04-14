@@ -8,3 +8,6 @@ data:
   MONGO_HOST: "procar-dev-test.gkvzjle.mongodb.net"
   MONGO_DATABASE: "procar-dev"
   MONGO_APP_NAME: "procar-dev-test"
+  STORAGE_ENDPOINT: "https://nbg1.your-objectstorage.com"
+  STORAGE_REGION: "eu-central"
+  STORAGE_BUCKET: "procar-test"

@@ -58,6 +58,31 @@ spec:
                   key: MONGO_APP_NAME
             - name: MONGODB_URI
               value: "mongodb+srv://$(MONGO_USERNAME):$(MONGO_PASSWORD)@$(MONGO_HOST)/$(MONGO_DATABASE)?appName=$(MONGO_APP_NAME)"
+            - name: STORAGE_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-config
+                  key: STORAGE_ENDPOINT
+            - name: STORAGE_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-config
+                  key: STORAGE_REGION
+            - name: STORAGE_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: mongodb-config
+                  key: STORAGE_BUCKET
+            - name: STORAGE_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storage-secret
+                  key: STORAGE_ACCESS_KEY
+            - name: STORAGE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: storage-secret
+                  key: STORAGE_SECRET_KEY
           livenessProbe:
             httpGet:
               path: /actuator/health
