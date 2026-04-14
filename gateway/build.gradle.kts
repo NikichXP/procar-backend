@@ -35,6 +35,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.7.0")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("software.amazon.awssdk:s3:2.29.52")
 	
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.springframework.boot", module = "spring-boot-starter-web")
