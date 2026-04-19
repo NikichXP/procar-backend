@@ -67,7 +67,7 @@ fun LotsScreen() {
                         1 -> Text(lot.title)
                         2 -> Text(lot.status)
                         3 -> Text("$${lot.auction.currentBid}")
-                        4 -> TextButton(onClick = { selectedLot = lot }) { Text("Options") }
+                        4 -> TextButton(onClick = { selectedLot = lot }) { Text("Details") }
                     }
                 }
             )
@@ -85,7 +85,7 @@ fun LotsScreen() {
     }
 
     selectedLot?.let { lot ->
-        LotOptionsDialog(
+        LotDetailsDialog(
             lot = lot,
             onDismiss = { selectedLot = null }
         )
@@ -93,27 +93,84 @@ fun LotsScreen() {
 }
 
 @Composable
-fun LotOptionsDialog(lot: AdminLotResponse, onDismiss: () -> Unit) {
+private fun DetailSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(title, style = MaterialTheme.typography.titleSmall)
+        HorizontalDivider(Modifier.padding(vertical = 2.dp))
+        content()
+    }
+}
+
+@Composable
+private fun DetailRow(label: String, value: String?) {
+    if (value.isNullOrBlank()) return
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("$label:", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.width(140.dp))
+        Text(value, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+fun LotDetailsDialog(lot: AdminLotResponse, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Lot Options") },
+        title = { Text(lot.title.ifBlank { "Lot Details" }) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("ID: ${lot.id}", style = MaterialTheme.typography.bodySmall)
-                Text("Title: ${lot.title}")
-                Text("Status: ${lot.status}")
-                Text("Current Bid: $${lot.auction.currentBid}")
-                Text("Make/Model: ${lot.vehicle.make} ${lot.vehicle.model} (${lot.vehicle.year})")
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()).width(520.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                DetailSection("General") {
+                    DetailRow("ID", lot.id)
+                    DetailRow("External ID", lot.externalId)
+                    DetailRow("Title", lot.title)
+                    DetailRow("Status", lot.status)
+                    DetailRow("Description", lot.description)
+                    DetailRow("Created", lot.createdAt)
+                    DetailRow("Updated", lot.updatedAt)
+                }
+
+                DetailSection("Vehicle") {
+                    val v = lot.vehicle
+                    DetailRow("Make", v.make)
+                    DetailRow("Model", v.model)
+                    DetailRow("Year", v.year.toString())
+                    DetailRow("VIN", v.vin)
+                    DetailRow("Trim", v.trim)
+                    DetailRow("Color", v.color)
+                    DetailRow("Body Type", v.bodyType)
+                    DetailRow("Transmission", v.transmission)
+                    DetailRow("Fuel Type", v.fuelType)
+                    DetailRow("Condition", v.condition)
+                    DetailRow("Mileage", v.mileage?.toString())
+                }
+
+                DetailSection("Auction") {
+                    val a = lot.auction
+                    DetailRow("Type", a.auctionType)
+                    DetailRow("Current Bid", "$${a.currentBid}")
+                    DetailRow("Starting Bid", "$${a.startingBid}")
+                    DetailRow("Bid Increment", "$${a.bidIncrement}")
+                    DetailRow("Total Bids", a.totalBids.toString())
+                    DetailRow("Reserve Price", a.reservePrice?.let { "$$it" })
+                    DetailRow("Buy It Now", a.buyItNowPrice?.let { "$$it" })
+                    DetailRow("Start Time", a.startTime)
+                    DetailRow("End Time", a.endTime)
+                }
+
+                DetailSection("Location") {
+                    val l = lot.location
+                    DetailRow("Address", l.address)
+                    DetailRow("City", l.city)
+                    DetailRow("State", l.state)
+                    DetailRow("ZIP", l.zipCode)
+                    DetailRow("Country", l.country)
+                    DetailRow("Timezone", l.timezone)
+                }
             }
         },
         confirmButton = {
-            Button(
-                onClick = onDismiss,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-            ) { Text("Close Lot") }
-        },
-        dismissButton = {
-            OutlinedButton(onClick = onDismiss) { Text("Cancel") }
+            Button(onClick = onDismiss) { Text("Close") }
         }
     )
 }
