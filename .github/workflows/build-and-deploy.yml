@@ -1,0 +1,101 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: build-and-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ${{ vars.REGISTRY_URL }}
+  IMAGE_PREFIX: ${{ vars.REGISTRY_URL }}/${{ vars.IMAGE_NAMESPACE }}
+  NAMESPACE: procar
+
+jobs:
+  build:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: admin-jetpack
+            dockerfile: admin-jetpack/Dockerfile
+          - name: gateway
+            dockerfile: gateway/Dockerfile
+          - name: auth
+            dockerfile: auth/Dockerfile
+          - name: user
+            dockerfile: user/Dockerfile
+          - name: auction-provider-procar
+            dockerfile: auction-provider-procar/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and push ${{ matrix.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}:latest
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.name }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+  deploy:
+    runs-on: self-hosted
+    needs: [build]
+    env:
+      KUBECONFIG: ${{ github.workspace }}/.kube/config
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+
+      - name: Write kubeconfig
+        shell: bash
+        run: |
+          mkdir -p "$(dirname "$KUBECONFIG")"
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > "$KUBECONFIG"
+          chmod 600 "$KUBECONFIG"
+          kubectl --namespace "$NAMESPACE" get deploy
+
+      - name: Roll out new images
+        shell: bash
+        run: |
+          set -euo pipefail
+          for svc in gateway auth user auction-provider-procar admin-jetpack; do
+            kubectl -n "$NAMESPACE" set image "deployment/$svc" \
+              "$svc=$IMAGE_PREFIX/$svc:$IMAGE_TAG" --record=false
+          done
+
+      - name: Wait for rollouts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for svc in gateway auth user auction-provider-procar admin-jetpack; do
+            kubectl -n "$NAMESPACE" rollout status "deployment/$svc" --timeout=300s
+          done
+
+      - name: Cleanup kubeconfig
+        if: always()
+        shell: bash
+        run: rm -f "$KUBECONFIG"
