@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: build-and-deploy-${{ github.ref }}
+  group: build-deploy
   cancel-in-progress: false
 
 env:
