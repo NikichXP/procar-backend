@@ -91,6 +91,14 @@ suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse {
     }.body()
 }
 
+suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): AdminLotResponse {
+    val response: ApiResponse<AdminLotResponse> = httpClient.put("$GATEWAY_BASE_URL/api/admin/lots/$lotId") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(request)
+    }.body()
+    return response.data
+}
+
 suspend fun fetchWarehouses(): List<AdminWarehouseResponse> {
     return try {
         val response: ApiResponse<List<AdminWarehouseResponse>> =

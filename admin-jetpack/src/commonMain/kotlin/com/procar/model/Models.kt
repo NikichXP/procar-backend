@@ -30,7 +30,19 @@ data class AdminVehicleInfoResponse(
     val vin: String? = null,
     val trim: String? = null,
     val color: String? = null,
+    val interiorColor: String? = null,
     val mileage: Int? = null,
+    val drivetrain: String? = null,
+    val engine: AdminEngineInfoResponse? = null,
+)
+
+@Serializable
+data class AdminEngineInfoResponse(
+    val type: String,
+    val displacement: Double? = null,
+    val cylinders: Int? = null,
+    val horsepower: Int? = null,
+    val torque: Int? = null,
 )
 
 @Serializable
@@ -121,6 +133,17 @@ data class AdminSellerInfoRequest(
     val id: String,
     val name: String,
     val type: String,
+)
+
+@Serializable
+data class AdminUpdateLotRequest(
+    val title: String? = null,
+    val description: String? = null,
+    val vehicle: AdminVehicleInfoRequest? = null,
+    val auction: AdminAuctionInfoRequest? = null,
+    val location: AdminLocationInfoRequest? = null,
+    val metadata: AdminLotMetadataRequest? = null,
+    val status: String? = null,
 )
 
 @Serializable
