@@ -1,11 +1,13 @@
 package com.procar.ui
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,34 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
             "https://api.pc-dev.nikichxp.xyz"
         } else {
             "http://localhost:8080"
+        }
+    }
+
+    fun submitLogin() {
+        if (isLoading) return
+        if (username.isBlank() || password.isBlank()) return
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+            try {
+                val result = login(username, password)
+                if (result.success && result.accessToken != null) {
+                    com.procar.api.AuthState.refreshToken = result.refreshToken ?: ""
+                    onLoginSuccess(result.accessToken.token)
+                } else {
+                    errorMessage = result.message ?: "Login failed"
+                }
+            } catch (e: ClientRequestException) {
+                errorMessage = if (e.response.status == HttpStatusCode.Unauthorized) {
+                    "Invalid username or password"
+                } else {
+                    "Server error: ${e.response.status.description}"
+                }
+            } catch (e: Exception) {
+                errorMessage = "Connection error: ${e.message}"
+            } finally {
+                isLoading = false
+            }
         }
     }
 
@@ -79,7 +109,9 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
                         label = { Text("Username") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        enabled = !isLoading
+                        enabled = !isLoading,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { submitLogin() })
                     )
                     
                     OutlinedTextField(
@@ -92,7 +124,11 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { submitLogin() }),
                         enabled = !isLoading
                     )
                     
@@ -105,31 +141,7 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
                     }
                     
                     Button(
-                        onClick = {
-                            scope.launch {
-                                isLoading = true
-                                errorMessage = null
-                                try {
-                                    val result = login(username, password)
-                                    if (result.success && result.accessToken != null) {
-                                        com.procar.api.AuthState.refreshToken = result.refreshToken ?: ""
-                                        onLoginSuccess(result.accessToken.token)
-                                    } else {
-                                        errorMessage = result.message ?: "Login failed"
-                                    }
-                                } catch (e: ClientRequestException) {
-                                    errorMessage = if (e.response.status == HttpStatusCode.Unauthorized) {
-                                        "Invalid username or password"
-                                    } else {
-                                        "Server error: ${e.response.status.description}"
-                                    }
-                                } catch (e: Exception) {
-                                    errorMessage = "Connection error: ${e.message}"
-                                } finally {
-                                    isLoading = false
-                                }
-                            }
-                        },
+                        onClick = { submitLogin() },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading
                     ) {
