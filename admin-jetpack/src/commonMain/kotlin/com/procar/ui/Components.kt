@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-val ModifiedFieldBackground: Color = Color(0xFFFFF59D)
+val ModifiedFieldBackground: Color = Color(0xC3FFF59D)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
