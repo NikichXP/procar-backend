@@ -8,7 +8,24 @@ import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+
+val ModifiedFieldBackground: Color = Color(0xFFFFF59D)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun modifiedFieldColors(modified: Boolean): TextFieldColors {
+    return if (modified) {
+        OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = ModifiedFieldBackground,
+            unfocusedContainerColor = ModifiedFieldBackground,
+            disabledContainerColor = ModifiedFieldBackground,
+        )
+    } else {
+        OutlinedTextFieldDefaults.colors()
+    }
+}
 
 @Composable
 fun SectionHeader(text: String) {
@@ -23,6 +40,7 @@ fun EnumDropdown(
     selected: String,
     options: List<String>,
     modifier: Modifier = Modifier.fillMaxWidth(),
+    modified: Boolean = false,
     onSelected: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -33,6 +51,7 @@ fun EnumDropdown(
             readOnly = true,
             label = { Text(label) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            colors = modifiedFieldColors(modified),
             modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable).fillMaxWidth(),
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
