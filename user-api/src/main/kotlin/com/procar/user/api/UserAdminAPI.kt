@@ -2,6 +2,8 @@ package com.procar.user.api
 
 import com.procar.user.api.dto.BlockUserRequest
 import com.procar.user.api.dto.CreateUserRequest
+import com.procar.user.api.dto.UpdateUserBrokerRequest
+import com.procar.user.api.dto.UpdateUserRolesRequest
 import com.procar.user.api.dto.UserDto
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.*
@@ -23,4 +25,16 @@ interface UserAdminAPI {
 
     @PostExchange("/{id}/block")
     suspend fun blockUser(@PathVariable id: String, @Valid @RequestBody request: BlockUserRequest): UserDto
+
+    @PostExchange("/{id}/roles")
+    suspend fun updateUserRoles(
+        @PathVariable id: String,
+        @Valid @RequestBody request: UpdateUserRolesRequest
+    ): UserDto
+
+    @PostExchange("/{id}/broker")
+    suspend fun updateUserBroker(
+        @PathVariable id: String,
+        @Valid @RequestBody request: UpdateUserBrokerRequest
+    ): UserDto
 }

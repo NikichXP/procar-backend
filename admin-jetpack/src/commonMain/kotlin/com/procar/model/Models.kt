@@ -184,18 +184,62 @@ data class AdminCreateWarehouseRequest(
     val contactEmail: String? = null,
 )
 
-// --- User models (local only, no API yet) ---
+// --- User models ---
 
-data class AdminUser(
+enum class UserRole { USER, BROKER, ADMIN }
+
+@Serializable
+data class UserDto(
     val id: String,
     val username: String,
-    val email: String,
-    val status: UserStatus,
-    val createdAt: String,
-    val lastLogin: String?,
+    val blocked: Boolean,
+    val roles: List<UserRole>,
+    val brokerOrgId: String? = null,
 )
 
-enum class UserStatus { ACTIVE, BANNED, PENDING }
+@Serializable
+data class CreateUserRequest(
+    val username: String,
+    val brokerOrgId: String? = null,
+    val roles: List<UserRole>? = null,
+)
+
+@Serializable
+data class BlockUserRequest(val blocked: Boolean)
+
+@Serializable
+data class UpdateUserRolesRequest(val roles: List<UserRole>)
+
+@Serializable
+data class UpdateUserBrokerRequest(val brokerOrgId: String? = null)
+
+// --- Broker models ---
+
+@Serializable
+data class BrokerDto(
+    val id: String,
+    val name: String,
+    val address: String = "",
+    val phones: List<String> = emptyList(),
+    val emails: List<String> = emptyList(),
+)
+
+@Serializable
+data class CreateBrokerRequest(
+    val id: String,
+    val name: String,
+    val address: String = "",
+    val phones: List<String> = emptyList(),
+    val emails: List<String> = emptyList(),
+)
+
+@Serializable
+data class UpdateBrokerRequest(
+    val name: String? = null,
+    val address: String? = null,
+    val phones: List<String>? = null,
+    val emails: List<String>? = null,
+)
 
 // --- Auth models ---
 

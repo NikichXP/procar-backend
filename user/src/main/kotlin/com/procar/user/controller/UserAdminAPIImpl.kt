@@ -1,9 +1,11 @@
 package com.procar.user.controller
 
+import com.procar.user.api.UserAdminAPI
 import com.procar.user.api.dto.BlockUserRequest
 import com.procar.user.api.dto.CreateUserRequest
+import com.procar.user.api.dto.UpdateUserBrokerRequest
+import com.procar.user.api.dto.UpdateUserRolesRequest
 import com.procar.user.api.dto.UserDto
-import com.procar.user.api.UserAdminAPI
 import com.procar.user.service.UserService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -33,6 +35,22 @@ class UserAdminAPIImpl(private val userService: UserService) : UserAdminAPI {
         @Valid @RequestBody request: BlockUserRequest
     ): UserDto {
         return userService.blockUser(id, request)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+    }
+
+    override suspend fun updateUserRoles(
+        @PathVariable id: String,
+        @Valid @RequestBody request: UpdateUserRolesRequest
+    ): UserDto {
+        return userService.updateUserRoles(id, request)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+    }
+
+    override suspend fun updateUserBroker(
+        @PathVariable id: String,
+        @Valid @RequestBody request: UpdateUserBrokerRequest
+    ): UserDto {
+        return userService.updateUserBroker(id, request)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
     }
 }

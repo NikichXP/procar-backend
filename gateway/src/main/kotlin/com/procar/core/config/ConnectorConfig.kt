@@ -6,6 +6,7 @@ import com.procar.provider.InternalLotAPI
 import com.procar.provider.admin.AdminBidController
 import com.procar.provider.admin.AdminLotController
 import com.procar.provider.admin.AdminWarehouseController
+import com.procar.user.api.BrokerAdminAPI
 import com.procar.user.api.UserAdminAPI
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -97,6 +98,14 @@ class ConnectorConfig {
             .builderFor(WebClientAdapter.create(webClient))
             .build()
         return factory.createClient<UserAdminAPI>()
+    }
+
+    @Bean("brokerHttpClient")
+    fun brokerController(@Qualifier("userWebClient") webClient: WebClient): BrokerAdminAPI {
+        val factory = HttpServiceProxyFactory
+            .builderFor(WebClientAdapter.create(webClient))
+            .build()
+        return factory.createClient<BrokerAdminAPI>()
     }
 }
 

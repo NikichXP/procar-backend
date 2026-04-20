@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.procar.api.AuthState
 import com.procar.api.getAccessToken
 
-enum class Screen { LOTS, WAREHOUSES, USERS }
+enum class Screen { LOTS, WAREHOUSES, USERS, BROKERS }
 
 @Composable
 fun AdminApp() {
@@ -52,6 +52,7 @@ fun AdminApp() {
                         Screen.LOTS -> LotsScreen()
                         Screen.WAREHOUSES -> WarehousesScreen()
                         Screen.USERS -> UsersScreen()
+                        Screen.BROKERS -> BrokersScreen()
                     }
                 }
             }
@@ -78,6 +79,7 @@ fun NavSidebar(currentScreen: Screen, onNavigate: (Screen) -> Unit, onLogout: ()
         NavItem("Lots", currentScreen == Screen.LOTS) { onNavigate(Screen.LOTS) }
         NavItem("Warehouses", currentScreen == Screen.WAREHOUSES) { onNavigate(Screen.WAREHOUSES) }
         NavItem("Users", currentScreen == Screen.USERS) { onNavigate(Screen.USERS) }
+        NavItem("Brokers", currentScreen == Screen.BROKERS) { onNavigate(Screen.BROKERS) }
         
         Spacer(modifier = Modifier.weight(1f))
         

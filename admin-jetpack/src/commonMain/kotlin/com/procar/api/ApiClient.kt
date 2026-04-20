@@ -115,3 +115,59 @@ suspend fun createWarehouse(request: AdminCreateWarehouseRequest): AdminWarehous
         setBody(request)
     }.body()
 }
+
+// --- Users ---
+
+suspend fun fetchUsers(): List<UserDto> = try {
+    httpClient.get("$GATEWAY_BASE_URL/api/admin/users").body()
+} catch (_: Exception) {
+    emptyList()
+}
+
+suspend fun createUser(request: CreateUserRequest): UserDto =
+    httpClient.post("$GATEWAY_BASE_URL/api/admin/users") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(request)
+    }.body()
+
+suspend fun blockUser(id: String, blocked: Boolean): UserDto =
+    httpClient.post("$GATEWAY_BASE_URL/api/admin/users/$id/block") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(BlockUserRequest(blocked))
+    }.body()
+
+suspend fun updateUserRoles(id: String, roles: List<UserRole>): UserDto =
+    httpClient.post("$GATEWAY_BASE_URL/api/admin/users/$id/roles") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(UpdateUserRolesRequest(roles))
+    }.body()
+
+suspend fun updateUserBroker(id: String, brokerOrgId: String?): UserDto =
+    httpClient.post("$GATEWAY_BASE_URL/api/admin/users/$id/broker") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(UpdateUserBrokerRequest(brokerOrgId))
+    }.body()
+
+// --- Brokers ---
+
+suspend fun fetchBrokers(): List<BrokerDto> = try {
+    httpClient.get("$GATEWAY_BASE_URL/api/admin/brokers").body()
+} catch (_: Exception) {
+    emptyList()
+}
+
+suspend fun createBroker(request: CreateBrokerRequest): BrokerDto =
+    httpClient.post("$GATEWAY_BASE_URL/api/admin/brokers") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(request)
+    }.body()
+
+suspend fun updateBroker(id: String, request: UpdateBrokerRequest): BrokerDto =
+    httpClient.put("$GATEWAY_BASE_URL/api/admin/brokers/$id") {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(request)
+    }.body()
+
+suspend fun deleteBroker(id: String) {
+    httpClient.delete("$GATEWAY_BASE_URL/api/admin/brokers/$id")
+}
