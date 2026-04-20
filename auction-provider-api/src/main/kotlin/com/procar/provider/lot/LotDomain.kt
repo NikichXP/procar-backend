@@ -15,6 +15,7 @@ data class VehicleLot(
     val location: LocationInfo,
     val metadata: LotMetadata,
     val status: LotStatus,
+    val brokerOrgId: String? = null,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )

@@ -45,6 +45,9 @@ data class LotDocument(
     @Field("status")
     val status: LotStatus,
 
+    @Field("broker_org_id")
+    val brokerOrgId: String? = null,
+
     @Field("created_at")
     val createdAt: LocalDateTime = LocalDateTime.now(),
 

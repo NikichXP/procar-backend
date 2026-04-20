@@ -23,7 +23,11 @@ class UserService(
     }
 
     suspend fun createUser(request: CreateUserRequest): UserDto {
-        val userEntity = UserEntity(username = request.username, roles = request.roles ?: listOf(UserRole.USER))
+        val userEntity = UserEntity(
+            username = request.username,
+            brokerOrgId = request.brokerOrgId,
+            roles = request.roles ?: listOf(UserRole.USER)
+        )
         return userRepository.save(userEntity).toDto()
     }
 

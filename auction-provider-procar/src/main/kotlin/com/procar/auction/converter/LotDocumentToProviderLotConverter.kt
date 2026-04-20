@@ -21,6 +21,7 @@ class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
             location = convertLocationInfo(source.location),
             metadata = convertLotMetadata(source.metadata),
             status = source.status,
+            brokerOrgId = source.brokerOrgId,
             createdAt = source.createdAt,
             updatedAt = source.updatedAt
         )

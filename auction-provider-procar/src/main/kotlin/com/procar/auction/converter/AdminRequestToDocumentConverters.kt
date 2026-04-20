@@ -18,7 +18,8 @@ class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequ
             auction = convertAuctionInfo(source.auction),
             location = convertLocationInfo(source.location),
             metadata = convertLotMetadata(source.metadata),
-            status = source.status
+            status = source.status,
+            brokerOrgId = source.brokerOrgId
         )
     }
     
@@ -184,6 +185,7 @@ class AdminUpdateLotRequestToLotDocumentConverter : Converter<Pair<AdminUpdateLo
             location = request.location?.let { convertLocationInfo(it) } ?: existing.location,
             metadata = request.metadata?.let { convertLotMetadata(it) } ?: existing.metadata,
             status = request.status ?: existing.status,
+            brokerOrgId = request.brokerOrgId,
             updatedAt = LocalDateTime.now()
         )
     }

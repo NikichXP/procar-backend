@@ -26,7 +26,9 @@ data class AdminCreateLotRequest(
     @field:Valid
     val metadata: AdminLotMetadataRequest,
 
-    val status: LotStatus
+    val status: LotStatus,
+
+    val brokerOrgId: String? = null
 )
 
 data class AdminUpdateLotRequest(
@@ -36,7 +38,8 @@ data class AdminUpdateLotRequest(
     val auction: AdminAuctionInfoRequest? = null,
     val location: AdminLocationInfoRequest? = null,
     val metadata: AdminLotMetadataRequest? = null,
-    val status: LotStatus? = null
+    val status: LotStatus? = null,
+    val brokerOrgId: String? = null
 )
 
 data class AdminUpdateStatusRequest(
@@ -188,6 +191,7 @@ data class AdminLotResponse(
     val location: AdminLocationInfoResponse,
     val metadata: AdminLotMetadataResponse,
     val status: LotStatus,
+    val brokerOrgId: String? = null,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )

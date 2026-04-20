@@ -12,7 +12,8 @@ class UserEntityToUserDtoConverter : Converter<UserEntity, UserDto> {
             id = source.id,
             username = source.username,
             blocked = source.blocked,
-            roles = source.roles
+            roles = source.roles,
+            brokerOrgId = source.brokerOrgId
         )
     }
 }
