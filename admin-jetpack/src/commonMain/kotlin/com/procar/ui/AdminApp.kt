@@ -17,7 +17,6 @@ enum class Screen { LOTS, WAREHOUSES, USERS, BROKERS }
 fun AdminApp() {
     var isAuthenticated by remember { mutableStateOf(false) }
     var isCheckingAuth by remember { mutableStateOf(true) }
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         if (AuthState.refreshToken.isNotEmpty()) {

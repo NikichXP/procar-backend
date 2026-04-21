@@ -1,5 +1,6 @@
 package com.procar.admin.ui
 
+import com.procar.admin.util.validateAddressFields
 import com.procar.provider.admin.AdminAuctionInfoRequest
 import com.procar.provider.admin.AdminCreateLotRequest
 import com.procar.provider.admin.AdminEngineInfoRequest
@@ -247,12 +248,7 @@ class CreateLotForm : VerticalLayout() {
         if (locationModeGroup.value == LocationMode.WAREHOUSE) {
             if (warehouseComboBox.value == null) errors.add("Warehouse is required")
         } else {
-            if (addressField.value.isNullOrBlank()) errors.add("Address is required")
-            if (cityField.value.isNullOrBlank()) errors.add("City is required")
-            if (stateField.value.isNullOrBlank()) errors.add("State is required")
-            if (zipCodeField.value.isNullOrBlank()) errors.add("ZIP Code is required")
-            if (countryField.value.isNullOrBlank()) errors.add("Country is required")
-            if (timezoneField.value.isNullOrBlank()) errors.add("Timezone is required")
+            errors.addAll(validateAddressFields(addressField, cityField, stateField, zipCodeField, countryField, timezoneField))
         }
 
         if (sellerIdField.value.isNullOrBlank()) errors.add("Seller ID is required")
