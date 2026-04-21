@@ -4,6 +4,8 @@ import com.procar.core.config.StorageProperties
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.future.await
+import kotlinx.coroutines.reactive.awaitSingle
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.core.async.AsyncResponseTransformer
@@ -20,8 +22,15 @@ class StorageService(
 ) {
 
     @OptIn(ExperimentalUuidApi::class)
-    suspend fun upload(filename: String, contentType: String, bytes: ByteArray): String {
-        val extension = filename.substringAfterLast('.', missingDelimiterValue = "")
+    suspend fun upload(filePart: FilePart): String {
+        val contentType = filePart.headers().contentType?.toString() ?: "application/octet-stream"
+        val buf = filePart.content()
+            .reduce { a, b -> a.write(b) }
+            .awaitSingle()
+        val bytes = ByteArray(buf.readableByteCount())
+        buf.read(bytes)
+
+        val extension = filePart.filename().substringAfterLast('.', missingDelimiterValue = "")
         val key = if (extension.isNotEmpty()) "${Uuid.generateV7()}.$extension" else "${Uuid.generateV7()}"
 
         val request = PutObjectRequest.builder()

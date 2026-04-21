@@ -1,6 +1,7 @@
 package com.procar.auction.service
 
 import com.procar.auction.document.LotDocument
+import com.procar.auction.document.VehicleImageDocument
 import com.procar.auction.repository.LotRepository
 import com.procar.provider.admin.AdminLotResponse
 import com.procar.provider.admin.AdminPaginatedLotsResponse
@@ -190,6 +191,18 @@ class InternalAuctionLotService(
                 nextCursor = nextCursor
             )
         )
+    }
+
+    fun addLotImage(lotId: String, image: VehicleImageDocument): LotDocument? {
+        val existing = lotRepository.findById(lotId).orElse(null) ?: return null
+        val newVehicle = existing.vehicle.copy(
+            images = existing.vehicle.images + image
+        )
+        val updated = existing.copy(
+            vehicle = newVehicle,
+            updatedAt = LocalDateTime.now()
+        )
+        return lotRepository.save(updated)
     }
 
     fun archiveLot(lotId: String): LotDocument? {

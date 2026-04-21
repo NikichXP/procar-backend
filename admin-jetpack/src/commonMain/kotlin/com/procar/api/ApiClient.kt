@@ -9,6 +9,7 @@ import io.ktor.client.plugins.auth.*
 import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -134,6 +135,27 @@ suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse =
 
 suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): AdminLotResponse =
     putEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId", request)
+
+/**
+ * Uploads a single photo file to the given lot and returns the updated lot.
+ * The gateway stores the file, derives a URL and appends it to the lot's vehicle.images.
+ *
+ * For multi-file selection on the UI, call this once per selected file.
+ */
+suspend fun uploadLotPhoto(
+    lotId: String,
+    fileName: String,
+    contentType: String,
+    bytes: ByteArray,
+): AdminLotResponse =
+    httpClient.post("$GATEWAY_BASE_URL/api/admin/lots/$lotId/photo") {
+        setBody(MultiPartFormDataContent(formData {
+            append("file", bytes, Headers.build {
+                append(HttpHeaders.ContentType, contentType)
+                append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
+            })
+        }))
+    }.body<ApiResponse<AdminLotResponse>>().data
 
 suspend fun fetchWarehouses(): List<AdminWarehouseResponse> =
     getEnveloped("$GATEWAY_BASE_URL/api/admin/warehouses")

@@ -6,7 +6,9 @@ import com.procar.provider.admin.AdminLotController
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
 import jakarta.validation.Valid
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -61,5 +63,21 @@ class AdminLotController(
         @RequestBody request: AdminHiddenRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.setHiddenStatus(lotId, request)
+    }
+
+    @PostMapping("/{lotId}/images")
+    override suspend fun addLotImage(
+        @PathVariable lotId: String,
+        @RequestBody request: AdminAddImageRequest
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.addLotImage(lotId, request)
+    }
+
+    @PostMapping("/{lotId}/photo", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    suspend fun uploadLotPhoto(
+        @PathVariable lotId: String,
+        @RequestPart("file") filePart: FilePart
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.uploadLotPhoto(lotId, filePart)
     }
 }

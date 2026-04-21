@@ -34,6 +34,15 @@ data class AdminVehicleInfoResponse(
     val mileage: Int? = null,
     val drivetrain: String? = null,
     val engine: AdminEngineInfoResponse? = null,
+    val images: List<AdminVehicleImageResponse> = emptyList(),
+)
+
+@Serializable
+data class AdminVehicleImageResponse(
+    val url: String,
+    val type: String,
+    val description: String? = null,
+    val isPrimary: Boolean = false,
 )
 
 @Serializable

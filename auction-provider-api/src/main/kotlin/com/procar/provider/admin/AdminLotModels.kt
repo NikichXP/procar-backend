@@ -50,6 +50,13 @@ data class AdminHiddenRequest(
     val hidden: Boolean
 )
 
+data class AdminAddImageRequest(
+    val url: String,
+    val type: ImageType = ImageType.EXTERIOR,
+    val description: String? = null,
+    val isPrimary: Boolean = false
+)
+
 data class AdminVehicleInfoRequest(
     val vin: String? = null,
     val make: String,

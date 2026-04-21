@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.core.io.buffer.DataBuffer
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.HttpStatus
@@ -25,14 +24,7 @@ class FileAPI(
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
     suspend fun upload(@RequestPart("file") filePart: FilePart): FileUploadResponse {
-        val contentType = filePart.headers().contentType?.toString() ?: "application/octet-stream"
-        val buf = filePart.content()
-            .reduce { a, b -> a.write(b) }
-            .awaitSingle()
-        val bytes = ByteArray(buf.readableByteCount())
-        buf.read(bytes)
-
-        val key = storageService.upload(filePart.filename(), contentType, bytes)
+        val key = storageService.upload(filePart)
         return FileUploadResponse(key)
     }
 

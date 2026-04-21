@@ -72,6 +72,10 @@ fun LotDetailsDialog(
                     saving = savingSection == "Location",
                     onSave = { trySave("Location", editState.location) },
                 )
+                PhotosSection(
+                    lot = lot,
+                    onUploaded = onSaved,
+                )
             }
         },
         confirmButton = {

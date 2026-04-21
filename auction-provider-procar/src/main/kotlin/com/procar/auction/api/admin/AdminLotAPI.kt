@@ -1,6 +1,7 @@
 package com.procar.auction.api.admin
 
 import com.procar.auction.document.LotDocument
+import com.procar.auction.document.VehicleImageDocument
 import com.procar.auction.service.InternalAuctionLotService
 import com.procar.provider.admin.*
 import com.procar.provider.common.ApiResponse
@@ -83,5 +84,22 @@ class AdminLotAPI(
         val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
         val message = if (request.hidden) "Lot hidden successfully" else "Lot unhidden successfully"
         return ResponseEntity.ok(ApiResponse(adminResponse, message))
+    }
+
+    override suspend fun addLotImage(
+        lotId: String,
+        request: AdminAddImageRequest
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val updatedLot = lotService.addLotImage(
+            lotId,
+            VehicleImageDocument(
+                url = request.url,
+                type = request.type,
+                description = request.description,
+                isPrimary = request.isPrimary
+            )
+        ) ?: return ResponseEntity.notFound().build()
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Image added successfully"))
     }
 }

@@ -45,4 +45,10 @@ interface AdminLotController {
         @PathVariable lotId: String,
         @RequestBody request: AdminHiddenRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>>
+
+    @PostExchange("/{lotId}/images")
+    suspend fun addLotImage(
+        @PathVariable lotId: String,
+        @RequestBody request: AdminAddImageRequest
+    ): ResponseEntity<ApiResponse<AdminLotResponse>>
 }
