@@ -13,22 +13,37 @@ import kotlinx.coroutines.launch
 @Composable
 fun LotsScreen() {
     val scope = rememberCoroutineScope()
+    val state = rememberScreenState()
     var lots by remember { mutableStateOf<List<AdminLotResponse>>(emptyList()) }
-    var loading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var showCreateDialog by remember { mutableStateOf(false) }
+    var nextCursor by remember { mutableStateOf<String?>(null) }
+    var hasNext by remember { mutableStateOf(false) }
+    var loadingMore by remember { mutableStateOf(false) }
     var selectedLot by remember { mutableStateOf<AdminLotResponse?>(null) }
 
     fun loadLots() {
+        scope.launchWithState(state, "Error loading lots") {
+            val page = fetchLots()
+            lots = page.lots
+            nextCursor = page.pagination.nextCursor
+            hasNext = page.pagination.hasNext
+        }
+    }
+
+    fun loadMore() {
+        val cursor = nextCursor ?: return
+        if (loadingMore) return
         scope.launch {
-            loading = true
-            errorMessage = null
+            loadingMore = true
+            state.errorMessage = null
             try {
-                lots = fetchLots()
+                val page = fetchLots(cursor = cursor)
+                lots = lots + page.lots
+                nextCursor = page.pagination.nextCursor
+                hasNext = page.pagination.hasNext
             } catch (e: Exception) {
-                errorMessage = "Error loading lots: ${e.message}"
+                state.errorMessage = "Error loading more lots: ${e.message}"
             } finally {
-                loading = false
+                loadingMore = false
             }
         }
     }
@@ -40,14 +55,14 @@ fun LotsScreen() {
         Spacer(Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { showCreateDialog = true }) { Text("Create Lot") }
+            Button(onClick = { state.showCreateDialog = true }) { Text("Create Lot") }
             OutlinedButton(onClick = { loadLots() }) { Text("Refresh") }
         }
 
         Spacer(Modifier.height(8.dp))
-        errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        state.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
-        if (loading) {
+        if (state.loading) {
             Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
@@ -56,6 +71,7 @@ fun LotsScreen() {
                 headers = listOf("ID", "Title", "Status", "Current Bid", "Actions"),
                 rows = lots,
                 rowKey = { it.id },
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 cellContent = { lot, col ->
                     when (col) {
                         0 -> Text(lot.id.take(8) + "…", style = MaterialTheme.typography.bodySmall)
@@ -66,14 +82,33 @@ fun LotsScreen() {
                     }
                 }
             )
+
+            if (hasNext) {
+                Spacer(Modifier.height(8.dp))
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    OutlinedButton(
+                        onClick = { loadMore() },
+                        enabled = !loadingMore,
+                    ) {
+                        if (loadingMore) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Text("Load more")
+                        }
+                    }
+                }
+            }
         }
     }
 
-    if (showCreateDialog) {
+    if (state.showCreateDialog) {
         CreateLotDialog(
-            onDismiss = { showCreateDialog = false },
+            onDismiss = { state.showCreateDialog = false },
             onCreated = {
-                showCreateDialog = false
+                state.showCreateDialog = false
                 loadLots()
             }
         )

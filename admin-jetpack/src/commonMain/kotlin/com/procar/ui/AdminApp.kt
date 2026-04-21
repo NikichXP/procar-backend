@@ -11,7 +11,12 @@ import androidx.compose.ui.unit.dp
 import com.procar.api.AuthState
 import com.procar.api.getAccessToken
 
-enum class Screen { LOTS, WAREHOUSES, USERS, BROKERS }
+enum class Screen(val label: String) {
+    LOTS("Lots"),
+    WAREHOUSES("Warehouses"),
+    USERS("Users"),
+    BROKERS("Brokers"),
+}
 
 @Composable
 fun AdminApp() {
@@ -75,10 +80,9 @@ fun NavSidebar(currentScreen: Screen, onNavigate: (Screen) -> Unit, onLogout: ()
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        NavItem("Lots", currentScreen == Screen.LOTS) { onNavigate(Screen.LOTS) }
-        NavItem("Warehouses", currentScreen == Screen.WAREHOUSES) { onNavigate(Screen.WAREHOUSES) }
-        NavItem("Users", currentScreen == Screen.USERS) { onNavigate(Screen.USERS) }
-        NavItem("Brokers", currentScreen == Screen.BROKERS) { onNavigate(Screen.BROKERS) }
+        Screen.entries.forEach { screen ->
+            NavItem(screen.label, currentScreen == screen) { onNavigate(screen) }
+        }
         
         Spacer(modifier = Modifier.weight(1f))
         

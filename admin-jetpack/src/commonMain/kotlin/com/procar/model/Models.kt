@@ -149,6 +149,13 @@ data class AdminUpdateLotRequest(
 @Serializable
 data class AdminPaginatedLotsResponse(
     val lots: List<AdminLotResponse>,
+    val pagination: PaginationResponse = PaginationResponse(hasNext = false),
+)
+
+@Serializable
+data class PaginationResponse(
+    val hasNext: Boolean,
+    val nextCursor: String? = null,
 )
 
 // --- Warehouse models ---

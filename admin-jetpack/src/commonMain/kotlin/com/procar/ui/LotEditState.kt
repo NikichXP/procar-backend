@@ -133,15 +133,9 @@ class LocationEditState(l: AdminLocationInfoResponse) : SectionEditState {
     override fun revert() = fields.forEach { it.revert() }
     override fun commit() = fields.forEach { it.commit() }
 
-    override fun validate(): String? {
-        if (address.current.isBlank()) return "Address is required"
-        if (city.current.isBlank()) return "City is required"
-        if (state.current.isBlank()) return "State is required"
-        if (zipCode.current.isBlank()) return "ZIP code is required"
-        if (country.current.isBlank()) return "Country is required"
-        if (timezone.current.isBlank()) return "Timezone is required"
-        return null
-    }
+    override fun validate(): String? = validateLocationFields(
+        address.current, city.current, state.current, zipCode.current, country.current, timezone.current,
+    )
 
     override fun buildRequest(): AdminUpdateLotRequest = AdminUpdateLotRequest(
         location = AdminLocationInfoRequest(

@@ -13,6 +13,27 @@ import androidx.compose.ui.unit.dp
 
 val ModifiedFieldBackground: Color = Color(0xC3FFF59D)
 
+/**
+ * Validates standard location fields. Returns the first error message, or null if all are valid.
+ * Pass `timezone = null` to skip the timezone check.
+ */
+fun validateLocationFields(
+    address: String,
+    city: String,
+    state: String,
+    zipCode: String,
+    country: String,
+    timezone: String? = null,
+): String? {
+    if (address.isBlank()) return "Address is required"
+    if (city.isBlank()) return "City is required"
+    if (state.isBlank()) return "State is required"
+    if (zipCode.isBlank()) return "ZIP code is required"
+    if (country.isBlank()) return "Country is required"
+    if (timezone != null && timezone.isBlank()) return "Timezone is required"
+    return null
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun modifiedFieldColors(modified: Boolean): TextFieldColors {
@@ -70,9 +91,10 @@ fun <T> DataTable(
     headers: List<String>,
     rows: List<T>,
     rowKey: (T) -> Any,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     cellContent: @Composable (item: T, columnIndex: Int) -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier) {
         // Header row
         Row(
             modifier = Modifier

@@ -57,11 +57,7 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
         if (startingBid.toDoubleOrNull() == null) return "Valid starting bid is required"
         if (currentBid.toDoubleOrNull() == null) return "Valid current bid is required"
         if (bidIncrement.toDoubleOrNull() == null) return "Valid bid increment is required"
-        if (address.isBlank()) return "Address is required"
-        if (city.isBlank()) return "City is required"
-        if (state.isBlank()) return "State is required"
-        if (zipCode.isBlank()) return "ZIP code is required"
-        if (country.isBlank()) return "Country is required"
+        validateLocationFields(address, city, state, zipCode, country)?.let { return it }
         if (sellerId.isBlank()) return "Seller ID is required"
         if (sellerName.isBlank()) return "Seller name is required"
         return null

@@ -62,11 +62,10 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
         }
     }
 
-    MaterialTheme {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
             Card(
                 modifier = Modifier
                     .width(400.dp)
@@ -158,4 +157,3 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
             }
         }
     }
-}

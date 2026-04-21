@@ -53,6 +53,7 @@ fun BrokersScreen() {
                 headers = listOf("ID", "Name", "Address", "Phones", "Emails", "Actions"),
                 rows = brokers,
                 rowKey = { it.id },
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 cellContent = { b, col ->
                     when (col) {
                         0 -> Text(b.id)

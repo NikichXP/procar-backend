@@ -5,7 +5,8 @@ import com.procar.createHttpClient
 import com.procar.model.*
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -41,13 +42,56 @@ val httpClient: HttpClient by lazy {
                 isLenient = true
             })
         }
-        defaultRequest {
-            if (AuthState.accessToken.isNotEmpty()) {
-                header(HttpHeaders.Authorization, "Bearer ${AuthState.accessToken}")
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    val refresh = AuthState.refreshToken
+                    if (refresh.isEmpty()) null
+                    else BearerTokens(AuthState.accessToken, refresh)
+                }
+                refreshTokens {
+                    val refresh = AuthState.refreshToken
+                    if (refresh.isEmpty()) return@refreshTokens null
+                    try {
+                        val newToken: AccessToken = client.post("$GATEWAY_BASE_URL/auth/access") {
+                            markAsRefreshTokenRequest()
+                            parameter("refreshToken", refresh)
+                        }.body()
+                        AuthState.accessToken = newToken.token
+                        BearerTokens(newToken.token, refresh)
+                    } catch (_: Exception) {
+                        // Refresh token is invalid/expired -> force re-login.
+                        AuthState.accessToken = ""
+                        AuthState.refreshToken = ""
+                        null
+                    }
+                }
+                // Attach Bearer proactively for every non-auth request
+                // (avoids the extra 401 round-trip on each call).
+                sendWithoutRequest { request ->
+                    !request.url.encodedPath.startsWith("/auth/")
+                }
             }
         }
     }
 }
+
+private suspend inline fun <reified T> getEnveloped(
+    url: String,
+    block: HttpRequestBuilder.() -> Unit = {},
+): T = httpClient.get(url, block).body<ApiResponse<T>>().data
+
+private suspend inline fun <reified T> postEnveloped(url: String, body: Any): T =
+    httpClient.post(url) {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(body)
+    }.body<ApiResponse<T>>().data
+
+private suspend inline fun <reified T> putEnveloped(url: String, body: Any): T =
+    httpClient.put(url) {
+        header(HttpHeaders.ContentType, ContentType.Application.Json)
+        setBody(body)
+    }.body<ApiResponse<T>>().data
 
 suspend fun login(username: String, password: String): AuthResult {
     val response = httpClient.post("$GATEWAY_BASE_URL/auth/login") {
@@ -74,55 +118,33 @@ suspend fun getAccessToken(refreshToken: String): AccessToken {
     return response.body()
 }
 
-suspend fun fetchLots(): List<AdminLotResponse> {
-    return try {
-        val response: ApiResponse<AdminPaginatedLotsResponse> =
-            httpClient.get("$GATEWAY_BASE_URL/api/admin/lots?limit=100").body()
-        response.data.lots
-    } catch (e: Exception) {
-        emptyList()
+const val DEFAULT_LOTS_PAGE_SIZE: Int = 25
+
+suspend fun fetchLots(
+    cursor: String? = null,
+    limit: Int = DEFAULT_LOTS_PAGE_SIZE,
+): AdminPaginatedLotsResponse =
+    getEnveloped("$GATEWAY_BASE_URL/api/admin/lots") {
+        parameter("limit", limit)
+        if (cursor != null) parameter("cursor", cursor)
     }
-}
 
-suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse {
-    return httpClient.post("$GATEWAY_BASE_URL/api/admin/lots") {
-        header(HttpHeaders.ContentType, ContentType.Application.Json)
-        setBody(request)
-    }.body()
-}
+suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse =
+    postEnveloped("$GATEWAY_BASE_URL/api/admin/lots", request)
 
-suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): AdminLotResponse {
-    val response: ApiResponse<AdminLotResponse> = httpClient.put("$GATEWAY_BASE_URL/api/admin/lots/$lotId") {
-        header(HttpHeaders.ContentType, ContentType.Application.Json)
-        setBody(request)
-    }.body()
-    return response.data
-}
+suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): AdminLotResponse =
+    putEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId", request)
 
-suspend fun fetchWarehouses(): List<AdminWarehouseResponse> {
-    return try {
-        val response: ApiResponse<List<AdminWarehouseResponse>> =
-            httpClient.get("$GATEWAY_BASE_URL/api/admin/warehouses").body()
-        response.data
-    } catch (_: Exception) {
-        emptyList()
-    }
-}
+suspend fun fetchWarehouses(): List<AdminWarehouseResponse> =
+    getEnveloped("$GATEWAY_BASE_URL/api/admin/warehouses")
 
-suspend fun createWarehouse(request: AdminCreateWarehouseRequest): AdminWarehouseResponse {
-    return httpClient.post("$GATEWAY_BASE_URL/api/admin/warehouses") {
-        header(HttpHeaders.ContentType, ContentType.Application.Json)
-        setBody(request)
-    }.body()
-}
+suspend fun createWarehouse(request: AdminCreateWarehouseRequest): AdminWarehouseResponse =
+    postEnveloped("$GATEWAY_BASE_URL/api/admin/warehouses", request)
 
 // --- Users ---
 
-suspend fun fetchUsers(): List<UserDto> = try {
+suspend fun fetchUsers(): List<UserDto> =
     httpClient.get("$GATEWAY_BASE_URL/api/admin/users").body()
-} catch (_: Exception) {
-    emptyList()
-}
 
 suspend fun createUser(request: CreateUserRequest): UserDto =
     httpClient.post("$GATEWAY_BASE_URL/api/admin/users") {
@@ -150,11 +172,8 @@ suspend fun updateUserBroker(id: String, brokerOrgId: String?): UserDto =
 
 // --- Brokers ---
 
-suspend fun fetchBrokers(): List<BrokerDto> = try {
+suspend fun fetchBrokers(): List<BrokerDto> =
     httpClient.get("$GATEWAY_BASE_URL/api/admin/brokers").body()
-} catch (_: Exception) {
-    emptyList()
-}
 
 suspend fun createBroker(request: CreateBrokerRequest): BrokerDto =
     httpClient.post("$GATEWAY_BASE_URL/api/admin/brokers") {

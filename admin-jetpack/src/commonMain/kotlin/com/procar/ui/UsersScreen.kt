@@ -56,6 +56,7 @@ fun UsersScreen() {
                 headers = listOf("ID", "Username", "Roles", "Broker", "Status", "Actions"),
                 rows = users,
                 rowKey = { it.id },
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 cellContent = { user, col ->
                     when (col) {
                         0 -> Text(user.id.take(8) + "…", style = MaterialTheme.typography.bodySmall)

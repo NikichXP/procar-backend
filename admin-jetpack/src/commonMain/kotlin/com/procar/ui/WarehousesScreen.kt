@@ -15,23 +15,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun WarehousesScreen() {
     val scope = rememberCoroutineScope()
+    val state = rememberScreenState()
     var warehouses by remember { mutableStateOf<List<AdminWarehouseResponse>>(emptyList()) }
-    var loading by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var showCreateDialog by remember { mutableStateOf(false) }
     var selectedWarehouse by remember { mutableStateOf<AdminWarehouseResponse?>(null) }
 
     fun loadWarehouses() {
-        scope.launch {
-            loading = true
-            errorMessage = null
-            try {
-                warehouses = fetchWarehouses()
-            } catch (e: Exception) {
-                errorMessage = "Error loading warehouses: ${e.message}"
-            } finally {
-                loading = false
-            }
+        scope.launchWithState(state, "Error loading warehouses") {
+            warehouses = fetchWarehouses()
         }
     }
 
@@ -42,14 +32,14 @@ fun WarehousesScreen() {
         Spacer(Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { showCreateDialog = true }) { Text("Create Warehouse") }
+            Button(onClick = { state.showCreateDialog = true }) { Text("Create Warehouse") }
             OutlinedButton(onClick = { loadWarehouses() }) { Text("Refresh") }
         }
 
         Spacer(Modifier.height(8.dp))
-        errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        state.errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
-        if (loading) {
+        if (state.loading) {
             Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
@@ -58,6 +48,7 @@ fun WarehousesScreen() {
                 headers = listOf("ID", "Name", "City", "State", "Country", "Timezone", "Contact", "Actions"),
                 rows = warehouses,
                 rowKey = { it.id },
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 cellContent = { wh, col ->
                     when (col) {
                         0 -> Text(wh.id.take(8) + "…", style = MaterialTheme.typography.bodySmall)
@@ -74,11 +65,11 @@ fun WarehousesScreen() {
         }
     }
 
-    if (showCreateDialog) {
+    if (state.showCreateDialog) {
         CreateWarehouseDialog(
-            onDismiss = { showCreateDialog = false },
+            onDismiss = { state.showCreateDialog = false },
             onCreated = {
-                showCreateDialog = false
+                state.showCreateDialog = false
                 loadWarehouses()
             }
         )
@@ -111,13 +102,7 @@ fun CreateWarehouseDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
 
     fun validate(): String? {
         if (name.isBlank()) return "Name is required"
-        if (address.isBlank()) return "Address is required"
-        if (city.isBlank()) return "City is required"
-        if (state.isBlank()) return "State is required"
-        if (zipCode.isBlank()) return "ZIP code is required"
-        if (country.isBlank()) return "Country is required"
-        if (timezone.isBlank()) return "Timezone is required"
-        return null
+        return validateLocationFields(address, city, state, zipCode, country, timezone)
     }
 
     AlertDialog(
