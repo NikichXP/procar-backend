@@ -60,6 +60,8 @@ kotlin {
                 // FileKit: multiplatform file picker (wasmJs, JVM desktop, Android, iOS).
                 // Keeps file selection/read logic in commonMain only.
                 implementation("io.github.vinceglb:filekit-compose:0.8.8")
+                implementation("io.coil-kt.coil3:coil-compose:3.0.4")
+                implementation("io.coil-kt.coil3:coil-network-ktor3:3.0.4")
             }
         }
 

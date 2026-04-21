@@ -102,4 +102,14 @@ class AdminLotAPI(
         val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(ApiResponse(adminResponse, "Image added successfully"))
     }
+
+    override suspend fun deleteLotImage(
+        lotId: String,
+        url: String
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val updatedLot = lotService.removeLotImage(lotId, url)
+            ?: return ResponseEntity.notFound().build()
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Image removed successfully"))
+    }
 }

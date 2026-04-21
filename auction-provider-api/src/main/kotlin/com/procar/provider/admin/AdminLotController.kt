@@ -51,4 +51,10 @@ interface AdminLotController {
         @PathVariable lotId: String,
         @RequestBody request: AdminAddImageRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>>
+
+    @DeleteExchange("/{lotId}/images")
+    suspend fun deleteLotImage(
+        @PathVariable lotId: String,
+        @RequestParam url: String
+    ): ResponseEntity<ApiResponse<AdminLotResponse>>
 }

@@ -73,6 +73,14 @@ class AdminLotController(
         return adminLotConnectorService.addLotImage(lotId, request)
     }
 
+    @DeleteMapping("/{lotId}/images")
+    override suspend fun deleteLotImage(
+        @PathVariable lotId: String,
+        @RequestParam url: String
+    ): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.deleteLotImage(lotId, url)
+    }
+
     @PostMapping("/{lotId}/photo", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     suspend fun uploadLotPhoto(
         @PathVariable lotId: String,

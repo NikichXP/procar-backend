@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.async.AsyncRequestBody
 import software.amazon.awssdk.core.async.AsyncResponseTransformer
 import software.amazon.awssdk.services.s3.S3AsyncClient
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import kotlin.uuid.ExperimentalUuidApi
@@ -42,6 +43,14 @@ class StorageService(
 
         s3.putObject(request, AsyncRequestBody.fromBytes(bytes)).await()
         return key
+    }
+
+    suspend fun delete(key: String) {
+        val request = DeleteObjectRequest.builder()
+            .bucket(props.bucket)
+            .key(key)
+            .build()
+        s3.deleteObject(request).await()
     }
 
     suspend fun download(key: String): Pair<String, Flow<ByteArray>> {

@@ -47,6 +47,17 @@ class AdminLotConnectorService(
         return adminLotController.addLotImage(lotId, request)
     }
 
+    suspend fun deleteLotImage(lotId: String, url: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val response = adminLotController.deleteLotImage(lotId, url)
+        if (response.statusCode.is2xxSuccessful) {
+            val prefix = "/files/"
+            if (url.startsWith(prefix)) {
+                runCatching { storageService.delete(url.removePrefix(prefix)) }
+            }
+        }
+        return response
+    }
+
     suspend fun uploadLotPhoto(lotId: String, filePart: FilePart): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val key = storageService.upload(filePart)
         val url = "/files/$key"

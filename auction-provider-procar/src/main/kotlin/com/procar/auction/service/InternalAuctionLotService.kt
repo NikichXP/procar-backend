@@ -205,6 +205,17 @@ class InternalAuctionLotService(
         return lotRepository.save(updated)
     }
 
+    fun removeLotImage(lotId: String, url: String): LotDocument? {
+        val existing = lotRepository.findById(lotId).orElse(null) ?: return null
+        val filtered = existing.vehicle.images.filterNot { it.url == url }
+        if (filtered.size == existing.vehicle.images.size) return existing
+        val updated = existing.copy(
+            vehicle = existing.vehicle.copy(images = filtered),
+            updatedAt = LocalDateTime.now()
+        )
+        return lotRepository.save(updated)
+    }
+
     fun archiveLot(lotId: String): LotDocument? {
         return updateLotStatus(lotId, LotStatus.CANCELLED)
     }

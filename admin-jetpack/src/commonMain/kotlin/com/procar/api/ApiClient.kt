@@ -1,5 +1,8 @@
 package com.procar.api
 
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.procar.TokenStorage
 import com.procar.createHttpClient
 import com.procar.model.*
@@ -136,12 +139,6 @@ suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse =
 suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): AdminLotResponse =
     putEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId", request)
 
-/**
- * Uploads a single photo file to the given lot and returns the updated lot.
- * The gateway stores the file, derives a URL and appends it to the lot's vehicle.images.
- *
- * For multi-file selection on the UI, call this once per selected file.
- */
 suspend fun uploadLotPhoto(
     lotId: String,
     fileName: String,
@@ -156,6 +153,25 @@ suspend fun uploadLotPhoto(
             })
         }))
     }.body<ApiResponse<AdminLotResponse>>().data
+
+suspend fun deleteLotPhoto(lotId: String, url: String): AdminLotResponse =
+    httpClient.delete("$GATEWAY_BASE_URL/api/admin/lots/$lotId/images") {
+        parameter("url", url)
+    }.body<ApiResponse<AdminLotResponse>>().data
+
+/**
+ * Shared Coil3 ImageLoader that reuses the authed Ktor client, so protected
+ * `files/{key}` URLs can be rendered inline via AsyncImage.
+ */
+val imageLoader: ImageLoader by lazy {
+    ImageLoader.Builder(PlatformContext.INSTANCE)
+        .components { add(KtorNetworkFetcherFactory(httpClient)) }
+        .build()
+}
+
+fun absoluteImageUrl(url: String): String =
+    if (url.startsWith("http://") || url.startsWith("https://")) url
+    else "$GATEWAY_BASE_URL$url"
 
 suspend fun fetchWarehouses(): List<AdminWarehouseResponse> =
     getEnveloped("$GATEWAY_BASE_URL/api/admin/warehouses")
