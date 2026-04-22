@@ -23,7 +23,7 @@ spec:
               service:
                 name: admin-jetpack
                 port:
-                  number: 8080
+                  number: 80
     - host: admin.test.procar-auction.com
       http:
         paths:
@@ -33,4 +33,4 @@ spec:
               service:
                 name: admin-jetpack
                 port:
-                  number: 8080
+                  number: 80
