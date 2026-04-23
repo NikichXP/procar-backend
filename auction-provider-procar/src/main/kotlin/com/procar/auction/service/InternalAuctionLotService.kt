@@ -217,7 +217,7 @@ class InternalAuctionLotService(
     }
 
     fun archiveLot(lotId: String): LotDocument? {
-        return updateLotStatus(lotId, LotStatus.CANCELLED)
+        return updateLotStatus(lotId, LotStatus.HIDDEN)
     }
 
     fun unarchiveLot(lotId: String): LotDocument? {

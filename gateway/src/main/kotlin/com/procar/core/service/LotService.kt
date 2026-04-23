@@ -141,23 +141,28 @@ class LotService(
 
     private fun mapStatus(status: LotStatus): ProviderLotStatus {
         return when (status) {
-            LotStatus.UPCOMING -> ProviderLotStatus.UPCOMING
+            LotStatus.PENDING -> ProviderLotStatus.PENDING
             LotStatus.ACTIVE -> ProviderLotStatus.ACTIVE
-            LotStatus.FINISHED -> ProviderLotStatus.ENDED
-            LotStatus.CANCELLED -> ProviderLotStatus.CANCELLED
+            LotStatus.AWAITING_PAYMENT -> ProviderLotStatus.AWAITING_PAYMENT
+            LotStatus.RELISTED -> ProviderLotStatus.RELISTED
+            LotStatus.AWAITING_SHIPMENT -> ProviderLotStatus.AWAITING_SHIPMENT
+            LotStatus.IN_TRANSIT -> ProviderLotStatus.IN_TRANSIT
+            LotStatus.COMPLETED -> ProviderLotStatus.COMPLETED
+            LotStatus.INVALID -> ProviderLotStatus.DRAFT
         }
     }
 
     private fun mapStatusToGateway(status: ProviderLotStatus): LotStatus {
         return when (status) {
-            ProviderLotStatus.UPCOMING -> LotStatus.UPCOMING
+            ProviderLotStatus.DRAFT -> LotStatus.INVALID
+            ProviderLotStatus.PENDING -> LotStatus.PENDING
             ProviderLotStatus.ACTIVE -> LotStatus.ACTIVE
-            ProviderLotStatus.ENDED,
-            ProviderLotStatus.SOLD,
-            ProviderLotStatus.UNSOLD -> LotStatus.FINISHED
-            ProviderLotStatus.CANCELLED,
-            ProviderLotStatus.SUSPENDED -> LotStatus.CANCELLED
-            else -> LotStatus.CANCELLED // Default fallback
+            ProviderLotStatus.AWAITING_PAYMENT -> LotStatus.AWAITING_PAYMENT
+            ProviderLotStatus.RELISTED -> LotStatus.RELISTED
+            ProviderLotStatus.AWAITING_SHIPMENT -> LotStatus.AWAITING_SHIPMENT
+            ProviderLotStatus.IN_TRANSIT -> LotStatus.IN_TRANSIT
+            ProviderLotStatus.COMPLETED -> LotStatus.COMPLETED
+            ProviderLotStatus.HIDDEN -> LotStatus.INVALID
         }
     }
 

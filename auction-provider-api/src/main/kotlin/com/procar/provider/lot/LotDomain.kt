@@ -143,7 +143,15 @@ data class ShippingInfo(
 )
 
 enum class LotStatus {
-    DRAFT, UPCOMING, ACTIVE, ENDED, SOLD, UNSOLD, CANCELLED, SUSPENDED
+    DRAFT,
+    PENDING,
+    ACTIVE,
+    AWAITING_PAYMENT,
+    RELISTED,
+    AWAITING_SHIPMENT,
+    IN_TRANSIT,
+    COMPLETED,
+    HIDDEN // for deleted etc.
 }
 
 enum class ImageType {

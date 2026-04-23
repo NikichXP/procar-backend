@@ -91,5 +91,12 @@ enum class Drivetrain {
 }
 
 enum class LotStatus {
-    UPCOMING, ACTIVE, FINISHED, CANCELLED
+    PENDING,
+    ACTIVE,
+    AWAITING_PAYMENT,
+    RELISTED,
+    AWAITING_SHIPMENT,
+    IN_TRANSIT,
+    COMPLETED,
+    INVALID
 }
