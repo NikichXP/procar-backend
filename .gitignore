@@ -10,9 +10,6 @@ build/
 */out/production/*
 auction-provider-procar/target/
 **/frontend/generated/**
-/admin-ui/src/main/frontend/
-/admin-ui/generated/
-/admin-ui/target/
 
 # vaadin generates those 2
 /src/

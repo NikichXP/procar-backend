@@ -9,7 +9,6 @@ COPY --from=node /usr/lib/x86_64-linux-gnu/libatomic.so.1.2.0 /usr/lib/x86_64-li
 WORKDIR /app
 
 COPY admin-jetpack ./admin-jetpack
-COPY admin-ui ./admin-ui
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
 
