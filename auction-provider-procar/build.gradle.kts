@@ -45,6 +45,7 @@ dependencies {
     
     // Internal API dependency
     implementation(project(":auction-provider-api"))
+    implementation(project(":commons"))
     
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

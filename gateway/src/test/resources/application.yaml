@@ -1,0 +1,6 @@
+storage:
+  endpoint: http://localhost:9000
+  region: eu-central
+  bucket: procar-test
+  access-key: test-access-key
+  secret-key: test-secret-key
