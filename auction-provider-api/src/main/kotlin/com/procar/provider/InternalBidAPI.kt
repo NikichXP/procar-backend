@@ -34,4 +34,9 @@ interface InternalBidAPI {
         @PathVariable lotId: String,
         @RequestParam(required = false) timeRange: String?
     ): ResponseEntity<ApiResponse<BidAnalyticsResponse>>
+
+    @PostExchange("/buyout")
+    fun buyout(
+        @RequestBody request: BuyoutRequest
+    ): ResponseEntity<ApiResponse<BuyoutResponse>>
 }

@@ -34,7 +34,7 @@ data class LotDocument(
     val vehicle: VehicleInfoDocument,
 
     @Field("auction")
-    val auction: AuctionInfoDocument,
+    val auction: AuctionInfoDocument?,
 
     @Field("location")
     val location: LocationInfoDocument,
@@ -52,7 +52,13 @@ data class LotDocument(
     val createdAt: LocalDateTime = LocalDateTime.now(),
 
     @Field("updated_at")
-    val updatedAt: LocalDateTime = LocalDateTime.now()
+    val updatedAt: LocalDateTime = LocalDateTime.now(),
+
+    @Field("lot_type")
+    val lotType: LotType = LotType.AUCTION,
+
+    @Field("buyout_price")
+    val buyoutPrice: Double? = null,
 )
 
 @Document

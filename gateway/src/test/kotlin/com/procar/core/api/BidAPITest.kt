@@ -156,4 +156,40 @@ class BidAPITest {
         // Then
         verify(bidService).placeBid(any(), any(), any())
     }
+
+    @Test
+    fun `buyout should call service with correct parameters`() {
+        // Given
+        val lotId = "test-lot-id"
+        val mockBuyoutResult = com.procar.core.api.dto.BuyoutResult(
+            lotId = lotId,
+            price = 25000.0,
+            purchasedAt = "2023-01-01T10:00:00Z"
+        )
+
+        whenever(bidService.buyout(lotId, "user")).thenReturn(mockBuyoutResult)
+
+        // When
+        webTestClient.mutateWith(mockUser()).post().uri("/lots/{lotId}/bids/buyout", lotId)
+            .exchange()
+            .expectStatus().isCreated
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.lotId").isEqualTo(lotId)
+            .jsonPath("$.price").isEqualTo(25000.0)
+
+        // Then
+        verify(bidService).buyout(lotId, "user")
+    }
+
+    @Test
+    fun `buyout should return 401 when not authenticated`() {
+        // Given
+        val lotId = "test-lot-id"
+
+        // When & Then
+        webTestClient.post().uri("/lots/{lotId}/bids/buyout", lotId)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
 }

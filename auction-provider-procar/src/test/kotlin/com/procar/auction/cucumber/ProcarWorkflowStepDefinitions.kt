@@ -318,9 +318,9 @@ class ProcarWorkflowStepDefinitions {
         val apiResponse = objectMapper.readValue<ApiResponse<AdminLotResponse>>(jsonResponse)
         val lotResponse = apiResponse.data
         assertNotNull(lotResponse.auction)
-        assertEquals(5000.0, lotResponse.auction.startingBid)
-        assertEquals(10000.0, lotResponse.auction.reservePrice)
-        assertEquals(100.0, lotResponse.auction.bidIncrement)
+        assertEquals(5000.0, lotResponse.auction?.startingBid)
+        assertEquals(10000.0, lotResponse.auction?.reservePrice)
+        assertEquals(100.0, lotResponse.auction?.bidIncrement)
     }
 
     @When("I search for the lot using public API")

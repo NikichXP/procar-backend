@@ -11,11 +11,13 @@ data class AdminLotResponse(
     val title: String,
     val description: String,
     val vehicle: AdminVehicleInfoResponse,
-    val auction: AdminAuctionInfoResponse,
+    val auction: AdminAuctionInfoResponse? = null,
     val location: AdminLocationInfoResponse,
     val status: String,
     val createdAt: String,
     val updatedAt: String,
+    val lotType: String = "AUCTION",
+    val buyoutPrice: Double? = null,
 )
 
 @Serializable
@@ -83,10 +85,12 @@ data class AdminCreateLotRequest(
     val title: String,
     val description: String,
     val vehicle: AdminVehicleInfoRequest,
-    val auction: AdminAuctionInfoRequest,
+    val auction: AdminAuctionInfoRequest? = null,
     val location: AdminLocationInfoRequest,
     val metadata: AdminLotMetadataRequest,
     val status: String,
+    val lotType: String = "AUCTION",
+    val buyoutPrice: Double? = null,
 )
 
 @Serializable
@@ -153,6 +157,8 @@ data class AdminUpdateLotRequest(
     val location: AdminLocationInfoRequest? = null,
     val metadata: AdminLotMetadataRequest? = null,
     val status: String? = null,
+    val lotType: String? = null,
+    val buyoutPrice: Double? = null,
 )
 
 @Serializable

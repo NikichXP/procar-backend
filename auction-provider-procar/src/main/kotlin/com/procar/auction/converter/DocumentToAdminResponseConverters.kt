@@ -15,13 +15,15 @@ class LotDocumentToAdminLotResponseConverter : Converter<LotDocument, AdminLotRe
             title = source.title,
             description = source.description,
             vehicle = convertVehicleInfo(source.vehicle),
-            auction = convertAuctionInfo(source.auction),
+            auction = source.auction?.let(::convertAuctionInfo),
             location = convertLocationInfo(source.location),
             metadata = convertLotMetadata(source.metadata),
             status = source.status,
             brokerOrgId = source.brokerOrgId,
             createdAt = source.createdAt,
-            updatedAt = source.updatedAt
+            updatedAt = source.updatedAt,
+            lotType = source.lotType,
+            buyoutPrice = source.buyoutPrice,
         )
     }
     

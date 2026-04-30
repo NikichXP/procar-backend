@@ -1,6 +1,7 @@
 package com.procar.auction.api
 
 import com.procar.auction.factory.BidResponseFactory
+import com.procar.auction.service.BuyoutService
 import com.procar.auction.service.InternalAuctionBidService
 import com.procar.provider.InternalBidAPI
 import com.procar.provider.bid.*
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class BidAPI(
     private val bidService: InternalAuctionBidService,
+    private val buyoutService: BuyoutService,
     private val responseFactory: BidResponseFactory
 ) : InternalBidAPI {
 
@@ -47,6 +49,26 @@ class BidAPI(
             ResponseEntity.ok(ApiResponse(response))
         } catch (e: Exception) {
             ResponseEntity.ok(ApiResponse(responseFactory.createErrorBidAnalyticsResponse(lotId, e.message ?: "Unknown error"), e.message))
+        }
+    }
+
+    override fun buyout(request: BuyoutRequest): ResponseEntity<ApiResponse<BuyoutResponse>> {
+        return try {
+            ResponseEntity.ok(ApiResponse(buyoutService.buyout(request)))
+        } catch (e: Exception) {
+            ResponseEntity.ok(
+                ApiResponse(
+                    BuyoutResponse(
+                        lotId = request.lotId,
+                        bidderId = request.bidderId,
+                        price = 0.0,
+                        purchasedAt = java.time.LocalDateTime.now(),
+                        status = BidStatus.REJECTED,
+                        message = e.message ?: "Unknown error",
+                    ),
+                    e.message,
+                ),
+            )
         }
     }
 }

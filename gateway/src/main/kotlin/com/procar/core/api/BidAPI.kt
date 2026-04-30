@@ -46,4 +46,16 @@ class BidAPI(
     ): Bid {
         return bidService.placeBid(lotId, bidRequest, authentication.name)
     }
+
+    @Operation(summary = "Buy a lot now", description = "Immediate purchase for BUYOUT or HYBRID lots.")
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/buyout")
+    @ResponseStatus(HttpStatus.CREATED)
+    fun buyout(
+        @Parameter(
+            description = "Lot ID",
+            example = "01956b0a-1234-7abc-9d2e-4f5a6b7c8d9e"
+        ) @PathVariable lotId: String,
+        authentication: Authentication
+    ): com.procar.core.api.dto.BuyoutResult = bidService.buyout(lotId, authentication.name)
 }

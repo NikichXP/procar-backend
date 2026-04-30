@@ -153,11 +153,11 @@ class LocationEditState(l: AdminLocationInfoResponse) : SectionEditState {
 class LotEditState(lot: AdminLotResponse) {
     val general = GeneralEditState(lot)
     val vehicle = VehicleEditState(lot.vehicle)
-    val auction = AuctionEditState(lot.auction)
+    val auction = lot.auction?.let { AuctionEditState(it) }
     val location = LocationEditState(lot.location)
 
     val isAnyModified: Boolean
-        get() = general.isModified || vehicle.isModified || auction.isModified || location.isModified
+        get() = general.isModified || vehicle.isModified || (auction?.isModified == true) || location.isModified
 }
 
 @Composable

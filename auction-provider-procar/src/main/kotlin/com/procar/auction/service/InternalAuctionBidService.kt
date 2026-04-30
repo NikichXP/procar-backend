@@ -31,6 +31,18 @@ class InternalAuctionBidService(
 ) {
 
     fun placeBid(request: PlaceBidRequest): PlaceBidResponse {
+        // First check lot type to reject BUYOUT lots early
+        val lot = lotRepository.findById(request.lotId).orElse(null)
+        if (lot?.lotType == com.procar.provider.lot.LotType.BUYOUT) {
+            return PlaceBidResponse(
+                bid = createErrorBid(request),
+                status = BidStatus.REJECTED,
+                message = "Bidding not allowed on buyout-only lot",
+                isWinning = false,
+                nextMinimumBid = 0.0,
+            )
+        }
+
         val query = Query.query(
             Criteria.where("_id").isEqualTo(request.lotId)
                 .and("status").isEqualTo(LotStatus.ACTIVE)
@@ -66,10 +78,16 @@ class InternalAuctionBidService(
             )
         }
 
+        // Compute cap for HYBRID lots
+        val capped = lot?.lotType == com.procar.provider.lot.LotType.HYBRID &&
+            lot.buyoutPrice != null &&
+            request.amount >= lot.buyoutPrice
+        val effectiveAmount = if (capped) lot.buyoutPrice!! else request.amount
+
         // Atomic update of lot's current bid and total bids
         val update = Update()
             .inc("auction.totalBids", 1)
-            .set("auction.currentBid", request.amount)
+            .set("auction.currentBid", effectiveAmount)
             .set("updatedAt", LocalDateTime.now())
 
         val updatedLot: LotDocument? = mongoTemplate.findAndModify(query, update, LotDocument::class.java)
@@ -90,21 +108,21 @@ class InternalAuctionBidService(
                     status = BidStatus.REJECTED,
                     message = "Lot is not active for bidding",
                     isWinning = false,
-                    nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+                    nextMinimumBid = lot.auction?.let { calculateNextMinimumBid(it.currentBid) } ?: 0.0
                 )
-                lot.auction.endTime.isBefore(LocalDateTime.now()) -> PlaceBidResponse(
+                lot.auction?.endTime?.isBefore(LocalDateTime.now()) == true -> PlaceBidResponse(
                     bid = createErrorBid(request),
                     status = BidStatus.REJECTED,
                     message = "Auction has ended",
                     isWinning = false,
-                    nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+                    nextMinimumBid = lot.auction?.let { calculateNextMinimumBid(it.currentBid) } ?: 0.0
                 )
                 else -> PlaceBidResponse(
                     bid = createErrorBid(request),
                     status = BidStatus.REJECTED,
                     message = "Bid validation failed",
                     isWinning = false,
-                    nextMinimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+                    nextMinimumBid = lot.auction?.let { calculateNextMinimumBid(it.currentBid) } ?: 0.0
                 )
             }
         }
@@ -114,25 +132,41 @@ class InternalAuctionBidService(
             lotId = request.lotId,
             externalId = UUID.randomUUID().toString(),
             bidderId = request.bidderId,
-            amount = request.amount,
-            bidType = request.bidType,
-            status = BidStatus.ACCEPTED,
-            isWinning = true, // Will be updated after checking other bids
+            amount = effectiveAmount,
+            bidType = if (capped) BidType.INSTANT_BUY else request.bidType,
+            status = if (capped) BidStatus.WON else BidStatus.ACCEPTED,
+            isWinning = true,
             isAutoBid = request.bidType == BidType.AUTO
         )
 
         val savedBid = bidRepository.save(bidDocument)
 
+        // If capped, set lot status to AWAITING_PAYMENT
+        if (capped && updatedLot != null) {
+            val lotToUpdate = updatedLot.copy(status = LotStatus.AWAITING_PAYMENT)
+            lotRepository.save(lotToUpdate)
+        }
+
         // Update other bids' winning status
         updateWinningBids(request.lotId, savedBid.amount)
 
-        return PlaceBidResponse(
-            bid = conversionService.convert(savedBid, ProviderBid::class.java)!!,
-            status = BidStatus.ACCEPTED,
-            message = "Bid placed successfully",
-            isWinning = true,
-            nextMinimumBid = calculateNextMinimumBid(request.amount)
-        )
+        return if (capped) {
+            PlaceBidResponse(
+                bid = conversionService.convert(savedBid, ProviderBid::class.java)!!,
+                status = BidStatus.ACCEPTED,
+                message = "Buyout via bid accepted",
+                isWinning = true,
+                nextMinimumBid = 0.0
+            )
+        } else {
+            PlaceBidResponse(
+                bid = conversionService.convert(savedBid, ProviderBid::class.java)!!,
+                status = BidStatus.ACCEPTED,
+                message = "Bid placed successfully",
+                isWinning = true,
+                nextMinimumBid = calculateNextMinimumBid(request.amount)
+            )
+        }
     }
 
     fun validateBid(request: ValidateBidRequest): ValidateBidResponse {
@@ -150,29 +184,39 @@ class InternalAuctionBidService(
                 warnings = emptyList()
             )
 
+        if (lot.lotType == com.procar.provider.lot.LotType.BUYOUT) {
+            return ValidateBidResponse(
+                isValid = false,
+                message = "Bidding not allowed on buyout-only lot",
+                minimumBid = 0.0, maximumBid = null,
+                bidIncrement = auctionProperties.bid.defaultIncrement,
+                warnings = emptyList(),
+            )
+        }
+
         if (lot.status != LotStatus.ACTIVE) {
             return ValidateBidResponse(
                 isValid = false,
                 message = "Lot is not active for bidding",
-                minimumBid = calculateNextMinimumBid(lot.auction.currentBid),
+                minimumBid = lot.auction?.let { calculateNextMinimumBid(it.currentBid) } ?: 0.0,
                 maximumBid = null,
                 bidIncrement = auctionProperties.bid.defaultIncrement,
                 warnings = emptyList()
             )
         }
 
-        if (lot.auction.endTime.isBefore(LocalDateTime.now())) {
+        if (lot.auction?.endTime?.isBefore(LocalDateTime.now()) == true) {
             return ValidateBidResponse(
                 isValid = false,
                 message = "Auction has ended",
-                minimumBid = calculateNextMinimumBid(lot.auction.currentBid),
+                minimumBid = lot.auction?.let { calculateNextMinimumBid(it.currentBid) } ?: 0.0,
                 maximumBid = null,
                 bidIncrement = auctionProperties.bid.defaultIncrement,
                 warnings = emptyList()
             )
         }
 
-        val minimumBid = calculateNextMinimumBid(lot.auction.currentBid)
+        val minimumBid = lot.auction?.let { calculateNextMinimumBid(it.currentBid) } ?: 0.0
         val warnings = mutableListOf<String>()
 
         if (amount < minimumBid) {
@@ -186,7 +230,7 @@ class InternalAuctionBidService(
             )
         }
 
-        if (lot.auction.reservePrice != null && amount < lot.auction.reservePrice) {
+        if (lot.auction?.reservePrice != null && amount < lot.auction.reservePrice) {
             warnings.add("Bid is below reserve price")
         }
 
@@ -265,7 +309,7 @@ class InternalAuctionBidService(
     private fun calculateNextMinimumBidForLot(lotId: String): Double {
         val lot = lotRepository.findById(lotId).orElse(null)
             ?: return 0.0
-        return calculateNextMinimumBid(lot.auction.currentBid)
+        return lot.auction?.let { calculateNextMinimumBid(it.currentBid) } ?: 0.0
     }
 
     private fun calculateBidSummary(bids: List<ProviderBid>): BidSummary {
@@ -321,7 +365,7 @@ class InternalAuctionBidService(
                 } else 0.0,
                 lastMinuteBidding = bids.any { 
                     val lot = lotRepository.findById(it.lotId).orElse(null)
-                    lot != null && it.placedAt.isAfter(lot.auction.endTime.minusMinutes(5))
+                    lot != null && lot.auction != null && it.placedAt.isAfter(lot.auction.endTime.minusMinutes(5))
                 }
             ),
             timeAnalytics = BidTimeAnalytics(
@@ -344,7 +388,7 @@ class InternalAuctionBidService(
         
         // Reset lot's auction information
         val lot = lotRepository.findById(lotId).orElse(null)
-        if (lot != null) {
+        if (lot != null && lot.auction != null) {
             val updatedLot = lot.copy(
                 auction = lot.auction.copy(
                     currentBid = lot.auction.startingBid,

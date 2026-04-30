@@ -85,4 +85,21 @@ class BidService(
         val apiResult = response.body
         return apiResult?.data?.isValid ?: false
     }
+
+    fun buyout(lotId: String, bidderId: String): com.procar.core.api.dto.BuyoutResult {
+        val body = internalBidAPI.buyout(BuyoutRequest(lotId, bidderId)).body
+            ?: throw RuntimeException("Failed to buyout")
+        val data = body.data
+        if (data.status != BidStatus.ACCEPTED) {
+            throw org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.CONFLICT,
+                data.message ?: "Buyout rejected",
+            )
+        }
+        return com.procar.core.api.dto.BuyoutResult(
+            lotId = data.lotId,
+            price = data.price,
+            purchasedAt = data.purchasedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+        )
+    }
 }

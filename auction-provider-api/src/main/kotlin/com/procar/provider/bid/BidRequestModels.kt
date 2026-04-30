@@ -15,3 +15,18 @@ data class ValidateBidRequest(
     val amount: Double,
     val bidType: BidType = BidType.MANUAL
 )
+
+data class BuyoutRequest(
+    val lotId: String,
+    val bidderId: String,
+    val metadata: Map<String, Any> = emptyMap(),
+)
+
+data class BuyoutResponse(
+    val lotId: String,
+    val bidderId: String,
+    val price: Double,
+    val purchasedAt: java.time.LocalDateTime,
+    val status: BidStatus,
+    val message: String? = null,
+)

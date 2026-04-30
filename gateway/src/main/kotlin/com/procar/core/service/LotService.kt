@@ -66,16 +66,18 @@ class LotService(
                     images = vehicleLot.vehicle.images.filter { it.isPrimary }.map { it.url }
                 ),
                 status = mapStatusToGateway(vehicleLot.status),
-                currentBid = vehicleLot.auction.currentBid,
-                startingBid = vehicleLot.auction.startingBid,
-                bidStep = vehicleLot.auction.bidIncrement,
-                bidsCount = vehicleLot.auction.totalBids,
-                startTime = vehicleLot.auction.startTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                endTime = vehicleLot.auction.endTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                currentBid = vehicleLot.auction?.currentBid,
+                startingBid = vehicleLot.auction?.startingBid,
+                bidStep = vehicleLot.auction?.bidIncrement,
+                bidsCount = vehicleLot.auction?.totalBids,
+                startTime = vehicleLot.auction?.startTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+                endTime = vehicleLot.auction?.endTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
                 source = LotSource(
                     name = vehicleLot.providerName,
                     lotUrl = "https://example.com/lot/${vehicleLot.id}" // TODO: Generate proper URL
-                )
+                ),
+                lotType = mapLotType(vehicleLot.lotType),
+                buyoutPrice = vehicleLot.buyoutPrice,
             )
         }
     }
@@ -112,12 +114,12 @@ class LotService(
                 )
             ),
             status = mapStatusToGateway(vehicleLot.status),
-            currentBid = vehicleLot.auction.currentBid,
-            startingBid = vehicleLot.auction.startingBid,
-            bidStep = vehicleLot.auction.bidIncrement,
-            bidsCount = vehicleLot.auction.totalBids,
-            startTime = vehicleLot.auction.startTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            endTime = vehicleLot.auction.endTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            currentBid = vehicleLot.auction?.currentBid,
+            startingBid = vehicleLot.auction?.startingBid,
+            bidStep = vehicleLot.auction?.bidIncrement,
+            bidsCount = vehicleLot.auction?.totalBids,
+            startTime = vehicleLot.auction?.startTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            endTime = vehicleLot.auction?.endTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             source = LotSource(
                 name = vehicleLot.providerName,
                 lotUrl = "https://example.com/lot/${vehicleLot.id}" // TODO: Generate proper URL
@@ -135,7 +137,9 @@ class LotService(
                     .find { it.type == FeeType.DOCUMENTATION }
                     ?.amount
             ),
-            recentBids = emptyList() // TODO: Fetch recent bids from bid API
+            recentBids = emptyList(), // TODO: Fetch recent bids from bid API
+            lotType = mapLotType(vehicleLot.lotType),
+            buyoutPrice = vehicleLot.buyoutPrice,
         )
     }
 
@@ -175,5 +179,11 @@ class LotService(
             VehicleCondition.DAMAGED,
             VehicleCondition.SALVAGE -> CarCondition.DAMAGED
         }
+    }
+
+    private fun mapLotType(t: com.procar.provider.lot.LotType): com.procar.core.api.dto.LotType = when (t) {
+        com.procar.provider.lot.LotType.AUCTION -> com.procar.core.api.dto.LotType.AUCTION
+        com.procar.provider.lot.LotType.BUYOUT  -> com.procar.core.api.dto.LotType.BUYOUT
+        com.procar.provider.lot.LotType.HYBRID  -> com.procar.core.api.dto.LotType.HYBRID
     }
 }
