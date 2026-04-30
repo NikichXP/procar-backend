@@ -36,7 +36,6 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
 
     // Auction fields
     var startingBid by remember { mutableStateOf("") }
-    var currentBid by remember { mutableStateOf("") }
     var bidIncrement by remember { mutableStateOf("100") }
 
     // Location fields
@@ -59,7 +58,6 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
         if (engineType.isBlank()) return "Engine type is required"
         if (lotType != "BUYOUT") {
             if (startingBid.toDoubleOrNull() == null) return "Valid starting bid is required"
-            if (currentBid.toDoubleOrNull() == null) return "Valid current bid is required"
             if (bidIncrement.toDoubleOrNull() == null) return "Valid bid increment is required"
         }
         if (lotType != "AUCTION") {
@@ -89,16 +87,16 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
 
                 SectionHeader("Vehicle Details")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(make, { make = it }, label = { Text("Make *") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(model, { model = it }, label = { Text("Model *") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(make, { make = it.replace("\t", "") }, label = { Text("Make *") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(model, { model = it.replace("\t", "") }, label = { Text("Model *") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(year, { year = it }, label = { Text("Year *") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(vin, { vin = it }, label = { Text("VIN") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(year, { year = it.replace("\t", "") }, label = { Text("Year *") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(vin, { vin = it.replace("\t", "") }, label = { Text("VIN") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(engineType, { engineType = it }, label = { Text("Engine Type *") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(mileage, { mileage = it }, label = { Text("Mileage") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(engineType, { engineType = it.replace("\t", "") }, label = { Text("Engine Type *") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(mileage, { mileage = it.replace("\t", "") }, label = { Text("Mileage") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
                 EnumDropdown("Body Type", bodyType, listOf("SEDAN","SUV","TRUCK","COUPE","CONVERTIBLE","HATCHBACK","WAGON","VAN","MINIVAN","OTHER")) { bodyType = it }
                 EnumDropdown("Transmission", transmission, listOf("AUTOMATIC","MANUAL","CVT","DCT")) { transmission = it }
@@ -109,32 +107,31 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                 if (lotType != "BUYOUT") {
                     SectionHeader("Auction Details")
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedTextField(startingBid, { startingBid = it }, label = { Text("Starting Bid *") }, modifier = Modifier.weight(1f))
-                        OutlinedTextField(currentBid, { currentBid = it }, label = { Text("Current Bid *") }, modifier = Modifier.weight(1f))
+                        OutlinedTextField(startingBid, { startingBid = it.replace("\t", "") }, label = { Text("Starting Bid *") }, modifier = Modifier.weight(1f), singleLine = true)
+                        OutlinedTextField(bidIncrement, { bidIncrement = it.replace("\t", "") }, label = { Text("Bid Increment *") }, modifier = Modifier.weight(1f), singleLine = true)
                     }
-                    OutlinedTextField(bidIncrement, { bidIncrement = it }, label = { Text("Bid Increment *") }, modifier = Modifier.fillMaxWidth())
                 }
                 if (lotType != "AUCTION") {
                     SectionHeader("Buyout")
-                    OutlinedTextField(buyoutPrice, { buyoutPrice = it }, label = { Text("Buyout Price *") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(buyoutPrice, { buyoutPrice = it.replace("\t", "") }, label = { Text("Buyout Price *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 }
 
                 SectionHeader("Location")
-                OutlinedTextField(address, { address = it }, label = { Text("Address *") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(address, { address = it.replace("\t", "") }, label = { Text("Address *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(city, { city = it }, label = { Text("City *") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(state, { state = it }, label = { Text("State *") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(city, { city = it.replace("\t", "") }, label = { Text("City *") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(state, { state = it.replace("\t", "") }, label = { Text("State *") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(zipCode, { zipCode = it }, label = { Text("ZIP *") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(country, { country = it }, label = { Text("Country *") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(zipCode, { zipCode = it.replace("\t", "") }, label = { Text("ZIP *") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(country, { country = it.replace("\t", "") }, label = { Text("Country *") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
-                OutlinedTextField(timezone, { timezone = it }, label = { Text("Timezone *") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(timezone, { timezone = it.replace("\t", "") }, label = { Text("Timezone *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
                 SectionHeader("Seller")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(sellerId, { sellerId = it }, label = { Text("Seller ID *") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(sellerName, { sellerName = it }, label = { Text("Seller Name *") }, modifier = Modifier.weight(1f))
+                    OutlinedTextField(sellerId, { sellerId = it.replace("\t", "") }, label = { Text("Seller ID *") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(sellerName, { sellerName = it.replace("\t", "") }, label = { Text("Seller Name *") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
                 EnumDropdown("Seller Type", sellerType, listOf("DEALER","PRIVATE","AUCTION_HOUSE")) { sellerType = it }
             }
@@ -171,7 +168,7 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                                 ),
                                 lotType = lotType,
                                 auction = if (lotType == "BUYOUT") null else AdminAuctionInfoRequest(
-                                    currentBid = currentBid.toDouble(),
+                                    currentBid = startingBid.toDouble(),
                                     startingBid = startingBid.toDouble(),
                                     bidIncrement = bidIncrement.toDouble(),
                                     startTime = "2025-01-01T00:00:00",
