@@ -30,11 +30,14 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
     var engineType by remember { mutableStateOf("") }
     var mileage by remember { mutableStateOf("") }
 
+    // Lot type
+    var lotType by remember { mutableStateOf("AUCTION") }
+    var buyoutPrice by remember { mutableStateOf("") }
+
     // Auction fields
     var startingBid by remember { mutableStateOf("") }
     var currentBid by remember { mutableStateOf("") }
     var bidIncrement by remember { mutableStateOf("100") }
-    var auctionType by remember { mutableStateOf("AUCTION") }
 
     // Location fields
     var address by remember { mutableStateOf("") }
@@ -54,9 +57,14 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
         if (model.isBlank()) return "Model is required"
         if (year.toIntOrNull() == null) return "Valid year is required"
         if (engineType.isBlank()) return "Engine type is required"
-        if (startingBid.toDoubleOrNull() == null) return "Valid starting bid is required"
-        if (currentBid.toDoubleOrNull() == null) return "Valid current bid is required"
-        if (bidIncrement.toDoubleOrNull() == null) return "Valid bid increment is required"
+        if (lotType != "BUYOUT") {
+            if (startingBid.toDoubleOrNull() == null) return "Valid starting bid is required"
+            if (currentBid.toDoubleOrNull() == null) return "Valid current bid is required"
+            if (bidIncrement.toDoubleOrNull() == null) return "Valid bid increment is required"
+        }
+        if (lotType != "AUCTION") {
+            if (buyoutPrice.toDoubleOrNull() == null) return "Valid buyout price is required"
+        }
         validateLocationFields(address, city, state, zipCode, country)?.let { return it }
         if (sellerId.isBlank()) return "Seller ID is required"
         if (sellerName.isBlank()) return "Seller name is required"
@@ -72,6 +80,12 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+
+                SectionHeader("Lot Type")
+                EnumDropdown(
+                    "Lot Type", lotType,
+                    listOf("AUCTION", "BUYOUT", "HYBRID"),
+                ) { lotType = it }
 
                 SectionHeader("Vehicle Details")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -92,14 +106,17 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                 EnumDropdown("Fuel Type", fuelType, listOf("GASOLINE","DIESEL","ELECTRIC","HYBRID","PLUG_IN_HYBRID")) { fuelType = it }
                 EnumDropdown("Condition", condition, listOf("NEW","USED","CERTIFIED","SALVAGE")) { condition = it }
 
-                SectionHeader("Auction Details")
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(startingBid, { startingBid = it }, label = { Text("Starting Bid *") }, modifier = Modifier.weight(1f))
-                    OutlinedTextField(currentBid, { currentBid = it }, label = { Text("Current Bid *") }, modifier = Modifier.weight(1f))
+                if (lotType != "BUYOUT") {
+                    SectionHeader("Auction Details")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(startingBid, { startingBid = it }, label = { Text("Starting Bid *") }, modifier = Modifier.weight(1f))
+                        OutlinedTextField(currentBid, { currentBid = it }, label = { Text("Current Bid *") }, modifier = Modifier.weight(1f))
+                    }
+                    OutlinedTextField(bidIncrement, { bidIncrement = it }, label = { Text("Bid Increment *") }, modifier = Modifier.fillMaxWidth())
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(bidIncrement, { bidIncrement = it }, label = { Text("Bid Increment *") }, modifier = Modifier.weight(1f))
-                    EnumDropdown("Auction Type", auctionType, listOf("AUCTION","BUY_IT_NOW","HYBRID"), modifier = Modifier.weight(1f)) { auctionType = it }
+                if (lotType != "AUCTION") {
+                    SectionHeader("Buyout")
+                    OutlinedTextField(buyoutPrice, { buyoutPrice = it }, label = { Text("Buyout Price *") }, modifier = Modifier.fillMaxWidth())
                 }
 
                 SectionHeader("Location")
@@ -152,14 +169,16 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                                     vin = vin.takeIf { it.isNotBlank() },
                                     mileage = mileage.toIntOrNull(),
                                 ),
-                                auction = AdminAuctionInfoRequest(
+                                lotType = lotType,
+                                auction = if (lotType == "BUYOUT") null else AdminAuctionInfoRequest(
                                     currentBid = currentBid.toDouble(),
                                     startingBid = startingBid.toDouble(),
                                     bidIncrement = bidIncrement.toDouble(),
-                                    auctionType = auctionType,
+                                    auctionType = "ONLINE",
                                     startTime = "2025-01-01T00:00:00",
                                     endTime = "2025-12-31T00:00:00",
                                 ),
+                                buyoutPrice = if (lotType == "AUCTION") null else buyoutPrice.toDoubleOrNull(),
                                 location = AdminLocationInfoRequest(
                                     address = address, city = city, state = state,
                                     zipCode = zipCode, country = country, timezone = timezone,

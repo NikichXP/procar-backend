@@ -65,6 +65,7 @@ fun LotDetailsDialog(
                     AuctionSection(
                         lot = lot,
                         state = editState.auction,
+                        lotType = editState.general.lotType.current,
                         saving = savingSection == "Auction",
                         onSave = { trySave("Auction", editState.auction) },
                     )
@@ -72,6 +73,7 @@ fun LotDetailsDialog(
                     AuctionSection(
                         lot = lot,
                         state = null,
+                        lotType = editState.general.lotType.current,
                         saving = false,
                         onSave = {},
                     )

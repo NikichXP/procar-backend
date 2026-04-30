@@ -17,7 +17,8 @@ private object VehicleOptions {
 }
 
 private val StatusOptions = listOf("DRAFT","PENDING","ACTIVE","SOLD","CANCELLED","EXPIRED","HIDDEN")
-private val AuctionTypeOptions = listOf("AUCTION","BUY_IT_NOW","HYBRID")
+private val LotTypeOptions = listOf("AUCTION","BUYOUT","HYBRID")
+private val LegacyAuctionTypeOptions = listOf("LIVE","ONLINE","SEALED_BID","BUY_IT_NOW","MAKE_OFFER")
 
 @Composable
 fun GeneralSection(
@@ -34,6 +35,10 @@ fun GeneralSection(
     EditableTextField(state.title, "Title *")
     EditableTextField(state.description, "Description")
     EditableEnumField(state.status, "Status", StatusOptions)
+    EditableEnumField(state.lotType, "Lot Type", LotTypeOptions)
+    if (state.lotType.current != "AUCTION") {
+        EditableTextField(state.buyoutPrice, "Buyout Price *")
+    }
     SectionActions(
         modified = state.isModified,
         saving = saving,
@@ -82,10 +87,15 @@ fun VehicleSection(
 fun AuctionSection(
     lot: AdminLotResponse,
     state: AuctionEditState?,
+    lotType: String,
     saving: Boolean,
     onSave: () -> Unit,
 ) {
     SectionHeader("Auction")
+    if (lotType == "BUYOUT") {
+        Text("No auction information (BUYOUT lot)")
+        return
+    }
     DetailRow("Current Bid", lot.auction?.currentBid?.let { "$$it" } ?: "N/A")
     DetailRow("Total Bids", lot.auction?.totalBids?.toString() ?: "N/A")
     if (state != null) {
@@ -97,7 +107,7 @@ fun AuctionSection(
             EditableTextField(state.reservePrice, "Reserve Price", Modifier.weight(1f))
             EditableTextField(state.buyItNowPrice, "Buy It Now", Modifier.weight(1f))
         }
-        EditableEnumField(state.auctionType, "Auction Type", AuctionTypeOptions)
+        EditableEnumField(state.auctionType, "Auction Type", LegacyAuctionTypeOptions)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             EditableTextField(state.startTime, "Start Time *", Modifier.weight(1f))
             EditableTextField(state.endTime, "End Time *", Modifier.weight(1f))
@@ -109,7 +119,7 @@ fun AuctionSection(
             onSave = onSave,
         )
     } else {
-        Text("No auction information available (BUYOUT lot)")
+        Text("No auction information available")
     }
 }
 

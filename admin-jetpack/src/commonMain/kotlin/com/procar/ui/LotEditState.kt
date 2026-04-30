@@ -9,8 +9,10 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     val title = FieldState(lot.title)
     val description = FieldState(lot.description)
     val status = FieldState(lot.status)
+    val lotType = FieldState(lot.lotType)
+    val buyoutPrice = FieldState(lot.buyoutPrice?.toString() ?: "")
 
-    private val fields: List<FieldState<*>> = listOf(title, description, status)
+    private val fields: List<FieldState<*>> = listOf(title, description, status, lotType, buyoutPrice)
 
     override val isModified: Boolean get() = fields.any { it.isModified }
     override fun revert() = fields.forEach { it.revert() }
@@ -18,6 +20,9 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
 
     override fun validate(): String? {
         if (title.current.isBlank()) return "Title is required"
+        if (lotType.current != "AUCTION" && buyoutPrice.current.toDoubleOrNull() == null) {
+            return "Valid buyout price is required"
+        }
         return null
     }
 
@@ -25,6 +30,8 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
         title = if (title.isModified) title.current else null,
         description = if (description.isModified) description.current else null,
         status = if (status.isModified) status.current else null,
+        lotType = if (lotType.isModified) lotType.current else null,
+        buyoutPrice = if (buyoutPrice.isModified) buyoutPrice.current.toDoubleOrNull() else null,
     )
 }
 
