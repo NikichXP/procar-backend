@@ -4,7 +4,6 @@ import com.procar.auction.document.BidDocument
 import com.procar.auction.document.LotDocument
 import com.procar.auction.repository.BidRepository
 import com.procar.provider.bid.*
-import com.procar.provider.lot.AuctionType
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.LotType
 import org.junit.jupiter.api.Test

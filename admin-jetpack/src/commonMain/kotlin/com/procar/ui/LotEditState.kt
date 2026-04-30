@@ -91,14 +91,12 @@ class VehicleEditState(v: AdminVehicleInfoResponse) : SectionEditState {
 class AuctionEditState(private val source: AdminAuctionInfoResponse) : SectionEditState {
     val startingBid = FieldState(source.startingBid.toString())
     val bidIncrement = FieldState(source.bidIncrement.toString())
-    val auctionType = FieldState(source.auctionType)
     val reservePrice = FieldState(source.reservePrice?.toString() ?: "")
-    val buyItNowPrice = FieldState(source.buyItNowPrice?.toString() ?: "")
     val startTime = FieldState(source.startTime)
     val endTime = FieldState(source.endTime)
 
     private val fields: List<FieldState<*>> = listOf(
-        startingBid, bidIncrement, auctionType, reservePrice, buyItNowPrice, startTime, endTime,
+        startingBid, bidIncrement, reservePrice, startTime, endTime,
     )
 
     override val isModified: Boolean get() = fields.any { it.isModified }
@@ -116,11 +114,9 @@ class AuctionEditState(private val source: AdminAuctionInfoResponse) : SectionEd
             currentBid = source.currentBid,
             startingBid = startingBid.current.toDouble(),
             bidIncrement = bidIncrement.current.toDouble(),
-            auctionType = auctionType.current,
             startTime = startTime.current,
             endTime = endTime.current,
             reservePrice = reservePrice.current.toDoubleOrNull(),
-            buyItNowPrice = buyItNowPrice.current.toDoubleOrNull(),
         )
     )
 }

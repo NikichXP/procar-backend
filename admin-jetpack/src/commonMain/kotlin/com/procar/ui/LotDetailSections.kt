@@ -18,7 +18,6 @@ private object VehicleOptions {
 
 private val StatusOptions = listOf("DRAFT","PENDING","ACTIVE","SOLD","CANCELLED","EXPIRED","HIDDEN")
 private val LotTypeOptions = listOf("AUCTION","BUYOUT","HYBRID")
-private val LegacyAuctionTypeOptions = listOf("LIVE","ONLINE","SEALED_BID","BUY_IT_NOW","MAKE_OFFER")
 
 @Composable
 fun GeneralSection(
@@ -105,9 +104,7 @@ fun AuctionSection(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             EditableTextField(state.reservePrice, "Reserve Price", Modifier.weight(1f))
-            EditableTextField(state.buyItNowPrice, "Buy It Now", Modifier.weight(1f))
         }
-        EditableEnumField(state.auctionType, "Auction Type", LegacyAuctionTypeOptions)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             EditableTextField(state.startTime, "Start Time *", Modifier.weight(1f))
             EditableTextField(state.endTime, "End Time *", Modifier.weight(1f))

@@ -93,9 +93,7 @@ class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequ
             totalBids = 0,
             startTime = auction.startTime,
             endTime = auction.endTime,
-            timeRemaining = auction.timeRemaining,
-            auctionType = auction.auctionType,
-            buyItNowPrice = auction.buyItNowPrice
+            timeRemaining = auction.timeRemaining
         )
     }
     
@@ -262,9 +260,7 @@ class AdminUpdateLotRequestToLotDocumentConverter : Converter<Pair<AdminUpdateLo
             totalBids = 0,
             startTime = auction.startTime,
             endTime = auction.endTime,
-            timeRemaining = auction.timeRemaining,
-            auctionType = auction.auctionType,
-            buyItNowPrice = auction.buyItNowPrice
+            timeRemaining = auction.timeRemaining
         )
     }
     

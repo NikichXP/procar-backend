@@ -126,9 +126,7 @@ data class AdminAuctionInfoRequest(
     @field:Positive val bidIncrement: Double,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val timeRemaining: Long? = null,
-    val auctionType: AuctionType,
-    val buyItNowPrice: Double? = null
+    val timeRemaining: Long? = null
 )
 
 data class AdminLocationInfoRequest(
@@ -268,9 +266,7 @@ data class AdminAuctionInfoResponse(
     val totalBids: Int,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val timeRemaining: Long?,
-    val auctionType: AuctionType,
-    val buyItNowPrice: Double?
+    val timeRemaining: Long?
 )
 
 data class AdminLocationInfoResponse(

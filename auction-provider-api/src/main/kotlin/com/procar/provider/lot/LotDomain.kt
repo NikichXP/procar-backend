@@ -79,9 +79,7 @@ data class AuctionInfo(
     val totalBids: Int,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val timeRemaining: Long?,
-    val auctionType: AuctionType,
-    val buyItNowPrice: Double?
+    val timeRemaining: Long?
 )
 
 data class LocationInfo(
@@ -186,11 +184,6 @@ enum class FuelType {
 
 enum class VehicleCondition {
     EXCELLENT, GOOD, FAIR, POOR, DAMAGED, SALVAGE
-}
-
-@Deprecated("Use LotType on VehicleLot/AdminLot* instead", ReplaceWith("LotType"))
-enum class AuctionType {
-    LIVE, ONLINE, SEALED_BID, BUY_IT_NOW, MAKE_OFFER
 }
 
 enum class LotType { AUCTION, BUYOUT, HYBRID }

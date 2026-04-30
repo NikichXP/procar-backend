@@ -87,9 +87,7 @@ class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
             totalBids = auction.totalBids,
             startTime = auction.startTime,
             endTime = auction.endTime,
-            timeRemaining = auction.timeRemaining,
-            auctionType = auction.auctionType,
-            buyItNowPrice = auction.buyItNowPrice
+            timeRemaining = auction.timeRemaining
         )
     }
 

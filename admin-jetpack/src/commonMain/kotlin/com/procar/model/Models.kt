@@ -63,10 +63,8 @@ data class AdminAuctionInfoResponse(
     val bidIncrement: Double,
     val startTime: String,
     val endTime: String,
-    val auctionType: String,
     val totalBids: Int = 0,
     val reservePrice: Double? = null,
-    val buyItNowPrice: Double? = null,
 )
 
 @Serializable
@@ -121,9 +119,7 @@ data class AdminAuctionInfoRequest(
     val bidIncrement: Double,
     val startTime: String,
     val endTime: String,
-    val auctionType: String,
     val reservePrice: Double? = null,
-    val buyItNowPrice: Double? = null,
 )
 
 @Serializable

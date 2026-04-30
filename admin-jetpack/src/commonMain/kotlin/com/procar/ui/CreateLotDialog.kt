@@ -174,7 +174,6 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                                     currentBid = currentBid.toDouble(),
                                     startingBid = startingBid.toDouble(),
                                     bidIncrement = bidIncrement.toDouble(),
-                                    auctionType = "ONLINE",
                                     startTime = "2025-01-01T00:00:00",
                                     endTime = "2025-12-31T00:00:00",
                                 ),

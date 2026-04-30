@@ -35,5 +35,15 @@ class LotTypeMigration(private val mongo: MongoTemplate) : CommandLineRunner {
             )
         }
         log.info("LotTypeMigration: done")
+        
+        // Second pass: unset legacy Mongo fields on already-migrated documents
+        val legacyCleanup = mongo.updateMulti(
+            Query(Criteria.where("auction.auction_type").exists(true)),
+            Update().unset("auction.auction_type").unset("auction.buy_it_now_price"),
+            coll,
+        )
+        if (legacyCleanup.modifiedCount > 0) {
+            log.info("LotTypeMigration: cleaned up legacy fields from {} lot(s)", legacyCleanup.modifiedCount)
+        }
     }
 }

@@ -433,7 +433,6 @@ components:
   schemas:
     AdminAuctionInfoRequest:
       required:
-        - auctionType
         - bidIncrement
         - currentBid
         - endTime
@@ -462,17 +461,6 @@ components:
         timeRemaining:
           type: integer
           format: int64
-        auctionType:
-          type: string
-          enum:
-            - LIVE
-            - ONLINE
-            - SEALED_BID
-            - BUY_IT_NOW
-            - MAKE_OFFER
-        buyItNowPrice:
-          type: number
-          format: double
     AdminDamageInfoRequest:
       required:
         - area
@@ -867,7 +855,6 @@ components:
           format: double
     AdminAuctionInfoResponse:
       required:
-        - auctionType
         - bidIncrement
         - currentBid
         - endTime
@@ -900,17 +887,6 @@ components:
         timeRemaining:
           type: integer
           format: int64
-        auctionType:
-          type: string
-          enum:
-            - LIVE
-            - ONLINE
-            - SEALED_BID
-            - BUY_IT_NOW
-            - MAKE_OFFER
-        buyItNowPrice:
-          type: number
-          format: double
     AdminDamageInfoResponse:
       required:
         - area
@@ -1584,7 +1560,6 @@ components:
           format: date-time
     AuctionInfo:
       required:
-        - auctionType
         - bidIncrement
         - currentBid
         - endTime
@@ -1617,17 +1592,6 @@ components:
         timeRemaining:
           type: integer
           format: int64
-        auctionType:
-          type: string
-          enum:
-            - LIVE
-            - ONLINE
-            - SEALED_BID
-            - BUY_IT_NOW
-            - MAKE_OFFER
-        buyItNowPrice:
-          type: number
-          format: double
     DamageInfo:
       required:
         - area

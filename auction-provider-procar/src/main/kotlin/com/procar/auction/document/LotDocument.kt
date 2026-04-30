@@ -202,13 +202,7 @@ data class AuctionInfoDocument(
     val endTime: LocalDateTime,
     
     @Field("time_remaining")
-    val timeRemaining: Long?,
-    
-    @Field("auction_type")
-    val auctionType: AuctionType,
-    
-    @Field("buy_it_now_price")
-    val buyItNowPrice: Double?
+    val timeRemaining: Long?
 )
 
 @Document
