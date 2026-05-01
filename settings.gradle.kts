@@ -1,5 +1,6 @@
 rootProject.name = "procar-backend"
 include("gateway")
+include("gateway-api")
 include("auth")
 include("auth-api")
 include("auction-provider-api")
@@ -8,5 +9,3 @@ include("admin-jetpack")
 include("user-api")
 include("user")
 include("commons")
-
-include("gateway-api")

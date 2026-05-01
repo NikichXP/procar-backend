@@ -1,7 +1,8 @@
 import org.gradle.jvm.tasks.Jar
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 // Disable bootJar task to avoid Gradle 9.x compatibility issues
-tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+tasks.named<BootJar>("bootJar") {
 	enabled = false
 }
 
@@ -30,4 +31,5 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("io.swagger.core.v3:swagger-annotations:2.2.25")
 }
