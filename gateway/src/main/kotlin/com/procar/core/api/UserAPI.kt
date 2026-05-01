@@ -1,8 +1,8 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.BidStatus
-import com.procar.core.api.dto.LotSummary
-import com.procar.core.api.dto.UserBidPage
+import com.procar.gateway.api.dto.BidStatus
+import com.procar.gateway.api.dto.LotSummary
+import com.procar.gateway.api.dto.UserBidPage
 import com.procar.core.service.UserService
 import com.procar.user.api.dto.UserInfoDto
 import io.swagger.v3.oas.annotations.Operation

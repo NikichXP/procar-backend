@@ -1,7 +1,7 @@
 package com.procar.core.service
 
-import com.procar.core.api.dto.Brand
-import com.procar.core.api.dto.Model
+import com.procar.gateway.api.dto.Brand
+import com.procar.gateway.api.dto.Model
 import org.springframework.stereotype.Service
 
 @Service

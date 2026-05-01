@@ -1,4 +1,4 @@
-package com.procar.core.api.dto
+package com.procar.gateway.api.dto
 
 data class LotSearchRequest(
     val status: LotStatus?,

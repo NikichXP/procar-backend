@@ -1,8 +1,9 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.Bid
-import com.procar.core.api.dto.BidPage
-import com.procar.core.api.dto.BidRequest
+import com.procar.gateway.api.dto.Bid
+import com.procar.gateway.api.dto.BidPage
+import com.procar.gateway.api.dto.BidRequest
+import com.procar.gateway.api.dto.BuyoutResult
 import com.procar.core.service.BidService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -57,5 +58,5 @@ class BidAPI(
             example = "01956b0a-1234-7abc-9d2e-4f5a6b7c8d9e"
         ) @PathVariable lotId: String,
         authentication: Authentication
-    ): com.procar.core.api.dto.BuyoutResult = bidService.buyout(lotId, authentication.name)
+    ): BuyoutResult = bidService.buyout(lotId, authentication.name)
 }

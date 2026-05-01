@@ -1,6 +1,7 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.LotSearchRequest
+import com.procar.gateway.api.dto.LotSearchRequest
+import com.procar.gateway.api.dto.LotSummary
 import com.procar.core.config.SecurityConfig
 import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
@@ -33,7 +34,7 @@ class LotAPITest {
     @Test
     fun `getLots should call service with correct parameters`() {
         // Given
-        val mockLots = emptyList<com.procar.core.api.dto.LotSummary>()
+        val mockLots = emptyList<LotSummary>()
         val totalCount = 100
 
         runBlocking {
@@ -60,7 +61,7 @@ class LotAPITest {
     @Test
     fun `getLots should use default values when parameters not provided`() {
         // Given
-        val mockLots = emptyList<com.procar.core.api.dto.LotSummary>()
+        val mockLots = emptyList<LotSummary>()
         val totalCount = 0
 
         runBlocking {

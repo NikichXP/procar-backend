@@ -8,3 +8,5 @@ include("admin-jetpack")
 include("user-api")
 include("user")
 include("commons")
+
+include("gateway-api")

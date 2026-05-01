@@ -1,9 +1,10 @@
 package com.procar.core.api
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.procar.core.api.dto.Bid
-import com.procar.core.api.dto.BidPage
-import com.procar.core.api.dto.BidRequest
+import com.procar.gateway.api.dto.Bid
+import com.procar.gateway.api.dto.BidPage
+import com.procar.gateway.api.dto.BidRequest
+import com.procar.gateway.api.dto.BuyoutResult
 import com.procar.core.config.SecurityConfig
 import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
@@ -161,7 +162,7 @@ class BidAPITest {
     fun `buyout should call service with correct parameters`() {
         // Given
         val lotId = "test-lot-id"
-        val mockBuyoutResult = com.procar.core.api.dto.BuyoutResult(
+        val mockBuyoutResult = BuyoutResult(
             lotId = lotId,
             price = 25000.0,
             purchasedAt = "2023-01-01T10:00:00Z"

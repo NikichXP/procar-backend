@@ -1,7 +1,7 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.Brand
-import com.procar.core.api.dto.Model
+import com.procar.gateway.api.dto.Brand
+import com.procar.gateway.api.dto.Model
 import com.procar.core.config.SecurityConfig
 import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService

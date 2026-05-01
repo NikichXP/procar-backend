@@ -23,6 +23,7 @@ tasks.named<Jar>("jar") {
 dependencies {
 	implementation(project(":auction-provider-api"))
 	implementation(project(":auth-api"))
+	implementation(project(":gateway-api"))
 	implementation(project(":user-api"))
 	implementation(project(":commons"))
 

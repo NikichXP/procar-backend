@@ -1,6 +1,6 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.UserBidPage
+import com.procar.gateway.api.dto.UserBidPage
 import com.procar.core.config.SecurityConfig
 import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService

@@ -7,6 +7,7 @@ WORKDIR /app
 COPY user ./user
 COPY user-api ./user-api
 COPY auth-api ./auth-api
+COPY commons ./commons
 COPY auction-provider-api ./auction-provider-api
 
 # Copy build configuration

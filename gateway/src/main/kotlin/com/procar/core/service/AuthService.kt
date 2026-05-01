@@ -2,7 +2,7 @@ package com.procar.core.service
 
 import com.procar.auth.api.AuthController
 import com.procar.auth.api.dto.*
-import com.procar.core.api.dto.GatewayUserRegisterRequest
+import com.procar.gateway.api.dto.GatewayUserRegisterRequest
 import com.procar.core.service.admin.AdminUserConnectorService
 import com.procar.user.api.dto.CreateUserRequest
 import com.procar.user.api.dto.UserRole

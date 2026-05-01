@@ -8,6 +8,7 @@ COPY auction-provider-procar ./auction-provider-procar
 COPY auction-provider-api ./auction-provider-api
 COPY auth ./auth
 COPY auth-api ./auth-api
+COPY commons ./commons
 COPY gateway ./gateway
 
 # Copy build configuration

@@ -1,8 +1,9 @@
 package com.procar.core.service
 
-import com.procar.core.api.dto.Bid
-import com.procar.core.api.dto.BidPage
-import com.procar.core.api.dto.BidRequest
+import com.procar.gateway.api.dto.Bid
+import com.procar.gateway.api.dto.BidPage
+import com.procar.gateway.api.dto.BidRequest
+import com.procar.gateway.api.dto.BuyoutResult
 import com.procar.provider.InternalBidAPI
 import com.procar.provider.bid.*
 import com.procar.provider.common.ApiResponse
@@ -86,7 +87,7 @@ class BidService(
         return apiResult?.data?.isValid ?: false
     }
 
-    fun buyout(lotId: String, bidderId: String): com.procar.core.api.dto.BuyoutResult {
+    fun buyout(lotId: String, bidderId: String): BuyoutResult {
         val body = internalBidAPI.buyout(BuyoutRequest(lotId, bidderId)).body
             ?: throw RuntimeException("Failed to buyout")
         val data = body.data
@@ -96,7 +97,7 @@ class BidService(
                 data.message ?: "Buyout rejected",
             )
         }
-        return com.procar.core.api.dto.BuyoutResult(
+        return BuyoutResult(
             lotId = data.lotId,
             price = data.price,
             purchasedAt = data.purchasedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),

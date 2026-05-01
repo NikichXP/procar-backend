@@ -6,6 +6,7 @@ WORKDIR /app
 # Copy source code
 COPY auth ./auth
 COPY auth-api ./auth-api
+COPY commons ./commons
 COPY gateway ./gateway
 COPY auction-provider-api ./auction-provider-api
 COPY auction-provider-procar ./auction-provider-procar

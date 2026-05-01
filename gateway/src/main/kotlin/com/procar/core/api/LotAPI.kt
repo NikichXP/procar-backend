@@ -1,6 +1,6 @@
 package com.procar.core.api
 
-import com.procar.core.api.dto.*
+import com.procar.gateway.api.dto.*
 import com.procar.core.service.LotService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter

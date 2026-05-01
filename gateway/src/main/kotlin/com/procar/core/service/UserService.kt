@@ -1,8 +1,8 @@
 package com.procar.core.service
 
-import com.procar.core.api.dto.BidStatus
-import com.procar.core.api.dto.LotSummary
-import com.procar.core.api.dto.UserBidPage
+import com.procar.gateway.api.dto.BidStatus
+import com.procar.gateway.api.dto.LotSummary
+import com.procar.gateway.api.dto.UserBidPage
 import com.procar.core.service.admin.AdminUserConnectorService
 import com.procar.user.api.dto.UserInfoDto
 import kotlinx.coroutines.reactive.awaitFirst

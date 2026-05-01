@@ -1,7 +1,8 @@
 package com.procar.core.service
 
-import com.procar.core.api.dto.*
-import com.procar.core.api.dto.LotStatus
+import com.procar.gateway.api.dto.*
+import com.procar.gateway.api.dto.LotStatus
+import com.procar.gateway.api.dto.LotType
 import com.procar.provider.InternalLotAPI
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.common.PaginationRequest
@@ -181,9 +182,9 @@ class LotService(
         }
     }
 
-    private fun mapLotType(t: com.procar.provider.lot.LotType): com.procar.core.api.dto.LotType = when (t) {
-        com.procar.provider.lot.LotType.AUCTION -> com.procar.core.api.dto.LotType.AUCTION
-        com.procar.provider.lot.LotType.BUYOUT  -> com.procar.core.api.dto.LotType.BUYOUT
-        com.procar.provider.lot.LotType.HYBRID  -> com.procar.core.api.dto.LotType.HYBRID
+    private fun mapLotType(t: com.procar.provider.lot.LotType): LotType = when (t) {
+        com.procar.provider.lot.LotType.AUCTION -> LotType.AUCTION
+        com.procar.provider.lot.LotType.BUYOUT  -> LotType.BUYOUT
+        com.procar.provider.lot.LotType.HYBRID  -> LotType.HYBRID
     }
 }
