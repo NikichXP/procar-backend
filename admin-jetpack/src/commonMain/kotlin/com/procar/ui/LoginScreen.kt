@@ -23,7 +23,7 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-    var useRemoteBackend by remember { mutableStateOf(false) }
+    var useRemoteBackend by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(useRemoteBackend) {
@@ -89,7 +89,7 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            if (useRemoteBackend) "Remote API (api.pc-dev.nikichxp.xyz)" else "Localhost (8080)",
+                            if (useRemoteBackend) "Remote API" else "Localhost (8080)",
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Switch(
