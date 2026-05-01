@@ -8,9 +8,11 @@ import com.procar.model.*
 class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     val title = FieldState(lot.title)
     val description = FieldState(lot.description)
-    val status = FieldState(lot.status)
+    val status = FieldState(lot.status.name)
+    val lotType = FieldState(lot.lotType.name)
+    val buyoutPrice = FieldState(lot.buyoutPrice?.toString() ?: "")
 
-    private val fields: List<FieldState<*>> = listOf(title, description, status)
+    private val fields: List<FieldState<*>> = listOf(title, description, status, lotType, buyoutPrice)
 
     override val isModified: Boolean get() = fields.any { it.isModified }
     override fun revert() = fields.forEach { it.revert() }
@@ -18,13 +20,18 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
 
     override fun validate(): String? {
         if (title.current.isBlank()) return "Title is required"
+        if (lotType.current != "AUCTION" && buyoutPrice.current.toDoubleOrNull() == null) {
+            return "Valid buyout price is required"
+        }
         return null
     }
 
     override fun buildRequest(): AdminUpdateLotRequest = AdminUpdateLotRequest(
         title = if (title.isModified) title.current else null,
         description = if (description.isModified) description.current else null,
-        status = if (status.isModified) status.current else null,
+        status = if (status.isModified) LotStatus.valueOf(status.current) else null,
+        lotType = if (lotType.isModified) LotType.valueOf(lotType.current) else null,
+        buyoutPrice = if (buyoutPrice.isModified) buyoutPrice.current.toDoubleOrNull() else null,
     )
 }
 
@@ -84,14 +91,12 @@ class VehicleEditState(v: AdminVehicleInfoResponse) : SectionEditState {
 class AuctionEditState(private val source: AdminAuctionInfoResponse) : SectionEditState {
     val startingBid = FieldState(source.startingBid.toString())
     val bidIncrement = FieldState(source.bidIncrement.toString())
-    val auctionType = FieldState(source.auctionType)
     val reservePrice = FieldState(source.reservePrice?.toString() ?: "")
-    val buyItNowPrice = FieldState(source.buyItNowPrice?.toString() ?: "")
     val startTime = FieldState(source.startTime)
     val endTime = FieldState(source.endTime)
 
     private val fields: List<FieldState<*>> = listOf(
-        startingBid, bidIncrement, auctionType, reservePrice, buyItNowPrice, startTime, endTime,
+        startingBid, bidIncrement, reservePrice, startTime, endTime,
     )
 
     override val isModified: Boolean get() = fields.any { it.isModified }
@@ -109,11 +114,9 @@ class AuctionEditState(private val source: AdminAuctionInfoResponse) : SectionEd
             currentBid = source.currentBid,
             startingBid = startingBid.current.toDouble(),
             bidIncrement = bidIncrement.current.toDouble(),
-            auctionType = auctionType.current,
             startTime = startTime.current,
             endTime = endTime.current,
             reservePrice = reservePrice.current.toDoubleOrNull(),
-            buyItNowPrice = buyItNowPrice.current.toDoubleOrNull(),
         )
     )
 }
@@ -153,11 +156,11 @@ class LocationEditState(l: AdminLocationInfoResponse) : SectionEditState {
 class LotEditState(lot: AdminLotResponse) {
     val general = GeneralEditState(lot)
     val vehicle = VehicleEditState(lot.vehicle)
-    val auction = AuctionEditState(lot.auction)
+    val auction = lot.auction?.let { AuctionEditState(it) }
     val location = LocationEditState(lot.location)
 
     val isAnyModified: Boolean
-        get() = general.isModified || vehicle.isModified || auction.isModified || location.isModified
+        get() = general.isModified || vehicle.isModified || (auction?.isModified == true) || location.isModified
 }
 
 @Composable

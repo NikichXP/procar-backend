@@ -17,13 +17,15 @@ class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
             title = source.title,
             description = source.description,
             vehicle = convertVehicleInfo(source.vehicle),
-            auction = convertAuctionInfo(source.auction),
+            auction = source.auction?.let(::convertAuctionInfo),
             location = convertLocationInfo(source.location),
             metadata = convertLotMetadata(source.metadata),
             status = source.status,
             brokerOrgId = source.brokerOrgId,
             createdAt = source.createdAt,
-            updatedAt = source.updatedAt
+            updatedAt = source.updatedAt,
+            lotType = source.lotType,
+            buyoutPrice = source.buyoutPrice,
         )
     }
 
@@ -85,9 +87,7 @@ class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
             totalBids = auction.totalBids,
             startTime = auction.startTime,
             endTime = auction.endTime,
-            timeRemaining = auction.timeRemaining,
-            auctionType = auction.auctionType,
-            buyItNowPrice = auction.buyItNowPrice
+            timeRemaining = auction.timeRemaining
         )
     }
 

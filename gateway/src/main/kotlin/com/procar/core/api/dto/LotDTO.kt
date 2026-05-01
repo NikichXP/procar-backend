@@ -45,29 +45,33 @@ data class LotSummary(
     @Schema(example = "01956b0a-1234-7abc-9d2e-4f5a6b7c8d9e") val id: String,
     val car: CarInfo,
     val status: LotStatus,
-    @Schema(example = "15500.0") val currentBid: Double,
-    @Schema(example = "12000.0") val startingBid: Double,
-    @Schema(example = "250.0") val bidStep: Double,
-    @Schema(example = "14") val bidsCount: Int,
-    @Schema(example = "2025-06-01T10:00:00Z") val startTime: String,
-    @Schema(example = "2025-06-08T18:00:00Z") val endTime: String,
-    val source: LotSource
+    @Schema(example = "15500.0") val currentBid: Double? = null,
+    @Schema(example = "12000.0") val startingBid: Double? = null,
+    @Schema(example = "250.0") val bidStep: Double? = null,
+    @Schema(example = "14") val bidsCount: Int? = null,
+    @Schema(example = "2025-06-01T10:00:00Z") val startTime: String? = null,
+    @Schema(example = "2025-06-08T18:00:00Z") val endTime: String? = null,
+    val source: LotSource,
+    val lotType: LotType = LotType.AUCTION,
+    val buyoutPrice: Double? = null,
 )
 
 data class LotDetail(
     @Schema(example = "01956b0a-1234-7abc-9d2e-4f5a6b7c8d9e") val id: String,
     val car: CarInfo,
     val status: LotStatus,
-    @Schema(example = "15500.0") val currentBid: Double,
-    @Schema(example = "12000.0") val startingBid: Double,
-    @Schema(example = "250.0") val bidStep: Double,
-    @Schema(example = "14") val bidsCount: Int,
-    @Schema(example = "2025-06-01T10:00:00Z") val startTime: String,
-    @Schema(example = "2025-06-08T18:00:00Z") val endTime: String,
+    @Schema(example = "15500.0") val currentBid: Double? = null,
+    @Schema(example = "12000.0") val startingBid: Double? = null,
+    @Schema(example = "250.0") val bidStep: Double? = null,
+    @Schema(example = "14") val bidsCount: Int? = null,
+    @Schema(example = "2025-06-01T10:00:00Z") val startTime: String? = null,
+    @Schema(example = "2025-06-08T18:00:00Z") val endTime: String? = null,
     val source: LotSource,
     val location: LotLocation,
     val fees: LotFees,
-    val recentBids: List<Bid>
+    val recentBids: List<Bid>,
+    val lotType: LotType = LotType.AUCTION,
+    val buyoutPrice: Double? = null,
 )
 
 data class LotPage(
@@ -100,3 +104,11 @@ enum class LotStatus {
     COMPLETED,
     INVALID
 }
+
+enum class LotType { AUCTION, BUYOUT, HYBRID }
+
+data class BuyoutResult(
+    val lotId: String,
+    val price: Double,
+    val purchasedAt: String,
+)

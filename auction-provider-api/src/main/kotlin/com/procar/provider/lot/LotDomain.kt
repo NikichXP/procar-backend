@@ -11,13 +11,15 @@ data class VehicleLot(
     val title: String,
     val description: String,
     val vehicle: VehicleInfo,
-    val auction: AuctionInfo,
+    val auction: AuctionInfo?,
     val location: LocationInfo,
     val metadata: LotMetadata,
     val status: LotStatus,
     val brokerOrgId: String? = null,
     val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val updatedAt: LocalDateTime,
+    val lotType: LotType = LotType.AUCTION,
+    val buyoutPrice: Double? = null,
 )
 
 data class VehicleInfo(
@@ -77,9 +79,7 @@ data class AuctionInfo(
     val totalBids: Int,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val timeRemaining: Long?,
-    val auctionType: AuctionType,
-    val buyItNowPrice: Double?
+    val timeRemaining: Long?
 )
 
 data class LocationInfo(
@@ -186,9 +186,7 @@ enum class VehicleCondition {
     EXCELLENT, GOOD, FAIR, POOR, DAMAGED, SALVAGE
 }
 
-enum class AuctionType {
-    LIVE, ONLINE, SEALED_BID, BUY_IT_NOW, MAKE_OFFER
-}
+enum class LotType { AUCTION, BUYOUT, HYBRID }
 
 enum class SellerType {
     DEALER, PRIVATE, AUCTION_HOUSE, LEASING_COMPANY, INSURANCE

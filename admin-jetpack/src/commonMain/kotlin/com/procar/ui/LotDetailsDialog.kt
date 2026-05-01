@@ -61,12 +61,23 @@ fun LotDetailsDialog(
                     saving = savingSection == "Vehicle",
                     onSave = { trySave("Vehicle", editState.vehicle) },
                 )
-                AuctionSection(
-                    lot = lot,
-                    state = editState.auction,
-                    saving = savingSection == "Auction",
-                    onSave = { trySave("Auction", editState.auction) },
-                )
+                if (editState.auction != null) {
+                    AuctionSection(
+                        lot = lot,
+                        state = editState.auction,
+                        lotType = editState.general.lotType.current,
+                        saving = savingSection == "Auction",
+                        onSave = { trySave("Auction", editState.auction) },
+                    )
+                } else {
+                    AuctionSection(
+                        lot = lot,
+                        state = null,
+                        lotType = editState.general.lotType.current,
+                        saving = false,
+                        onSave = {},
+                    )
+                }
                 LocationSection(
                     state = editState.location,
                     saving = savingSection == "Location",

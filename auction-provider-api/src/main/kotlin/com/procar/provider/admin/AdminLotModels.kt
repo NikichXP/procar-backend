@@ -7,6 +7,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Positive
 import java.time.LocalDateTime
 
+@ValidLotType
 data class AdminCreateLotRequest(
     val externalId: String,
 
@@ -18,7 +19,7 @@ data class AdminCreateLotRequest(
     val vehicle: AdminVehicleInfoRequest,
 
     @field:Valid
-    val auction: AdminAuctionInfoRequest,
+    val auction: AdminAuctionInfoRequest? = null,
 
     @field:Valid
     val location: AdminLocationInfoRequest,
@@ -28,9 +29,12 @@ data class AdminCreateLotRequest(
 
     val status: LotStatus,
 
-    val brokerOrgId: String? = null
+    val brokerOrgId: String? = null,
+    val lotType: LotType = LotType.AUCTION,
+    val buyoutPrice: Double? = null,
 )
 
+@ValidLotType
 data class AdminUpdateLotRequest(
     val title: String? = null,
     val description: String? = null,
@@ -39,7 +43,9 @@ data class AdminUpdateLotRequest(
     val location: AdminLocationInfoRequest? = null,
     val metadata: AdminLotMetadataRequest? = null,
     val status: LotStatus? = null,
-    val brokerOrgId: String? = null
+    val brokerOrgId: String? = null,
+    val lotType: LotType? = null,
+    val buyoutPrice: Double? = null,
 )
 
 data class AdminUpdateStatusRequest(
@@ -120,9 +126,7 @@ data class AdminAuctionInfoRequest(
     @field:Positive val bidIncrement: Double,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val timeRemaining: Long? = null,
-    val auctionType: AuctionType,
-    val buyItNowPrice: Double? = null
+    val timeRemaining: Long? = null
 )
 
 data class AdminLocationInfoRequest(
@@ -194,13 +198,15 @@ data class AdminLotResponse(
     val title: String,
     val description: String,
     val vehicle: AdminVehicleInfoResponse,
-    val auction: AdminAuctionInfoResponse,
+    val auction: AdminAuctionInfoResponse?,
     val location: AdminLocationInfoResponse,
     val metadata: AdminLotMetadataResponse,
     val status: LotStatus,
     val brokerOrgId: String? = null,
     val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val updatedAt: LocalDateTime,
+    val lotType: LotType = LotType.AUCTION,
+    val buyoutPrice: Double? = null,
 )
 
 data class AdminVehicleInfoResponse(
@@ -260,9 +266,7 @@ data class AdminAuctionInfoResponse(
     val totalBids: Int,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val timeRemaining: Long?,
-    val auctionType: AuctionType,
-    val buyItNowPrice: Double?
+    val timeRemaining: Long?
 )
 
 data class AdminLocationInfoResponse(

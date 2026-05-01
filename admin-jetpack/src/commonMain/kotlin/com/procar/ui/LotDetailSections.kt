@@ -2,7 +2,7 @@ package com.procar.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -17,7 +17,7 @@ private object VehicleOptions {
 }
 
 private val StatusOptions = listOf("DRAFT","PENDING","ACTIVE","SOLD","CANCELLED","EXPIRED","HIDDEN")
-private val AuctionTypeOptions = listOf("AUCTION","BUY_IT_NOW","HYBRID")
+private val LotTypeOptions = listOf("AUCTION","BUYOUT","HYBRID")
 
 @Composable
 fun GeneralSection(
@@ -34,6 +34,10 @@ fun GeneralSection(
     EditableTextField(state.title, "Title *")
     EditableTextField(state.description, "Description")
     EditableEnumField(state.status, "Status", StatusOptions)
+    EditableEnumField(state.lotType, "Lot Type", LotTypeOptions)
+    if (state.lotType.current != "AUCTION") {
+        EditableTextField(state.buyoutPrice, "Buyout Price *")
+    }
     SectionActions(
         modified = state.isModified,
         saving = saving,
@@ -81,32 +85,39 @@ fun VehicleSection(
 @Composable
 fun AuctionSection(
     lot: AdminLotResponse,
-    state: AuctionEditState,
+    state: AuctionEditState?,
+    lotType: String,
     saving: Boolean,
     onSave: () -> Unit,
 ) {
     SectionHeader("Auction")
-    DetailRow("Current Bid", "$${lot.auction.currentBid}")
-    DetailRow("Total Bids", lot.auction.totalBids.toString())
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        EditableTextField(state.startingBid, "Starting Bid *", Modifier.weight(1f))
-        EditableTextField(state.bidIncrement, "Bid Increment *", Modifier.weight(1f))
+    if (lotType == "BUYOUT") {
+        Text("No auction information (BUYOUT lot)")
+        return
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        EditableTextField(state.reservePrice, "Reserve Price", Modifier.weight(1f))
-        EditableTextField(state.buyItNowPrice, "Buy It Now", Modifier.weight(1f))
+    DetailRow("Current Bid", lot.auction?.currentBid?.let { "$$it" } ?: "N/A")
+    DetailRow("Total Bids", lot.auction?.totalBids?.toString() ?: "N/A")
+    if (state != null) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            EditableTextField(state.startingBid, "Starting Bid *", Modifier.weight(1f))
+            EditableTextField(state.bidIncrement, "Bid Increment *", Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            EditableTextField(state.reservePrice, "Reserve Price", Modifier.weight(1f))
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            EditableTextField(state.startTime, "Start Time *", Modifier.weight(1f))
+            EditableTextField(state.endTime, "End Time *", Modifier.weight(1f))
+        }
+        SectionActions(
+            modified = state.isModified,
+            saving = saving,
+            onRevert = { state.revert() },
+            onSave = onSave,
+        )
+    } else {
+        Text("No auction information available")
     }
-    EditableEnumField(state.auctionType, "Auction Type", AuctionTypeOptions)
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        EditableTextField(state.startTime, "Start Time *", Modifier.weight(1f))
-        EditableTextField(state.endTime, "End Time *", Modifier.weight(1f))
-    }
-    SectionActions(
-        modified = state.isModified,
-        saving = saving,
-        onRevert = { state.revert() },
-        onSave = onSave,
-    )
 }
 
 @Composable

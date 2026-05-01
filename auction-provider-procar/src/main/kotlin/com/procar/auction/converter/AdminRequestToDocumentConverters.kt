@@ -15,11 +15,13 @@ class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequ
             title = source.title,
             description = source.description,
             vehicle = convertVehicleInfo(source.vehicle),
-            auction = convertAuctionInfo(source.auction),
+            auction = source.auction?.let(::convertAuctionInfo),
             location = convertLocationInfo(source.location),
             metadata = convertLotMetadata(source.metadata),
             status = source.status,
-            brokerOrgId = source.brokerOrgId
+            brokerOrgId = source.brokerOrgId,
+            lotType = source.lotType,
+            buyoutPrice = source.buyoutPrice,
         )
     }
     
@@ -91,9 +93,7 @@ class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequ
             totalBids = 0,
             startTime = auction.startTime,
             endTime = auction.endTime,
-            timeRemaining = auction.timeRemaining,
-            auctionType = auction.auctionType,
-            buyItNowPrice = auction.buyItNowPrice
+            timeRemaining = auction.timeRemaining
         )
     }
     
@@ -186,6 +186,8 @@ class AdminUpdateLotRequestToLotDocumentConverter : Converter<Pair<AdminUpdateLo
             metadata = request.metadata?.let { convertLotMetadata(it) } ?: existing.metadata,
             status = request.status ?: existing.status,
             brokerOrgId = request.brokerOrgId,
+            lotType = request.lotType ?: existing.lotType,
+            buyoutPrice = request.buyoutPrice ?: existing.buyoutPrice,
             updatedAt = LocalDateTime.now()
         )
     }
@@ -258,9 +260,7 @@ class AdminUpdateLotRequestToLotDocumentConverter : Converter<Pair<AdminUpdateLo
             totalBids = 0,
             startTime = auction.startTime,
             endTime = auction.endTime,
-            timeRemaining = auction.timeRemaining,
-            auctionType = auction.auctionType,
-            buyItNowPrice = auction.buyItNowPrice
+            timeRemaining = auction.timeRemaining
         )
     }
     

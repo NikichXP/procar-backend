@@ -126,8 +126,7 @@ class ProcarWorkflowStepDefinitions {
                 reservePrice = 18000.0,
                 bidIncrement = 250.0,
                 startTime = LocalDateTime.now().plusMinutes(5),
-                endTime = LocalDateTime.now().plusDays(7),
-                auctionType = AuctionType.ONLINE
+                endTime = LocalDateTime.now().plusDays(7)
             ),
             location = AdminLocationInfoRequest(
                 address = "789 Workflow Street",
@@ -185,7 +184,8 @@ class ProcarWorkflowStepDefinitions {
                     restrictions = listOf("Continental US only", "Must schedule pickup")
                 )
             ),
-            status = LotStatus.ACTIVE
+            status = LotStatus.ACTIVE,
+            lotType = LotType.AUCTION
         )
 
         lastResponse = restTemplate.postForEntity(
@@ -235,8 +235,7 @@ class ProcarWorkflowStepDefinitions {
                 reservePrice = 10000.0,
                 bidIncrement = 100.0,
                 startTime = LocalDateTime.now().plusMinutes(5),
-                endTime = LocalDateTime.now().plusDays(7),
-                auctionType = AuctionType.ONLINE
+                endTime = LocalDateTime.now().plusDays(7)
             ),
             location = AdminLocationInfoRequest(
                 address = "123 Minimal Street",
@@ -288,7 +287,8 @@ class ProcarWorkflowStepDefinitions {
                     restrictions = listOf("Local pickup only")
                 )
             ),
-            status = LotStatus.ACTIVE
+            status = LotStatus.ACTIVE,
+            lotType = LotType.AUCTION
         )
 
         lastResponse = restTemplate.postForEntity(
@@ -318,9 +318,9 @@ class ProcarWorkflowStepDefinitions {
         val apiResponse = objectMapper.readValue<ApiResponse<AdminLotResponse>>(jsonResponse)
         val lotResponse = apiResponse.data
         assertNotNull(lotResponse.auction)
-        assertEquals(5000.0, lotResponse.auction.startingBid)
-        assertEquals(10000.0, lotResponse.auction.reservePrice)
-        assertEquals(100.0, lotResponse.auction.bidIncrement)
+        assertEquals(5000.0, lotResponse.auction?.startingBid)
+        assertEquals(10000.0, lotResponse.auction?.reservePrice)
+        assertEquals(100.0, lotResponse.auction?.bidIncrement)
     }
 
     @When("I search for the lot using public API")

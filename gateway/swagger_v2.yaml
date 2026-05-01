@@ -95,6 +95,26 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/Bid'
+  /lots/{lotId}/bids/buyout:
+    post:
+      tags:
+        - bid-api
+      operationId: buyout
+      parameters:
+        - name: lotId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/BuyoutResult'
+        '409':
+          description: Conflict - buyout not available or rejected
   /auth/register:
     post:
       tags:
@@ -413,7 +433,6 @@ components:
   schemas:
     AdminAuctionInfoRequest:
       required:
-        - auctionType
         - bidIncrement
         - currentBid
         - endTime
@@ -442,17 +461,6 @@ components:
         timeRemaining:
           type: integer
           format: int64
-        auctionType:
-          type: string
-          enum:
-            - LIVE
-            - ONLINE
-            - SEALED_BID
-            - BUY_IT_NOW
-            - MAKE_OFFER
-        buyItNowPrice:
-          type: number
-          format: double
     AdminDamageInfoRequest:
       required:
         - area
@@ -687,6 +695,11 @@ components:
             - UNSOLD
             - CANCELLED
             - SUSPENDED
+        lotType:
+          $ref: '#/components/schemas/LotType'
+        buyoutPrice:
+          type: number
+          format: double
     AdminVehicleHistoryRequest:
       required:
         - accidents
@@ -842,7 +855,6 @@ components:
           format: double
     AdminAuctionInfoResponse:
       required:
-        - auctionType
         - bidIncrement
         - currentBid
         - endTime
@@ -875,17 +887,6 @@ components:
         timeRemaining:
           type: integer
           format: int64
-        auctionType:
-          type: string
-          enum:
-            - LIVE
-            - ONLINE
-            - SEALED_BID
-            - BUY_IT_NOW
-            - MAKE_OFFER
-        buyItNowPrice:
-          type: number
-          format: double
     AdminDamageInfoResponse:
       required:
         - area
@@ -1043,7 +1044,6 @@ components:
           $ref: '#/components/schemas/AdminShippingInfoResponse'
     AdminLotResponse:
       required:
-        - auction
         - createdAt
         - description
         - externalId
@@ -1089,6 +1089,11 @@ components:
         updatedAt:
           type: string
           format: date-time
+        lotType:
+          $ref: '#/components/schemas/LotType'
+        buyoutPrice:
+          type: number
+          format: double
     AdminSellerInfoResponse:
       required:
         - id
@@ -1555,7 +1560,6 @@ components:
           format: date-time
     AuctionInfo:
       required:
-        - auctionType
         - bidIncrement
         - currentBid
         - endTime
@@ -1588,17 +1592,6 @@ components:
         timeRemaining:
           type: integer
           format: int64
-        auctionType:
-          type: string
-          enum:
-            - LIVE
-            - ONLINE
-            - SEALED_BID
-            - BUY_IT_NOW
-            - MAKE_OFFER
-        buyItNowPrice:
-          type: number
-          format: double
     DamageInfo:
       required:
         - area
@@ -1977,7 +1970,6 @@ components:
             $ref: '#/components/schemas/DamageInfo'
     VehicleLot:
       required:
-        - auction
         - createdAt
         - description
         - externalId
@@ -2029,6 +2021,11 @@ components:
         updatedAt:
           type: string
           format: date-time
+        lotType:
+          $ref: '#/components/schemas/LotType'
+        buyoutPrice:
+          type: number
+          format: double
     ValidateBidRequest:
       required:
         - amount
@@ -2274,7 +2271,6 @@ components:
           type: string
     AdminCreateLotRequest:
       required:
-        - auction
         - description
         - externalId
         - location
@@ -2309,6 +2305,11 @@ components:
             - UNSOLD
             - CANCELLED
             - SUSPENDED
+        lotType:
+          $ref: '#/components/schemas/LotType'
+        buyoutPrice:
+          type: number
+          format: double
     AdminUpdateStatusRequest:
       required:
         - status
@@ -2411,15 +2412,9 @@ components:
           type: string
     LotSummary:
       required:
-        - bidStep
-        - bidsCount
         - car
-        - currentBid
-        - endTime
         - id
         - source
-        - startTime
-        - startingBid
         - status
       type: object
       properties:
@@ -2452,6 +2447,11 @@ components:
           type: string
         source:
           $ref: '#/components/schemas/LotSource'
+        lotType:
+          $ref: '#/components/schemas/LotType'
+        buyoutPrice:
+          type: number
+          format: double
     UserBid:
       required:
         - amount
@@ -2538,18 +2538,12 @@ components:
             $ref: '#/components/schemas/LotSummary'
     LotDetail:
       required:
-        - bidStep
-        - bidsCount
         - car
-        - currentBid
-        - endTime
         - fees
         - id
         - location
         - recentBids
         - source
-        - startTime
-        - startingBid
         - status
       type: object
       properties:
@@ -2590,6 +2584,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Bid'
+        lotType:
+          $ref: '#/components/schemas/LotType'
+        buyoutPrice:
+          type: number
+          format: double
     LotFees:
       type: object
       properties:
@@ -2893,6 +2892,27 @@ components:
         message:
           type: string
         timestamp:
+          type: string
+          format: date-time
+    LotType:
+      type: string
+      enum:
+        - AUCTION
+        - BUYOUT
+        - HYBRID
+    BuyoutResult:
+      required:
+        - lotId
+        - price
+        - purchasedAt
+      type: object
+      properties:
+        lotId:
+          type: string
+        price:
+          type: number
+          format: double
+        purchasedAt:
           type: string
           format: date-time
 

@@ -76,8 +76,8 @@ fun LotsScreen() {
                     when (col) {
                         0 -> Text(lot.id.take(8) + "…", style = MaterialTheme.typography.bodySmall)
                         1 -> Text(lot.title)
-                        2 -> Text(lot.status)
-                        3 -> Text("$${lot.auction.currentBid}")
+                        2 -> Text(lot.status.name)
+                        3 -> Text(lot.auction?.currentBid?.let { "$$it" } ?: "N/A")
                         4 -> TextButton(onClick = { selectedLot = lot }) { Text("Details") }
                     }
                 }
