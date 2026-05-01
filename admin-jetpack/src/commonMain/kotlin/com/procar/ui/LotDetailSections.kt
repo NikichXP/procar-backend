@@ -66,7 +66,7 @@ fun VehicleSection(
         EditableTextField(state.color, "Color", Modifier.weight(1f))
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        EditableTextField(state.engineType, "Engine Type *", Modifier.weight(1f))
+        EditableTextField(state.engineType, "Cylinder count/shape *", Modifier.weight(1f))
         EditableTextField(state.mileage, "Mileage", Modifier.weight(1f))
     }
     EditableEnumField(state.bodyType, "Body Type", VehicleOptions.bodyType)

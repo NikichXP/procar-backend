@@ -64,7 +64,7 @@ class VehicleEditState(v: AdminVehicleInfoResponse) : SectionEditState {
         if (make.current.isBlank()) return "Make is required"
         if (model.current.isBlank()) return "Model is required"
         if (year.current.toIntOrNull() == null) return "Valid year is required"
-        if (engineType.current.isBlank()) return "Engine type is required"
+        if (engineType.current.isBlank()) return "Cylinder count/shape is required"
         return null
     }
 

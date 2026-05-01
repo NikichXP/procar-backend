@@ -106,7 +106,7 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
         if (make.isBlank()) return "Make is required"
         if (model.isBlank()) return "Model is required"
         if (year.toIntOrNull() == null) return "Valid year is required"
-        if (engineType.isBlank()) return "Engine type is required"
+        if (engineType.isBlank()) return "Cylinder count/shape is required"
         if (lotType != LotType.BUYOUT) {
             if (startingBid.toDoubleOrNull() == null) return "Valid starting bid is required"
             if (bidIncrement.toDoubleOrNull() == null) return "Valid bid increment is required"
@@ -145,7 +145,7 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                     OutlinedTextField(vin, { vin = it.replace("\t", "") }, label = { Text("VIN") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(engineType, { engineType = it.replace("\t", "") }, label = { Text("Engine Type *") }, modifier = Modifier.weight(1f), singleLine = true)
+                    OutlinedTextField(engineType, { engineType = it.replace("\t", "") }, label = { Text("Cylinder count/shape *") }, modifier = Modifier.weight(1f), singleLine = true)
                     OutlinedTextField(mileage, { mileage = it.replace("\t", "") }, label = { Text("Mileage") }, modifier = Modifier.weight(1f), singleLine = true)
                 }
                 EnumDropdown("Body Type", bodyType.displayName, BodyType.entries.map { it.displayName }) { selected -> bodyType = BodyType.entries.first { it.displayName == selected } }
