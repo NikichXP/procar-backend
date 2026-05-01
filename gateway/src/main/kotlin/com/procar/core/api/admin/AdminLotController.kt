@@ -2,7 +2,6 @@ package com.procar.core.api.admin
 
 import com.procar.core.service.admin.AdminLotConnectorService
 import com.procar.provider.admin.*
-import com.procar.provider.admin.AdminLotController
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
 import jakarta.validation.Valid
@@ -15,20 +14,20 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/admin/lots")
 class AdminLotController(
     private val adminLotConnectorService: AdminLotConnectorService
-) : AdminLotController {
+) {
 
     @PostMapping
-    override suspend fun createLot(@Valid @RequestBody request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    suspend fun createLot(@Valid @RequestBody request: GatewayCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.createLot(request)
     }
 
     @GetMapping("/{lotId}")
-    override suspend fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+    suspend fun getLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.getLot(lotId)
     }
 
     @PutMapping("/{lotId}")
-    override suspend fun updateLot(
+    suspend fun updateLot(
         @PathVariable lotId: String,
         @Valid @RequestBody request: AdminUpdateLotRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -36,12 +35,12 @@ class AdminLotController(
     }
 
     @DeleteMapping("/{lotId}")
-    override suspend fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
+    suspend fun deleteLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<Void?>> {
         return adminLotConnectorService.deleteLot(lotId)
     }
 
     @PostMapping("/{lotId}/status")
-    override suspend fun updateLotStatus(
+    suspend fun updateLotStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminUpdateStatusRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -49,7 +48,7 @@ class AdminLotController(
     }
 
     @GetMapping
-    override suspend fun getAllLots(
+    suspend fun getAllLots(
         @RequestParam cursor: String?,
         @RequestParam limit: Int,
         @RequestParam status: LotStatus?
@@ -58,7 +57,7 @@ class AdminLotController(
     }
 
     @PostMapping("/{lotId}/hidden")
-    override suspend fun setHiddenStatus(
+    suspend fun setHiddenStatus(
         @PathVariable lotId: String,
         @RequestBody request: AdminHiddenRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -66,7 +65,7 @@ class AdminLotController(
     }
 
     @PostMapping("/{lotId}/images")
-    override suspend fun addLotImage(
+    suspend fun addLotImage(
         @PathVariable lotId: String,
         @RequestBody request: AdminAddImageRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
@@ -74,7 +73,7 @@ class AdminLotController(
     }
 
     @DeleteMapping("/{lotId}/images")
-    override suspend fun deleteLotImage(
+    suspend fun deleteLotImage(
         @PathVariable lotId: String,
         @RequestParam url: String
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {

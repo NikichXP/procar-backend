@@ -112,10 +112,10 @@ private fun BrokerFormColumn(
     ) {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         header()
-        OutlinedTextField(name, onNameChange, label = { Text(nameLabel) }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(address, onAddressChange, label = { Text("Address") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(phones, onPhonesChange, label = { Text("Phones (comma-separated)") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(emails, onEmailsChange, label = { Text("Emails (comma-separated)") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(name, { onNameChange(it.replace("\t", "")) }, label = { Text(nameLabel) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(address, { onAddressChange(it.replace("\t", "")) }, label = { Text("Address") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(phones, { onPhonesChange(it.replace("\t", "")) }, label = { Text("Phones (comma-separated)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(emails, { onEmailsChange(it.replace("\t", "")) }, label = { Text("Emails (comma-separated)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
     }
 }
 
@@ -142,10 +142,11 @@ private fun CreateBrokerDialog(onDismiss: () -> Unit, onCreated: (BrokerDto) -> 
                 emails = emails, onEmailsChange = { emails = it },
             ) {
                 OutlinedTextField(
-                    id, { id = it.lowercase() },
+                    id, { id = it.lowercase().replace("\t", "") },
                     label = { Text("ID (a-z 0-9 -) *") },
                     supportingText = { Text("Unique readable identifier, e.g. acme-brokers") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
             }
         },

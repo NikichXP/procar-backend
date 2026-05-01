@@ -8,8 +8,8 @@ import com.procar.model.*
 class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     val title = FieldState(lot.title)
     val description = FieldState(lot.description)
-    val status = FieldState(lot.status)
-    val lotType = FieldState(lot.lotType)
+    val status = FieldState(lot.status.name)
+    val lotType = FieldState(lot.lotType.name)
     val buyoutPrice = FieldState(lot.buyoutPrice?.toString() ?: "")
 
     private val fields: List<FieldState<*>> = listOf(title, description, status, lotType, buyoutPrice)
@@ -29,8 +29,8 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     override fun buildRequest(): AdminUpdateLotRequest = AdminUpdateLotRequest(
         title = if (title.isModified) title.current else null,
         description = if (description.isModified) description.current else null,
-        status = if (status.isModified) status.current else null,
-        lotType = if (lotType.isModified) lotType.current else null,
+        status = if (status.isModified) LotStatus.valueOf(status.current) else null,
+        lotType = if (lotType.isModified) LotType.valueOf(lotType.current) else null,
         buyoutPrice = if (buyoutPrice.isModified) buyoutPrice.current.toDoubleOrNull() else null,
     )
 }

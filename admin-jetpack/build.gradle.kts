@@ -54,6 +54,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:3.1.3")
                 implementation("io.ktor:ktor-client-auth:3.1.3")
                 implementation("io.ktor:ktor-client-content-negotiation:3.1.3")
+                implementation("io.ktor:ktor-client-logging:3.1.3")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
@@ -76,6 +77,7 @@ kotlin {
                 implementation(compose.desktop.currentOs)
                 implementation("io.ktor:ktor-client-cio:3.1.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
+                implementation("org.slf4j:slf4j-simple:2.0.9")
             }
         }
     }

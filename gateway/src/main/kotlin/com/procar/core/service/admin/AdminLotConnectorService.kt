@@ -1,22 +1,71 @@
 package com.procar.core.service.admin
 
+import com.procar.core.api.admin.GatewayCreateLotRequest
 import com.procar.core.service.StorageService
 import com.procar.provider.admin.*
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
+import com.procar.provider.lot.SellerType
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
+import org.springframework.web.server.ResponseStatusException
 
 @Service
 class AdminLotConnectorService(
     @Qualifier("adminLotHttpClient") private val adminLotController: AdminLotController,
-    private val storageService: StorageService
+    private val storageService: StorageService,
+    private val adminBrokerConnectorService: AdminBrokerConnectorService,
+    private val adminWarehouseConnectorService: AdminWarehouseConnectorService,
 ) {
 
-    suspend fun createLot(request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
-        return adminLotController.createLot(request)
+    suspend fun createLot(request: GatewayCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val broker = try {
+            adminBrokerConnectorService.getBroker(request.brokerId)
+        } catch (e: Exception) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Broker '${request.brokerId}' not found", e)
+        }
+
+        val warehouseResponse = adminWarehouseConnectorService.getWarehouse(request.warehouseId)
+        val warehouse = warehouseResponse.body?.data
+            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Warehouse '${request.warehouseId}' not found")
+
+        val providerRequest = AdminCreateLotRequest(
+            externalId = request.externalId,
+            title = request.title,
+            description = request.description,
+            vehicle = request.vehicle,
+            auction = request.auction,
+            location = AdminLocationInfoRequest(
+                address = warehouse.address,
+                city = warehouse.city,
+                state = warehouse.state,
+                zipCode = warehouse.zipCode,
+                country = warehouse.country,
+                coordinates = warehouse.coordinates,
+                timezone = warehouse.timezone,
+            ),
+            metadata = AdminLotMetadataRequest(
+                tags = request.metadata.tags,
+                categories = request.metadata.categories,
+                sellerInfo = AdminSellerInfoRequest(
+                    id = broker.id,
+                    name = broker.name,
+                    type = SellerType.DEALER,
+                ),
+                inspection = request.metadata.inspection,
+                history = request.metadata.history,
+                fees = request.metadata.fees,
+                shipping = request.metadata.shipping,
+            ),
+            status = request.status,
+            brokerOrgId = broker.id,
+            lotType = request.lotType,
+            buyoutPrice = request.buyoutPrice,
+        )
+        return adminLotController.createLot(providerRequest)
     }
 
     suspend fun getLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {

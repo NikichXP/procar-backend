@@ -5,6 +5,22 @@ import kotlinx.serialization.Serializable
 // --- Lot models ---
 
 @Serializable
+enum class LotStatus {
+    DRAFT,
+    PENDING,
+    ACTIVE,
+    CLOSED,
+    CANCELLED
+}
+
+@Serializable
+enum class LotType {
+    AUCTION,
+    BUYOUT,
+    HYBRID
+}
+
+@Serializable
 data class AdminLotResponse(
     val id: String,
     val externalId: String,
@@ -13,10 +29,10 @@ data class AdminLotResponse(
     val vehicle: AdminVehicleInfoResponse,
     val auction: AdminAuctionInfoResponse? = null,
     val location: AdminLocationInfoResponse,
-    val status: String,
+    val status: LotStatus,
     val createdAt: String,
     val updatedAt: String,
-    val lotType: String = "AUCTION",
+    val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
 )
 
@@ -77,17 +93,23 @@ data class AdminLocationInfoResponse(
     val timezone: String,
 )
 
+/**
+ * Gateway-facing create-lot payload. The gateway resolves [brokerId] and
+ * [warehouseId] to full broker/warehouse data, so the client does not need to
+ * pass seller info or location.
+ */
 @Serializable
 data class AdminCreateLotRequest(
+    val brokerId: String,
+    val warehouseId: String,
     val externalId: String,
     val title: String,
     val description: String,
     val vehicle: AdminVehicleInfoRequest,
     val auction: AdminAuctionInfoRequest? = null,
-    val location: AdminLocationInfoRequest,
-    val metadata: AdminLotMetadataRequest,
-    val status: String,
-    val lotType: String = "AUCTION",
+    val metadata: AdminLotMetadataRequest = AdminLotMetadataRequest(),
+    val status: LotStatus,
+    val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
 )
 
@@ -132,16 +154,14 @@ data class AdminLocationInfoRequest(
     val timezone: String,
 )
 
+/**
+ * Gateway-level lot metadata. Seller info is intentionally omitted: it is
+ * derived from the referenced broker on the server side.
+ */
 @Serializable
 data class AdminLotMetadataRequest(
-    val sellerInfo: AdminSellerInfoRequest,
-)
-
-@Serializable
-data class AdminSellerInfoRequest(
-    val id: String,
-    val name: String,
-    val type: String,
+    val tags: List<String> = emptyList(),
+    val categories: List<String> = emptyList(),
 )
 
 @Serializable
@@ -152,8 +172,8 @@ data class AdminUpdateLotRequest(
     val auction: AdminAuctionInfoRequest? = null,
     val location: AdminLocationInfoRequest? = null,
     val metadata: AdminLotMetadataRequest? = null,
-    val status: String? = null,
-    val lotType: String? = null,
+    val status: LotStatus? = null,
+    val lotType: LotType? = null,
     val buyoutPrice: Double? = null,
 )
 
