@@ -1,4 +1,4 @@
-package com.procar.ui
+package com.procar.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,6 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.api.fetchLots
 import com.procar.model.AdminLotResponse
+import com.procar.ui.components.DataTable
+import com.procar.ui.dialogs.CreateLotDialog
+import com.procar.ui.dialogs.LotDetailsDialog
+import com.procar.ui.state.launchWithState
+import com.procar.ui.state.rememberScreenState
 import kotlinx.coroutines.launch
 
 @Composable

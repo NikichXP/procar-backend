@@ -1,4 +1,4 @@
-package com.procar.ui
+package com.procar.ui.state
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable

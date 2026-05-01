@@ -10,6 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.api.AuthState
 import com.procar.api.getAccessToken
+import com.procar.ui.screens.BrokersScreen
+import com.procar.ui.screens.LotsScreen
+import com.procar.ui.screens.LoginScreen
+import com.procar.ui.screens.UsersScreen
+import com.procar.ui.screens.WarehousesScreen
 
 enum class Screen(val label: String) {
     LOTS("Lots"),

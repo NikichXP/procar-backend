@@ -1,4 +1,4 @@
-package com.procar.ui
+package com.procar.ui.dialogs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +18,8 @@ import com.procar.model.Transmission
 import com.procar.model.Drivetrain
 import com.procar.model.FuelType
 import com.procar.model.VehicleCondition
+import com.procar.ui.components.EnumDropdown
+import com.procar.ui.components.SectionHeader
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType

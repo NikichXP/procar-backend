@@ -1,4 +1,4 @@
-package com.procar.ui
+package com.procar.ui.dialogs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,6 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.api.updateLot
 import com.procar.model.AdminLotResponse
+import com.procar.ui.components.SectionEditState
+import com.procar.ui.lot.AuctionSection
+import com.procar.ui.lot.GeneralSection
+import com.procar.ui.lot.LocationSection
+import com.procar.ui.lot.PhotosSection
+import com.procar.ui.lot.VehicleSection
+import com.procar.ui.state.rememberLotEditState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

@@ -1,4 +1,4 @@
-package com.procar.ui
+package com.procar.ui.lot
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +17,7 @@ import com.procar.api.imageLoader
 import com.procar.api.uploadLotPhoto
 import com.procar.model.AdminLotResponse
 import com.procar.model.AdminVehicleImageResponse
+import com.procar.ui.components.SectionHeader
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType

@@ -1,10 +1,12 @@
-package com.procar.ui
+package com.procar.ui.state
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.procar.model.*
+import com.procar.ui.components.FieldState
+import com.procar.ui.components.SectionEditState
+import com.procar.ui.components.validateLocationFields
 
-/** Edit state for the lot's top-level scalar fields. */
 class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     val title = FieldState(lot.title)
     val description = FieldState(lot.description)
@@ -35,7 +37,6 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     )
 }
 
-/** Edit state for the lot's vehicle section. Sends the full vehicle block on save. */
 class VehicleEditState(v: AdminVehicleInfoResponse) : SectionEditState {
     val make = FieldState(v.make)
     val model = FieldState(v.model)
@@ -87,7 +88,6 @@ class VehicleEditState(v: AdminVehicleInfoResponse) : SectionEditState {
     )
 }
 
-/** Edit state for the lot's auction section. [currentBid] is preserved from the server. */
 class AuctionEditState(private val source: AdminAuctionInfoResponse) : SectionEditState {
     val startingBid = FieldState(source.startingBid.toString())
     val bidIncrement = FieldState(source.bidIncrement.toString())
@@ -121,7 +121,6 @@ class AuctionEditState(private val source: AdminAuctionInfoResponse) : SectionEd
     )
 }
 
-/** Edit state for the lot's location section. */
 class LocationEditState(l: AdminLocationInfoResponse) : SectionEditState {
     val address = FieldState(l.address)
     val city = FieldState(l.city)
@@ -152,7 +151,6 @@ class LocationEditState(l: AdminLocationInfoResponse) : SectionEditState {
     )
 }
 
-/** Aggregate edit state for all sections of a lot. */
 class LotEditState(lot: AdminLotResponse) {
     val general = GeneralEditState(lot)
     val vehicle = VehicleEditState(lot.vehicle)

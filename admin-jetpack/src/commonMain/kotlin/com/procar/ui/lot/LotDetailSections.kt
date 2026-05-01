@@ -1,4 +1,4 @@
-package com.procar.ui
+package com.procar.ui.lot
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -7,6 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.model.AdminLotResponse
+import com.procar.ui.components.DetailRow
+import com.procar.ui.components.EditableEnumField
+import com.procar.ui.components.EditableTextField
+import com.procar.ui.components.SectionActions
+import com.procar.ui.components.SectionHeader
+import com.procar.ui.state.AuctionEditState
+import com.procar.ui.state.GeneralEditState
+import com.procar.ui.state.LocationEditState
+import com.procar.ui.state.VehicleEditState
 
 private object VehicleOptions {
     val bodyType = listOf("SEDAN","SUV","TRUCK","COUPE","CONVERTIBLE","HATCHBACK","WAGON","VAN","MINIVAN","OTHER")
