@@ -11,12 +11,16 @@ import androidx.compose.ui.unit.dp
 import com.procar.api.createLot
 import com.procar.api.fetchBrokers
 import com.procar.api.fetchWarehouses
+import com.procar.api.uploadLotPhoto
 import com.procar.model.*
 import com.procar.model.BodyType
 import com.procar.model.Transmission
 import com.procar.model.Drivetrain
 import com.procar.model.FuelType
 import com.procar.model.VehicleCondition
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.launch
 
 @Composable
@@ -30,6 +34,11 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
     var warehouses by remember { mutableStateOf<List<AdminWarehouseResponse>>(emptyList()) }
     var selectedWarehouseId by remember { mutableStateOf<String?>(null) }
     var loadingWarehouses by remember { mutableStateOf(false) }
+
+    // Photo upload state
+    val selectedPhotos = remember { mutableStateListOf<io.github.vinceglb.filekit.core.PlatformFile>() }
+    var uploadingPhotos by remember { mutableStateOf(false) }
+    var photoUploadProgress by remember { mutableStateOf<String?>(null) }
 
     // Load brokers when dialog opens
     LaunchedEffect(Unit) {
@@ -81,6 +90,16 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
 
     LaunchedEffect(selectedWarehouseDisplay) {
         selectedWarehouseId = warehouseOptions[selectedWarehouseDisplay]?.id
+    }
+
+    // File picker for photos
+    val photoPicker = rememberFilePickerLauncher(
+        type = PickerType.Image,
+        mode = PickerMode.Multiple(),
+        title = "Select photos",
+    ) { files ->
+        if (files.isNullOrEmpty()) return@rememberFilePickerLauncher
+        selectedPhotos.addAll(files)
     }
 
     fun validate(): String? {
@@ -172,6 +191,34 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                         brokerOptions.keys.toList()
                     ) { selectedBrokerDisplay = it }
                 }
+
+                SectionHeader("Photos")
+                if (selectedPhotos.isEmpty()) {
+                    Text("No photos selected", style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        selectedPhotos.forEach { file ->
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(file.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+                                OutlinedButton(
+                                    onClick = { selectedPhotos.remove(file) },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Text("×", style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { photoPicker.launch() }) {
+                        Text("Add Photos")
+                    }
+                }
+                photoUploadProgress?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
             }
         },
         confirmButton = {
@@ -187,7 +234,7 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                         saving = true
                         try {
                             val autoTitle = "${year} ${make} ${model}".trim()
-                            createLot(AdminCreateLotRequest(
+                            val createdLot = createLot(AdminCreateLotRequest(
                                 brokerId = selectedBrokerId!!,
                                 warehouseId = selectedWarehouseId!!,
                                 externalId = autoTitle.replace(" ", "_").lowercase(),
@@ -216,11 +263,30 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                                 ),
                                 buyoutPrice = if (lotType == LotType.AUCTION) null else buyoutPrice.toDoubleOrNull(),
                             ))
+
+                            // Upload photos if any were selected
+                            if (selectedPhotos.isNotEmpty()) {
+                                uploadingPhotos = true
+                                selectedPhotos.forEachIndexed { idx, file ->
+                                    photoUploadProgress = "Uploading photo ${idx + 1}/${selectedPhotos.size}: ${file.name}"
+                                    val bytes = file.readBytes()
+                                    uploadLotPhoto(
+                                        lotId = createdLot.id,
+                                        fileName = file.name,
+                                        contentType = guessImageContentType(file.name),
+                                        bytes = bytes,
+                                    )
+                                }
+                                photoUploadProgress = null
+                                uploadingPhotos = false
+                            }
+
                             onCreated()
                         } catch (e: Exception) {
-                            error = "Error creating lot: ${e.message}"
+                            error = "Error: ${e.message}"
                         } finally {
                             saving = false
+                            uploadingPhotos = false
                         }
                     }
                 }
@@ -233,4 +299,20 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
             OutlinedButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
+}
+
+/** Best-effort content-type from filename extension. */
+private fun guessImageContentType(fileName: String): String {
+    val ext = fileName.substringAfterLast('.', "").lowercase()
+    return when (ext) {
+        "jpg", "jpeg" -> "image/jpeg"
+        "png" -> "image/png"
+        "gif" -> "image/gif"
+        "webp" -> "image/webp"
+        "bmp" -> "image/bmp"
+        "heic" -> "image/heic"
+        "heif" -> "image/heif"
+        "svg" -> "image/svg+xml"
+        else -> "application/octet-stream"
+    }
 }
