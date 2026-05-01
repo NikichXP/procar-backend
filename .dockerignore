@@ -51,3 +51,8 @@ docker-compose.yaml
 
 # Scripts
 scripts/
+
+# Admin-jetpack specific
+admin-jetpack/build/
+admin-jetpack/.gradle/
+admin-jetpack/.idea/

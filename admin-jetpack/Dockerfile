@@ -8,9 +8,12 @@ COPY --from=node /usr/lib/x86_64-linux-gnu/libatomic.so.1.2.0 /usr/lib/x86_64-li
 
 WORKDIR /app
 
-COPY admin-jetpack ./admin-jetpack
+# Copy build files first for better caching
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
+
+# Copy admin-jetpack source
+COPY admin-jetpack ./admin-jetpack
 
 ENV GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
 
