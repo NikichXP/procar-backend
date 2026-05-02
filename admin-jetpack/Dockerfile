@@ -19,17 +19,6 @@ COPY settings.gradle.kts .
 # Copy admin-jetpack source
 COPY admin-jetpack ./admin-jetpack
 
-# Minimal settings.gradle.kts for admin-jetpack only to avoid missing module errors
-RUN echo 'pluginManagement {' > settings.gradle.kts && \
-    echo '    repositories {' >> settings.gradle.kts && \
-    echo '        google()' >> settings.gradle.kts && \
-    echo '        mavenCentral()' >> settings.gradle.kts && \
-    echo '        gradlePluginPortal()' >> settings.gradle.kts && \
-    echo '    }' >> settings.gradle.kts && \
-    echo '}' >> settings.gradle.kts && \
-    echo 'rootProject.name = "procar-backend"' >> settings.gradle.kts && \
-    echo 'include("admin-jetpack")' >> settings.gradle.kts
-
 ENV GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
 
 RUN ./gradlew :admin-jetpack:wasmJsBrowserDistribution --no-daemon -Dkotlin.daemon.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g" && \
