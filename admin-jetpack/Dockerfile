@@ -11,7 +11,6 @@ WORKDIR /app
 # Copy gradle wrapper and config
 COPY gradlew .
 RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
-COPY gradle ./gradle
 COPY gradle.properties .
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
