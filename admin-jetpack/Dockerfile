@@ -20,7 +20,7 @@ COPY admin-jetpack ./admin-jetpack
 
 ENV GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
 
-RUN ./gradlew :admin-jetpack:wasmJsBrowserDistribution --no-daemon -Dkotlin.daemon.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g" && \
+RUN gradle :admin-jetpack:wasmJsBrowserDistribution --no-daemon -Dkotlin.daemon.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g" && \
     rm -rf /app/admin-jetpack/build/compileSync \
            /app/admin-jetpack/build/kotlin \
            /app/admin-jetpack/build/tmp \
