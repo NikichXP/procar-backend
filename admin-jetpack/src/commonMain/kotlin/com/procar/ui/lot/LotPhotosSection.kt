@@ -15,8 +15,8 @@ import com.procar.api.absoluteImageUrl
 import com.procar.api.deleteLotPhoto
 import com.procar.api.imageLoader
 import com.procar.api.uploadLotPhoto
-import com.procar.model.AdminLotResponse
-import com.procar.model.AdminVehicleImageResponse
+import com.procar.gateway.api.dto.AdminLotResponse
+import com.procar.gateway.api.dto.AdminVehicleImageResponse
 import com.procar.ui.components.SectionHeader
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerMode

@@ -1,5 +1,8 @@
-package com.procar.model
+package com.procar.gateway.api.dto
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class BodyType(val displayName: String) {
     SEDAN("Sedan"),
     SUV("SUV"),
@@ -15,6 +18,7 @@ enum class BodyType(val displayName: String) {
     override fun toString(): String = name
 }
 
+@Serializable
 enum class Transmission(val displayName: String) {
     AUTOMATIC("Automatic"),
     MANUAL("Manual"),
@@ -24,6 +28,7 @@ enum class Transmission(val displayName: String) {
     override fun toString(): String = name
 }
 
+@Serializable
 enum class Drivetrain(val displayName: String) {
     FWD("FWD"),
     RWD("RWD"),
@@ -36,6 +41,7 @@ enum class Drivetrain(val displayName: String) {
     }
 }
 
+@Serializable
 enum class FuelType(val displayName: String) {
     GASOLINE("Gasoline"),
     DIESEL("Diesel"),
@@ -49,6 +55,7 @@ enum class FuelType(val displayName: String) {
     }
 }
 
+@Serializable
 enum class VehicleCondition(val displayName: String) {
     EXCELLENT("Excellent"),
     GOOD("Good"),

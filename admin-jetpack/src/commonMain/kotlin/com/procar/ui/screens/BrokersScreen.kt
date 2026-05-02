@@ -10,9 +10,9 @@ import com.procar.api.createBroker
 import com.procar.api.deleteBroker
 import com.procar.api.fetchBrokers
 import com.procar.api.updateBroker
-import com.procar.model.BrokerDto
-import com.procar.model.CreateBrokerRequest
-import com.procar.model.UpdateBrokerRequest
+import com.procar.gateway.api.dto.BrokerDto
+import com.procar.gateway.api.dto.CreateBrokerRequest
+import com.procar.gateway.api.dto.UpdateBrokerRequest
 import com.procar.ui.components.DataTable
 import com.procar.ui.state.launchWithState
 import com.procar.ui.state.rememberScreenState

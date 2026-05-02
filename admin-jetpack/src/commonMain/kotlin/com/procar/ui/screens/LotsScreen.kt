@@ -7,7 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.api.fetchLots
-import com.procar.model.AdminLotResponse
+import com.procar.gateway.api.dto.AdminLotResponse
 import com.procar.ui.components.DataTable
 import com.procar.ui.dialogs.CreateLotDialog
 import com.procar.ui.dialogs.LotDetailsDialog

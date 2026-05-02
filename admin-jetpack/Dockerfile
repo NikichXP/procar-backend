@@ -17,6 +17,7 @@ COPY settings.gradle.kts .
 
 # Copy admin-jetpack source
 COPY admin-jetpack ./admin-jetpack
+COPY gateway-api ./gateway-api
 
 ENV GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
 

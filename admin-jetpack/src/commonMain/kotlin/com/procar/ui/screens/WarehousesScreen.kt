@@ -8,8 +8,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.api.createWarehouse
 import com.procar.api.fetchWarehouses
-import com.procar.model.AdminCreateWarehouseRequest
-import com.procar.model.AdminWarehouseResponse
+import com.procar.gateway.api.dto.AdminCreateWarehouseRequest
+import com.procar.gateway.api.dto.AdminWarehouseResponse
 import com.procar.ui.components.DataTable
 import com.procar.ui.components.SectionHeader
 import com.procar.ui.components.validateLocationFields

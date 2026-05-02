@@ -6,7 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.procar.model.AdminLotResponse
+import com.procar.gateway.api.dto.AdminLotResponse
 import com.procar.ui.components.DetailRow
 import com.procar.ui.components.EditableEnumField
 import com.procar.ui.components.EditableTextField

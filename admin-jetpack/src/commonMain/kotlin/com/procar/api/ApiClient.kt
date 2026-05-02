@@ -5,7 +5,7 @@ import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.procar.TokenStorage
 import com.procar.createHttpClient
 import com.procar.getPlatformContext
-import com.procar.model.*
+import com.procar.gateway.api.dto.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.auth.*

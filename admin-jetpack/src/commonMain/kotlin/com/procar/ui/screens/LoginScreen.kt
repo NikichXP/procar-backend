@@ -42,9 +42,10 @@ fun LoginScreen(onLoginSuccess: (accessToken: String) -> Unit) {
             errorMessage = null
             try {
                 val result = login(username, password)
-                if (result.success && result.accessToken != null) {
+                val accessToken = result.accessToken
+                if (result.success && accessToken != null) {
                     com.procar.api.AuthState.refreshToken = result.refreshToken ?: ""
-                    onLoginSuccess(result.accessToken.token)
+                    onLoginSuccess(accessToken.token)
                 } else {
                     errorMessage = result.message ?: "Login failed"
                 }

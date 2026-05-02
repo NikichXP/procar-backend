@@ -7,6 +7,7 @@ plugins {
 	id("org.jetbrains.compose") version "1.8.0" apply false
 	id("org.jetbrains.kotlin.plugin.compose") version "2.1.21" apply false
 	id("com.android.application") version "8.7.3" apply false
+	id("com.android.library") version "8.7.3" apply false
 }
 
 group = "com.procar"
@@ -18,7 +19,7 @@ repositories {
 }
 
 subprojects {
-	if (name == "admin-jetpack") return@subprojects
+	if (name == "admin-jetpack" || name == "gateway-api") return@subprojects
 
 	apply(plugin = "java")
 	apply(plugin = "org.jetbrains.kotlin.jvm")

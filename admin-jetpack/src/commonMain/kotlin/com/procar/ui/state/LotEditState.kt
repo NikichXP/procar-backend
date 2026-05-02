@@ -2,7 +2,7 @@ package com.procar.ui.state
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import com.procar.model.*
+import com.procar.gateway.api.dto.*
 import com.procar.ui.components.FieldState
 import com.procar.ui.components.SectionEditState
 import com.procar.ui.components.validateLocationFields
@@ -31,7 +31,7 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     override fun buildRequest(): AdminUpdateLotRequest = AdminUpdateLotRequest(
         title = if (title.isModified) title.current else null,
         description = if (description.isModified) description.current else null,
-        status = if (status.isModified) LotStatus.valueOf(status.current) else null,
+        status = if (status.isModified) AdminLotStatus.valueOf(status.current) else null,
         lotType = if (lotType.isModified) LotType.valueOf(lotType.current) else null,
         buyoutPrice = if (buyoutPrice.isModified) buyoutPrice.current.toDoubleOrNull() else null,
     )

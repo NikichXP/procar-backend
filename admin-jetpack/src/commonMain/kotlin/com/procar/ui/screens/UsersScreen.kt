@@ -12,10 +12,10 @@ import com.procar.api.fetchBrokers
 import com.procar.api.fetchUsers
 import com.procar.api.updateUserBroker
 import com.procar.api.updateUserRoles
-import com.procar.model.BrokerDto
-import com.procar.model.CreateUserRequest
-import com.procar.model.UserDto
-import com.procar.model.UserRole
+import com.procar.gateway.api.dto.BrokerDto
+import com.procar.gateway.api.dto.CreateUserRequest
+import com.procar.gateway.api.dto.UserDto
+import com.procar.gateway.api.dto.UserRole
 import com.procar.ui.components.DataTable
 import com.procar.ui.components.EnumDropdown
 import com.procar.ui.components.SectionHeader

@@ -8,7 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.procar.api.updateLot
-import com.procar.model.AdminLotResponse
+import com.procar.gateway.api.dto.AdminLotResponse
 import com.procar.ui.components.SectionEditState
 import com.procar.ui.lot.AuctionSection
 import com.procar.ui.lot.GeneralSection

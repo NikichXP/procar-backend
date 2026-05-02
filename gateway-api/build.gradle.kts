@@ -1,21 +1,48 @@
-import org.gradle.jvm.tasks.Jar
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    kotlin("jvm")
+    kotlin("multiplatform")
+    kotlin("plugin.serialization") version "2.1.21"
+    id("com.android.library")
 }
 
 group = "com.procar"
 version = "0.0.1-SNAPSHOT"
 
-tasks.named<Jar>("jar") {
-	enabled = true
-	archiveClassifier.set("")
-}
-
 repositories {
     mavenCentral()
+    google()
 }
 
-dependencies {
-    implementation("io.swagger.core.v3:swagger-annotations:2.2.25")
+kotlin {
+    jvmToolchain(21)
+
+    jvm()
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+    }
+
+    androidTarget()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+            }
+        }
+    }
+}
+
+android {
+    namespace = "com.procar.gateway.api"
+    compileSdk = 35
+    defaultConfig {
+        minSdk = 35
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
 }

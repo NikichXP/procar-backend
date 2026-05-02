@@ -1,5 +1,8 @@
 package com.procar.gateway.api.dto
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class LotSearchRequest(
     val status: LotStatus?,
     val source: String?,
@@ -13,5 +16,5 @@ data class LotSearchRequest(
     val condition: CarCondition?,
     val offset: Int = 0,
     val limit: Int = 20,
-    val sort: String = "endTime,asc"
+    val sort: String = "endTime,asc",
 )

@@ -1,5 +1,5 @@
 # Stage 1: Build stage using Gradle image
-FROM gradle:8.5-jdk21 AS builder
+FROM gradle:8.10-jdk21 AS builder
 
 WORKDIR /app
 

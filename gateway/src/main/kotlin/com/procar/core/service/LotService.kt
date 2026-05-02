@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.format.DateTimeFormatter
 import com.procar.provider.lot.LotStatus as ProviderLotStatus
+import com.procar.provider.lot.VehicleCondition as ProviderVehicleCondition
 
 @Service
 class LotService(
@@ -171,14 +172,14 @@ class LotService(
         }
     }
 
-    private fun mapCondition(condition: VehicleCondition): CarCondition {
+    private fun mapCondition(condition: ProviderVehicleCondition): CarCondition {
         return when (condition) {
-            VehicleCondition.EXCELLENT,
-            VehicleCondition.GOOD -> CarCondition.USED
-            VehicleCondition.FAIR,
-            VehicleCondition.POOR -> CarCondition.USED
-            VehicleCondition.DAMAGED,
-            VehicleCondition.SALVAGE -> CarCondition.DAMAGED
+            ProviderVehicleCondition.EXCELLENT,
+            ProviderVehicleCondition.GOOD -> CarCondition.USED
+            ProviderVehicleCondition.FAIR,
+            ProviderVehicleCondition.POOR -> CarCondition.USED
+            ProviderVehicleCondition.DAMAGED,
+            ProviderVehicleCondition.SALVAGE -> CarCondition.DAMAGED
         }
     }
 

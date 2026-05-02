@@ -12,12 +12,7 @@ import com.procar.api.createLot
 import com.procar.api.fetchBrokers
 import com.procar.api.fetchWarehouses
 import com.procar.api.uploadLotPhoto
-import com.procar.model.*
-import com.procar.model.BodyType
-import com.procar.model.Transmission
-import com.procar.model.Drivetrain
-import com.procar.model.FuelType
-import com.procar.model.VehicleCondition
+import com.procar.gateway.api.dto.*
 import com.procar.ui.components.EnumDropdown
 import com.procar.ui.components.SectionHeader
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
@@ -242,7 +237,7 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
                                 externalId = autoTitle.replace(" ", "_").lowercase(),
                                 title = autoTitle,
                                 description = "",
-                                status = LotStatus.DRAFT,
+                                status = AdminLotStatus.DRAFT,
                                 vehicle = AdminVehicleInfoRequest(
                                     make = make, model = model,
                                     year = year.toInt(),

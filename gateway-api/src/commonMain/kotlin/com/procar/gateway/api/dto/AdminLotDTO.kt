@@ -1,23 +1,14 @@
-package com.procar.model
+package com.procar.gateway.api.dto
 
 import kotlinx.serialization.Serializable
 
-// --- Lot models ---
-
 @Serializable
-enum class LotStatus {
+enum class AdminLotStatus {
     DRAFT,
     PENDING,
     ACTIVE,
     CLOSED,
-    CANCELLED
-}
-
-@Serializable
-enum class LotType {
-    AUCTION,
-    BUYOUT,
-    HYBRID
+    CANCELLED,
 }
 
 @Serializable
@@ -29,7 +20,7 @@ data class AdminLotResponse(
     val vehicle: AdminVehicleInfoResponse,
     val auction: AdminAuctionInfoResponse? = null,
     val location: AdminLocationInfoResponse,
-    val status: LotStatus,
+    val status: AdminLotStatus,
     val createdAt: String,
     val updatedAt: String,
     val lotType: LotType = LotType.AUCTION,
@@ -93,11 +84,6 @@ data class AdminLocationInfoResponse(
     val timezone: String,
 )
 
-/**
- * Gateway-facing create-lot payload. The gateway resolves [brokerId] and
- * [warehouseId] to full broker/warehouse data, so the client does not need to
- * pass seller info or location.
- */
 @Serializable
 data class AdminCreateLotRequest(
     val brokerId: String,
@@ -108,7 +94,7 @@ data class AdminCreateLotRequest(
     val vehicle: AdminVehicleInfoRequest,
     val auction: AdminAuctionInfoRequest? = null,
     val metadata: AdminLotMetadataRequest = AdminLotMetadataRequest(),
-    val status: LotStatus,
+    val status: AdminLotStatus,
     val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
 )
@@ -154,10 +140,6 @@ data class AdminLocationInfoRequest(
     val timezone: String,
 )
 
-/**
- * Gateway-level lot metadata. Seller info is intentionally omitted: it is
- * derived from the referenced broker on the server side.
- */
 @Serializable
 data class AdminLotMetadataRequest(
     val tags: List<String> = emptyList(),
@@ -172,7 +154,7 @@ data class AdminUpdateLotRequest(
     val auction: AdminAuctionInfoRequest? = null,
     val location: AdminLocationInfoRequest? = null,
     val metadata: AdminLotMetadataRequest? = null,
-    val status: LotStatus? = null,
+    val status: AdminLotStatus? = null,
     val lotType: LotType? = null,
     val buyoutPrice: Double? = null,
 )
@@ -182,120 +164,3 @@ data class AdminPaginatedLotsResponse(
     val lots: List<AdminLotResponse>,
     val pagination: PaginationResponse = PaginationResponse(hasNext = false),
 )
-
-@Serializable
-data class PaginationResponse(
-    val hasNext: Boolean,
-    val nextCursor: String? = null,
-)
-
-// --- Warehouse models ---
-
-@Serializable
-data class AdminWarehouseResponse(
-    val id: String,
-    val name: String,
-    val address: String,
-    val city: String,
-    val state: String,
-    val zipCode: String,
-    val country: String,
-    val timezone: String,
-    val createdAt: String,
-    val updatedAt: String,
-    val contactName: String? = null,
-    val contactPhone: String? = null,
-    val contactEmail: String? = null,
-)
-
-@Serializable
-data class AdminCreateWarehouseRequest(
-    val name: String,
-    val address: String,
-    val city: String,
-    val state: String,
-    val zipCode: String,
-    val country: String,
-    val timezone: String,
-    val contactName: String? = null,
-    val contactPhone: String? = null,
-    val contactEmail: String? = null,
-)
-
-// --- User models ---
-
-enum class UserRole { USER, BROKER, ADMIN }
-
-@Serializable
-data class UserDto(
-    val id: String,
-    val username: String,
-    val blocked: Boolean,
-    val roles: List<UserRole>,
-    val brokerOrgId: String? = null,
-)
-
-@Serializable
-data class CreateUserRequest(
-    val username: String,
-    val brokerOrgId: String? = null,
-    val roles: List<UserRole>? = null,
-)
-
-@Serializable
-data class BlockUserRequest(val blocked: Boolean)
-
-@Serializable
-data class UpdateUserRolesRequest(val roles: List<UserRole>)
-
-@Serializable
-data class UpdateUserBrokerRequest(val brokerOrgId: String? = null)
-
-// --- Broker models ---
-
-@Serializable
-data class BrokerDto(
-    val id: String,
-    val name: String,
-    val address: String = "",
-    val phones: List<String> = emptyList(),
-    val emails: List<String> = emptyList(),
-)
-
-@Serializable
-data class CreateBrokerRequest(
-    val id: String,
-    val name: String,
-    val address: String = "",
-    val phones: List<String> = emptyList(),
-    val emails: List<String> = emptyList(),
-)
-
-@Serializable
-data class UpdateBrokerRequest(
-    val name: String? = null,
-    val address: String? = null,
-    val phones: List<String>? = null,
-    val emails: List<String>? = null,
-)
-
-// --- Auth models ---
-
-@Serializable
-data class LoginRequest(val username: String, val password: String)
-
-@Serializable
-data class AccessToken(val token: String, val validUntil: String)
-
-@Serializable
-data class AuthResult(
-    val success: Boolean,
-    val message: String? = null,
-    val accessToken: AccessToken? = null,
-    val refreshToken: String? = null,
-)
-
-// --- API wrapper ---
-
-@Serializable
-data class ApiResponse<T>(val data: T)
