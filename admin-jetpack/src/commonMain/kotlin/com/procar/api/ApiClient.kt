@@ -1,7 +1,6 @@
 package com.procar.api
 
 import coil3.ImageLoader
-import coil3.PlatformContext
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.procar.TokenStorage
 import com.procar.createHttpClient

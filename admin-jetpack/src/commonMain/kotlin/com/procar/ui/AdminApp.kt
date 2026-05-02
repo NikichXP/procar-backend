@@ -37,7 +37,7 @@ fun AdminApp() {
                 val accessToken = getAccessToken(AuthState.refreshToken)
                 AuthState.accessToken = accessToken.token
                 isAuthenticated = true
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 AuthState.refreshToken = ""
             }
         }
