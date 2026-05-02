@@ -41,9 +41,6 @@ fun UsersScreen() {
     LaunchedEffect(Unit) { load() }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Users", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(8.dp))
-
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { state.showCreateDialog = true }) { Text("Create User") }
             OutlinedButton(onClick = { load() }) { Text("Refresh") }

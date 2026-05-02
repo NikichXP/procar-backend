@@ -54,6 +54,7 @@ kotlin {
                 implementation(compose.material3)
                 implementation(compose.ui)
                 implementation(compose.components.resources)
+                implementation(compose.materialIconsExtended)
                 implementation("io.ktor:ktor-client-core:3.1.3")
                 implementation("io.ktor:ktor-client-auth:3.1.3")
                 implementation("io.ktor:ktor-client-content-negotiation:3.1.3")

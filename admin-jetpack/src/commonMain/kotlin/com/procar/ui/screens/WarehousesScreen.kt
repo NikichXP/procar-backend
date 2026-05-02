@@ -33,9 +33,6 @@ fun WarehousesScreen() {
     LaunchedEffect(Unit) { loadWarehouses() }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Warehouses", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(8.dp))
-
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { state.showCreateDialog = true }) { Text("Create Warehouse") }
             OutlinedButton(onClick = { loadWarehouses() }) { Text("Refresh") }

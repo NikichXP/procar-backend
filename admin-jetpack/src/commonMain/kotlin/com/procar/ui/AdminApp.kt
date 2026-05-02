@@ -1,8 +1,10 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.procar.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +17,7 @@ import com.procar.ui.screens.LotsScreen
 import com.procar.ui.screens.LoginScreen
 import com.procar.ui.screens.UsersScreen
 import com.procar.ui.screens.WarehousesScreen
+import kotlinx.coroutines.launch
 
 enum class Screen(val label: String) {
     LOTS("Lots"),
@@ -35,7 +38,6 @@ fun AdminApp() {
                 AuthState.accessToken = accessToken.token
                 isAuthenticated = true
             } catch (e: Exception) {
-                // Refresh token is invalid or expired, clear it and show login
                 AuthState.refreshToken = ""
             }
         }
@@ -53,16 +55,54 @@ fun AdminApp() {
         } else if (!isAuthenticated) {
             LoginScreen(onLoginSuccess = { token -> AuthState.accessToken = token; isAuthenticated = true })
         } else {
-            Row(modifier = Modifier.fillMaxSize()) {
-                var currentScreen by remember { mutableStateOf(Screen.LOTS) }
-                NavSidebar(currentScreen = currentScreen, onNavigate = { currentScreen = it }, onLogout = { isAuthenticated = false; AuthState.refreshToken = "" })
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when (currentScreen) {
-                        Screen.LOTS -> LotsScreen()
-                        Screen.WAREHOUSES -> WarehousesScreen()
-                        Screen.USERS -> UsersScreen()
-                        Screen.BROKERS -> BrokersScreen()
+            AuthenticatedLayout(onLogout = { isAuthenticated = false; AuthState.refreshToken = "" })
+        }
+    }
+}
+
+@Composable
+private fun AuthenticatedLayout(onLogout: () -> Unit) {
+    var currentScreen by remember { mutableStateOf(Screen.LOTS) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    fun toggleDrawer() {
+        scope.launch {
+            if (drawerState.isOpen) drawerState.close() else drawerState.open()
+        }
+    }
+
+    fun navigate(screen: Screen) {
+        currentScreen = screen
+        scope.launch { drawerState.close() }
+    }
+
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(currentScreen.label) },
+                navigationIcon = {
+                    IconButton(onClick = { toggleDrawer() }) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
+                }
+            )
+        }
+    ) { padding ->
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                ModalDrawerSheet {
+                    DrawerItems(currentScreen, ::navigate, onLogout)
+                }
+            }
+        ) {
+            Box(modifier = Modifier.padding(padding).fillMaxSize()) {
+                when (currentScreen) {
+                    Screen.LOTS -> LotsScreen()
+                    Screen.WAREHOUSES -> WarehousesScreen()
+                    Screen.USERS -> UsersScreen()
+                    Screen.BROKERS -> BrokersScreen()
                 }
             }
         }
@@ -70,49 +110,33 @@ fun AdminApp() {
 }
 
 @Composable
-fun NavSidebar(currentScreen: Screen, onNavigate: (Screen) -> Unit, onLogout: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .width(200.dp)
-            .fillMaxHeight()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(vertical = 16.dp)
-    ) {
+private fun DrawerItems(
+    currentScreen: Screen,
+    onNavigate: (Screen) -> Unit,
+    onLogout: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp)) {
         Text(
             "Procar Admin",
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         Screen.entries.forEach { screen ->
-            NavItem(screen.label, currentScreen == screen) { onNavigate(screen) }
+            NavigationDrawerItem(
+                label = { Text(screen.label) },
+                selected = currentScreen == screen,
+                onClick = { onNavigate(screen) },
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
         }
-        
         Spacer(modifier = Modifier.weight(1f))
-        
         Button(
             onClick = onLogout,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         ) {
             Text("Logout")
         }
-    }
-}
-
-@Composable
-fun NavItem(label: String, selected: Boolean, onClick: () -> Unit) {
-    val bg = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val fg = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(bg)
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Text(label, color = fg, style = MaterialTheme.typography.bodyMedium)
     }
 }
