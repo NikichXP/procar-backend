@@ -5,6 +5,7 @@ import coil3.PlatformContext
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.procar.TokenStorage
 import com.procar.createHttpClient
+import com.procar.getPlatformContext
 import com.procar.model.*
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -170,7 +171,7 @@ suspend fun deleteLotPhoto(lotId: String, url: String): AdminLotResponse =
  * `files/{key}` URLs can be rendered inline via AsyncImage.
  */
 val imageLoader: ImageLoader by lazy {
-    ImageLoader.Builder(PlatformContext.INSTANCE)
+    ImageLoader.Builder(getPlatformContext())
         .components { add(KtorNetworkFetcherFactory(httpClient)) }
         .build()
 }

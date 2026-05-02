@@ -1,5 +1,6 @@
 package com.procar
 
+import coil3.PlatformContext
 import io.ktor.client.*
 
 expect object TokenStorage {
@@ -7,5 +8,7 @@ expect object TokenStorage {
     fun setItem(key: String, value: String)
     fun removeItem(key: String)
 }
+
+expect fun getPlatformContext(): PlatformContext
 
 expect fun createHttpClient(): HttpClient
