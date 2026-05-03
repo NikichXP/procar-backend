@@ -19,7 +19,7 @@ repositories {
 }
 
 subprojects {
-	if (name == "admin-jetpack" || name == "gateway-api") return@subprojects
+	if (name == "admin-jetpack" || name == "customer-jetpack" || name == "gateway-api") return@subprojects
 
 	apply(plugin = "java")
 	apply(plugin = "org.jetbrains.kotlin.jvm")
