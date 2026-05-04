@@ -143,14 +143,13 @@ data class ShippingInfo(
 )
 
 enum class LotStatus {
-    DRAFT,
-    PENDING,
-    ACTIVE,
-    AWAITING_PAYMENT,
-    RELISTED,
-    AWAITING_SHIPMENT,
-    IN_TRANSIT,
-    COMPLETED,
+    DRAFT, // lot is created, not all info is set
+    PENDING, // lot is ready to be auctioned or sold, could be either waiting for auction start date or manual start in case of buyout
+    ACTIVE, // ongoing trading for the lot
+    AWAITING_PAYMENT, // after winning auction we wait until customer will pay for the lot he won
+    AWAITING_SHIPMENT, // we got payment, we are waiting for shipment, pure CRM-only status
+    IN_TRANSIT, // we got payment, we are waiting for shipment, pure CRM-only status
+    COMPLETED, // customer received the lot, pure CRM-only status
     HIDDEN // for deleted etc.
 }
 

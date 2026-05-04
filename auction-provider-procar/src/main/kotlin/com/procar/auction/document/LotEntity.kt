@@ -10,7 +10,7 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Document(collection = "lots")
-data class LotDocument(
+data class LotEntity(
     @Id
     @OptIn(ExperimentalUuidApi::class)
     val id: String = Uuid.generateV7().toString(),

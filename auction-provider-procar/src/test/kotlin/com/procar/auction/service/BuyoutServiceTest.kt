@@ -1,7 +1,7 @@
 package com.procar.auction.service
 
-import com.procar.auction.document.BidDocument
-import com.procar.auction.document.LotDocument
+import com.procar.auction.document.BidEntity
+import com.procar.auction.document.LotEntity
 import com.procar.auction.repository.BidRepository
 import com.procar.provider.bid.*
 import com.procar.provider.lot.LotStatus
@@ -31,7 +31,7 @@ class BuyoutServiceTest {
         // Given
         val lotId = "lot-123"
         val bidderId = "user-456"
-        val lot = org.mockito.kotlin.mock<LotDocument> {
+        val lot = org.mockito.kotlin.mock<LotEntity> {
             on { id }.thenReturn(lotId)
             on { status }.thenReturn(LotStatus.ACTIVE)
             on { lotType }.thenReturn(LotType.BUYOUT)
@@ -42,18 +42,16 @@ class BuyoutServiceTest {
             any<Query>(),
             any<Update>(),
             any<FindAndModifyOptions>(),
-            eq(LotDocument::class.java)
+            eq(LotEntity::class.java)
         )).thenReturn(lot)
 
-        whenever(bidRepository.save(any<BidDocument>())).thenReturn(
-            BidDocument(
+        whenever(bidRepository.save(any<BidEntity>())).thenReturn(
+            BidEntity(
                 lotId = lotId,
-                externalId = null,
                 bidderId = bidderId,
                 amount = 25000.0,
                 bidType = BidType.INSTANT_BUY,
                 status = BidStatus.WON,
-                isWinning = true,
                 isAutoBid = false,
                 placedAt = LocalDateTime.now()
             )
@@ -75,7 +73,7 @@ class BuyoutServiceTest {
         // Given
         val lotId = "lot-123"
         val bidderId = "user-456"
-        val lot = org.mockito.kotlin.mock<LotDocument> {
+        val lot = org.mockito.kotlin.mock<LotEntity> {
             on { id }.thenReturn(lotId)
             on { status }.thenReturn(LotStatus.ACTIVE)
             on { lotType }.thenReturn(LotType.HYBRID)
@@ -86,18 +84,16 @@ class BuyoutServiceTest {
             any<Query>(),
             any<Update>(),
             any<FindAndModifyOptions>(),
-            eq(LotDocument::class.java)
+            eq(LotEntity::class.java)
         )).thenReturn(lot)
 
-        whenever(bidRepository.save(any<BidDocument>())).thenReturn(
-            BidDocument(
+        whenever(bidRepository.save(any<BidEntity>())).thenReturn(
+            BidEntity(
                 lotId = lotId,
-                externalId = null,
                 bidderId = bidderId,
                 amount = 25000.0,
                 bidType = BidType.INSTANT_BUY,
                 status = BidStatus.WON,
-                isWinning = true,
                 isAutoBid = false,
                 placedAt = LocalDateTime.now()
             )
@@ -123,7 +119,7 @@ class BuyoutServiceTest {
             any<Query>(),
             any<Update>(),
             any<FindAndModifyOptions>(),
-            eq(LotDocument::class.java)
+            eq(LotEntity::class.java)
         )).thenReturn(null)
 
         // When
@@ -134,6 +130,6 @@ class BuyoutServiceTest {
         assertEquals(BidStatus.REJECTED, response.status)
         assertEquals(lotId, response.lotId)
         assertEquals("Lot is not available for buyout", response.message)
-        verify(bidRepository, never()).save(any<BidDocument>())
+        verify(bidRepository, never()).save(any<BidEntity>())
     }
 }

@@ -1,14 +1,14 @@
 package com.procar.auction.converter
 
-import com.procar.auction.document.LotDocument
+import com.procar.auction.document.LotEntity
 import com.procar.provider.lot.*
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
 @Component
-class LotDocumentToProviderLotConverter : Converter<LotDocument, VehicleLot> {
+class LotDocumentToProviderLotConverter : Converter<LotEntity, VehicleLot> {
 
-    override fun convert(source: LotDocument): VehicleLot {
+    override fun convert(source: LotEntity): VehicleLot {
         return VehicleLot(
             id = source.id,
             providerId = source.providerId,

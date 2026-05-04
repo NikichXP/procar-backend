@@ -18,7 +18,7 @@ class BidService(
 ) {
 
     fun getBidHistory(lotId: String, page: Int, size: Int): BidPage {
-        val response: ResponseEntity<ApiResponse<BidHistoryResponse>> = internalBidAPI.getBidHistory(lotId, null)
+        val response: ResponseEntity<ApiResponse<BidHistoryResponse>> = internalBidAPI.getBidHistory(lotId)
         val apiResponse = response.body ?: throw RuntimeException("Failed to get bid history")
         val bidHistory = apiResponse.data
         
@@ -74,17 +74,6 @@ class BidService(
             placedAt = placedBid.bid.placedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             isWinning = placedBid.bid.isWinning
         )
-    }
-
-    fun validateBid(lotId: String, amount: Double, bidderId: String): Boolean {
-        val request = ValidateBidRequest(
-            lotId = lotId,
-            amount = amount,
-            bidderId = bidderId
-        )
-        val response: ResponseEntity<ApiResponse<ValidateBidResponse>> = internalBidAPI.validateBid(request)
-        val apiResult = response.body
-        return apiResult?.data?.isValid ?: false
     }
 
     fun buyout(lotId: String, bidderId: String): BuyoutResult {

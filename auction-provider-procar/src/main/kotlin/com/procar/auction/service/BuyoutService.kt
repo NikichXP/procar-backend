@@ -1,7 +1,7 @@
 package com.procar.auction.service
 
-import com.procar.auction.document.BidDocument
-import com.procar.auction.document.LotDocument
+import com.procar.auction.document.BidEntity
+import com.procar.auction.document.LotEntity
 import com.procar.auction.repository.BidRepository
 import com.procar.provider.bid.*
 import com.procar.provider.lot.LotStatus
@@ -29,7 +29,7 @@ class BuyoutService(
             q,
             Update().set("status", LotStatus.AWAITING_PAYMENT),
             FindAndModifyOptions.options().returnNew(true),
-            LotDocument::class.java,
+            LotEntity::class.java,
         ) ?: return BuyoutResponse(
             lotId = request.lotId,
             bidderId = request.bidderId,
@@ -40,14 +40,12 @@ class BuyoutService(
         )
         val price = requireNotNull(updated.buyoutPrice) { "buyoutPrice must be set" }
         val bid = bidRepository.save(
-            BidDocument(
+            BidEntity(
                 lotId = updated.id,
-                externalId = null,
                 bidderId = request.bidderId,
                 amount = price,
                 bidType = BidType.INSTANT_BUY,
                 status = BidStatus.WON,
-                isWinning = true,
                 isAutoBid = false,
             )
         )

@@ -211,7 +211,6 @@ fun LotStatusChip(status: LotStatus, modifier: Modifier = Modifier) {
         LotStatus.AWAITING_SHIPMENT -> "Paid" to Color(0xFF6A1B9A)
         LotStatus.IN_TRANSIT -> "Shipping" to Color(0xFF00695C)
         LotStatus.COMPLETED -> "Done" to Color(0xFF546E7A)
-        LotStatus.RELISTED -> "Relisted" to Color(0xFFE65100)
         LotStatus.INVALID -> "Invalid" to Color(0xFFB71C1C)
     }
     Surface(

@@ -6,9 +6,9 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
 @Component
-class LotDocumentToAdminLotResponseConverter : Converter<LotDocument, AdminLotResponse> {
+class LotDocumentToAdminLotResponseConverter : Converter<LotEntity, AdminLotResponse> {
     
-    override fun convert(source: LotDocument): AdminLotResponse {
+    override fun convert(source: LotEntity): AdminLotResponse {
         return AdminLotResponse(
             id = source.id,
             externalId = source.externalId,

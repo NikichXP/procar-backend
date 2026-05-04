@@ -15,8 +15,7 @@ interface InternalBidAPI {
     
     @GetExchange("/{lotId}/history")
     fun getBidHistory(
-        @PathVariable lotId: String,
-        @RequestParam(required = false) connectionId: String?
+        @PathVariable lotId: String
     ): ResponseEntity<ApiResponse<BidHistoryResponse>>
     
     @PostExchange("/place")

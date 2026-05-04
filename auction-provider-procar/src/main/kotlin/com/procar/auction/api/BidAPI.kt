@@ -6,6 +6,8 @@ import com.procar.auction.service.InternalAuctionBidService
 import com.procar.provider.InternalBidAPI
 import com.procar.provider.bid.*
 import com.procar.provider.common.ApiResponse
+import com.procar.provider.common.PaginationResponse
+import org.springframework.core.convert.ConversionService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 
@@ -13,13 +15,29 @@ import org.springframework.web.bind.annotation.RestController
 class BidAPI(
     private val bidService: InternalAuctionBidService,
     private val buyoutService: BuyoutService,
-    private val responseFactory: BidResponseFactory
+    private val responseFactory: BidResponseFactory,
+    private val conversionService: ConversionService
 ) : InternalBidAPI {
 
-    override fun getBidHistory(lotId: String, connectionId: String?): ResponseEntity<ApiResponse<BidHistoryResponse>> {
+    override fun getBidHistory(lotId: String): ResponseEntity<ApiResponse<BidHistoryResponse>> {
         return try {
-            val response = bidService.getBidHistory(lotId, connectionId)
-            ResponseEntity.ok(ApiResponse(response))
+            val bids = bidService.getAllBidsForLot(lotId)
+                .mapNotNull { conversionService.convert(it, ProviderBid::class.java) }
+            val active = bids.filter { it.status == BidStatus.ACCEPTED || it.status == BidStatus.WON }
+            val summary = BidSummary(
+                totalBids = bids.size,
+                currentBid = active.maxOfOrNull { it.amount } ?: 0.0,
+                bidCount = active.size,
+                highestBid = active.maxOfOrNull { it.amount } ?: 0.0,
+                lowestBid = active.minOfOrNull { it.amount } ?: 0.0,
+                averageBid = if (active.isNotEmpty()) active.map { it.amount }.average() else 0.0
+            )
+            ResponseEntity.ok(ApiResponse(BidHistoryResponse(
+                lotId = lotId,
+                bids = bids,
+                pagination = PaginationResponse(hasNext = false, nextCursor = null),
+                summary = summary
+            )))
         } catch (_: Exception) {
             ResponseEntity.ok(ApiResponse(responseFactory.createEmptyBidHistoryResponse(lotId)))
         }

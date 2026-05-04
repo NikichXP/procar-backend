@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequest, LotDocument> {
+class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequest, LotEntity> {
     
-    override fun convert(source: AdminCreateLotRequest): LotDocument {
-        return LotDocument(
+    override fun convert(source: AdminCreateLotRequest): LotEntity {
+        return LotEntity(
             externalId = source.externalId,
             title = source.title,
             description = source.description,
@@ -173,9 +173,9 @@ class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequ
 }
 
 @Component
-class AdminUpdateLotRequestToLotDocumentConverter : Converter<Pair<AdminUpdateLotRequest, LotDocument>, LotDocument> {
+class AdminUpdateLotRequestToLotDocumentConverter : Converter<Pair<AdminUpdateLotRequest, LotEntity>, LotEntity> {
     
-    override fun convert(source: Pair<AdminUpdateLotRequest, LotDocument>): LotDocument {
+    override fun convert(source: Pair<AdminUpdateLotRequest, LotEntity>): LotEntity {
         val (request, existing) = source
         return existing.copy(
             title = request.title ?: existing.title,

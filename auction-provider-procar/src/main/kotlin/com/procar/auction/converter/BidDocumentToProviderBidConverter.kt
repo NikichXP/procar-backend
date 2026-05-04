@@ -1,19 +1,19 @@
 package com.procar.auction.converter
 
-import com.procar.auction.document.BidDocument
+import com.procar.auction.document.BidEntity
 import com.procar.provider.bid.ProviderBid
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 
 @Component
-class BidDocumentToProviderBidConverter : Converter<BidDocument, ProviderBid> {
+class BidDocumentToProviderBidConverter : Converter<BidEntity, ProviderBid> {
 
-    override fun convert(source: BidDocument): ProviderBid {
+    override fun convert(source: BidEntity): ProviderBid {
         return ProviderBid(
             id = source.id,
             lotId = source.lotId,
             providerId = source.providerId,
-            externalId = source.externalId,
+            externalId = null,
             bidderId = source.bidderId,
             amount = source.amount,
             bidType = source.bidType,

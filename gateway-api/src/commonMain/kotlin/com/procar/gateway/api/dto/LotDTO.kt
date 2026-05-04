@@ -100,7 +100,6 @@ enum class LotStatus {
     PENDING,
     ACTIVE,
     AWAITING_PAYMENT,
-    RELISTED,
     AWAITING_SHIPMENT,
     IN_TRANSIT,
     COMPLETED,

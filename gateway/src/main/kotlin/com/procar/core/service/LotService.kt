@@ -150,7 +150,6 @@ class LotService(
             LotStatus.PENDING -> ProviderLotStatus.PENDING
             LotStatus.ACTIVE -> ProviderLotStatus.ACTIVE
             LotStatus.AWAITING_PAYMENT -> ProviderLotStatus.AWAITING_PAYMENT
-            LotStatus.RELISTED -> ProviderLotStatus.RELISTED
             LotStatus.AWAITING_SHIPMENT -> ProviderLotStatus.AWAITING_SHIPMENT
             LotStatus.IN_TRANSIT -> ProviderLotStatus.IN_TRANSIT
             LotStatus.COMPLETED -> ProviderLotStatus.COMPLETED
@@ -164,7 +163,6 @@ class LotService(
             ProviderLotStatus.PENDING -> LotStatus.PENDING
             ProviderLotStatus.ACTIVE -> LotStatus.ACTIVE
             ProviderLotStatus.AWAITING_PAYMENT -> LotStatus.AWAITING_PAYMENT
-            ProviderLotStatus.RELISTED -> LotStatus.RELISTED
             ProviderLotStatus.AWAITING_SHIPMENT -> LotStatus.AWAITING_SHIPMENT
             ProviderLotStatus.IN_TRANSIT -> LotStatus.IN_TRANSIT
             ProviderLotStatus.COMPLETED -> LotStatus.COMPLETED

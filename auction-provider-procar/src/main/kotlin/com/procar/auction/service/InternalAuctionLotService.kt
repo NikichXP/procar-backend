@@ -1,6 +1,6 @@
 package com.procar.auction.service
 
-import com.procar.auction.document.LotDocument
+import com.procar.auction.document.LotEntity
 import com.procar.auction.document.VehicleImageDocument
 import com.procar.auction.repository.LotRepository
 import com.procar.provider.admin.AdminLotResponse
@@ -22,17 +22,18 @@ import java.time.LocalDateTime
 @Service
 class InternalAuctionLotService(
     private val lotRepository: LotRepository,
+    private val lotStateService: LotStateService,
     private val mongoTemplate: MongoTemplate,
     private val conversionService: ConversionService
 ) {
 
-    fun createLot(lotDocument: LotDocument): LotDocument {
-        val savedLot = lotRepository.save(lotDocument)
+    fun createLot(lotEntity: LotEntity): LotEntity {
+        val savedLot = lotRepository.save(lotEntity)
         
         return savedLot
     }
 
-    fun getLotById(lotId: String): LotDocument? {
+    fun getLotById(lotId: String): LotEntity? {
         return lotRepository.findById(lotId).orElse(null)
     }
 
@@ -98,7 +99,7 @@ class InternalAuctionLotService(
 
         val limit = request.pagination.limit
         mongoQuery.limit(limit + 1)
-        val lots = mongoTemplate.find<LotDocument>(mongoQuery)
+        val lots = mongoTemplate.find<LotEntity>(mongoQuery)
 
         val hasNext = lots.size > limit
         val page = if (hasNext) lots.dropLast(1) else lots
@@ -116,18 +117,18 @@ class InternalAuctionLotService(
         )
     }
 
-    fun updateLot(lotId: String, lotDocument: LotDocument): LotDocument {
+    fun updateLot(lotId: String, lotEntity: LotEntity): LotEntity {
         val existingLot = lotRepository.findById(lotId)
             .orElseThrow { IllegalArgumentException("Lot not found with id: $lotId") }
         
         val updatedLot = existingLot.copy(
-            title = lotDocument.title,
-            description = lotDocument.description,
-            vehicle = lotDocument.vehicle,
-            auction = lotDocument.auction,
-            location = lotDocument.location,
-            metadata = lotDocument.metadata,
-            status = lotDocument.status,
+            title = lotEntity.title,
+            description = lotEntity.description,
+            vehicle = lotEntity.vehicle,
+            auction = lotEntity.auction,
+            location = lotEntity.location,
+            metadata = lotEntity.metadata,
+            status = lotEntity.status,
             updatedAt = LocalDateTime.now()
         )
         
@@ -143,7 +144,7 @@ class InternalAuctionLotService(
         }
     }
 
-    fun updateLotStatus(lotId: String, status: LotStatus): LotDocument? {
+    fun updateLotStatus(lotId: String, status: LotStatus): LotEntity? {
         val existingLot = lotRepository.findById(lotId).orElse(null) ?: return null
         
         val updatedLot = existingLot.copy(
@@ -169,7 +170,7 @@ class InternalAuctionLotService(
         mongoQuery.with(Sort.by(Sort.Direction.DESC, "_id"))
         mongoQuery.limit(limit + 1)
         
-        val lots = mongoTemplate.find<LotDocument>(mongoQuery)
+        val lots = mongoTemplate.find<LotEntity>(mongoQuery)
         
         val hasMore = lots.size > limit
         val lotsToReturn = if (hasMore) lots.dropLast(1) else lots
@@ -193,7 +194,7 @@ class InternalAuctionLotService(
         )
     }
 
-    fun addLotImage(lotId: String, image: VehicleImageDocument): LotDocument? {
+    fun addLotImage(lotId: String, image: VehicleImageDocument): LotEntity? {
         val existing = lotRepository.findById(lotId).orElse(null) ?: return null
         val newVehicle = existing.vehicle.copy(
             images = existing.vehicle.images + image
@@ -205,7 +206,7 @@ class InternalAuctionLotService(
         return lotRepository.save(updated)
     }
 
-    fun removeLotImage(lotId: String, url: String): LotDocument? {
+    fun removeLotImage(lotId: String, url: String): LotEntity? {
         val existing = lotRepository.findById(lotId).orElse(null) ?: return null
         val filtered = existing.vehicle.images.filterNot { it.url == url }
         if (filtered.size == existing.vehicle.images.size) return existing
@@ -216,11 +217,11 @@ class InternalAuctionLotService(
         return lotRepository.save(updated)
     }
 
-    fun archiveLot(lotId: String): LotDocument? {
+    fun archiveLot(lotId: String): LotEntity? {
         return updateLotStatus(lotId, LotStatus.HIDDEN)
     }
 
-    fun unarchiveLot(lotId: String): LotDocument? {
+    fun unarchiveLot(lotId: String): LotEntity? {
         return updateLotStatus(lotId, LotStatus.ACTIVE)
     }
 }

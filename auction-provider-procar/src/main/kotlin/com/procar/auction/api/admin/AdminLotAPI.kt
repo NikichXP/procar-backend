@@ -1,6 +1,6 @@
 package com.procar.auction.api.admin
 
-import com.procar.auction.document.LotDocument
+import com.procar.auction.document.LotEntity
 import com.procar.auction.document.VehicleImageDocument
 import com.procar.auction.service.InternalAuctionLotService
 import com.procar.provider.admin.*
@@ -17,8 +17,8 @@ class AdminLotAPI(
 ) : AdminLotController {
 
     override suspend fun createLot(request: AdminCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
-        val lotDocument = conversionService.convert(request, LotDocument::class.java)!!
-        val savedLot = lotService.createLot(lotDocument)
+        val lotEntity = conversionService.convert(request, LotEntity::class.java)!!
+        val savedLot = lotService.createLot(lotEntity)
         val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(ApiResponse(adminResponse, "Lot created successfully"))
     }
@@ -37,7 +37,7 @@ class AdminLotAPI(
         val existingLot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
         
-        val updatedLot = conversionService.convert(Pair(request, existingLot), LotDocument::class.java)!!
+        val updatedLot = conversionService.convert(Pair(request, existingLot), LotEntity::class.java)!!
         val savedLot = lotService.updateLot(lotId, updatedLot)
         val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(ApiResponse(adminResponse, "Lot updated successfully"))
