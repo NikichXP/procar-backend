@@ -56,6 +56,15 @@ class AdminLotController(
         return adminLotConnectorService.getAllLots(cursor, limit, status)
     }
 
+    @GetMapping("/{lotId}/possible-statuses")
+    suspend fun getPossibleStatuses(
+        @PathVariable lotId: String
+    ): ResponseEntity<ApiResponse<List<String>>> {
+        val response = adminLotConnectorService.getPossibleStatuses(lotId)
+        val names = response.body?.data?.map { it.name } ?: emptyList()
+        return ResponseEntity.ok(ApiResponse(names))
+    }
+
     @PostMapping("/{lotId}/hidden")
     suspend fun setHiddenStatus(
         @PathVariable lotId: String,

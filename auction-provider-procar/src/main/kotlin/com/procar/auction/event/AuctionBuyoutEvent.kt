@@ -2,8 +2,7 @@ package com.procar.auction.event
 
 import org.springframework.context.ApplicationEvent
 
-// TODO
-class AuctionCompletedEvent(
+class AuctionBuyoutEvent(
     source: Any,
     val lotId: String,
     val winnerId: String,

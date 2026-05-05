@@ -145,6 +145,12 @@ suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse =
 suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): AdminLotResponse =
     putEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId", request)
 
+suspend fun updateLotStatus(lotId: String, status: AdminLotStatus): AdminLotResponse =
+    postEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId/status", AdminUpdateStatusRequest(status))
+
+suspend fun fetchPossibleStatuses(lotId: String): List<String> =
+    getEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId/possible-statuses")
+
 suspend fun uploadLotPhoto(
     lotId: String,
     fileName: String,

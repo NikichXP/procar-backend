@@ -17,6 +17,7 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     private val fields: List<FieldState<*>> = listOf(title, description, status, lotType, buyoutPrice)
 
     override val isModified: Boolean get() = fields.any { it.isModified }
+    val isOnlyStatusModified: Boolean get() = status.isModified && fields.filterNot { it === status }.none { it.isModified }
     override fun revert() = fields.forEach { it.revert() }
     override fun commit() = fields.forEach { it.commit() }
 

@@ -57,4 +57,9 @@ interface AdminLotController {
         @PathVariable lotId: String,
         @RequestParam url: String
     ): ResponseEntity<ApiResponse<AdminLotResponse>>
+
+    @GetExchange("/{lotId}/possible-statuses")
+    suspend fun getPossibleStatuses(
+        @PathVariable lotId: String
+    ): ResponseEntity<ApiResponse<List<LotStatus>>>
 }

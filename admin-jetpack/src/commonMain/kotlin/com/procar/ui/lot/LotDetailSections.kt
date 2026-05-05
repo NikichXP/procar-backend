@@ -25,13 +25,13 @@ private object VehicleOptions {
     val condition = listOf("NEW","USED","CERTIFIED","SALVAGE")
 }
 
-private val StatusOptions = listOf("DRAFT","PENDING","ACTIVE","SOLD","CANCELLED","EXPIRED","HIDDEN")
 private val LotTypeOptions = listOf("AUCTION","BUYOUT","HYBRID")
 
 @Composable
 fun GeneralSection(
     lot: AdminLotResponse,
     state: GeneralEditState,
+    statusOptions: List<String>,
     saving: Boolean,
     onSave: () -> Unit,
 ) {
@@ -42,7 +42,7 @@ fun GeneralSection(
     DetailRow("Updated", lot.updatedAt)
     EditableTextField(state.title, "Title *")
     EditableTextField(state.description, "Description")
-    EditableEnumField(state.status, "Status", StatusOptions)
+    EditableEnumField(state.status, "Status", statusOptions)
     EditableEnumField(state.lotType, "Lot Type", LotTypeOptions)
     if (state.lotType.current != "AUCTION") {
         EditableTextField(state.buyoutPrice, "Buyout Price *")

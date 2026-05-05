@@ -3,7 +3,7 @@ package com.procar.auction.service
 import com.procar.auction.config.AuctionProperties
 import com.procar.auction.document.BidEntity
 import com.procar.auction.document.LotEntity
-import com.procar.auction.event.AuctionCompletedEvent
+import com.procar.auction.event.AuctionBuyoutEvent
 import com.procar.auction.repository.BidRepository
 import com.procar.provider.bid.*
 import com.procar.provider.lot.LotStatus
@@ -20,7 +20,6 @@ import java.time.LocalDateTime
 @Service
 class InternalAuctionBidService(
     private val bidRepository: BidRepository,
-    private val auctionProperties: AuctionProperties,
     private val mongoTemplate: MongoTemplate,
     private val eventPublisher: ApplicationEventPublisher,
     @Lazy private val lotStateService: LotStateService
@@ -59,7 +58,7 @@ class InternalAuctionBidService(
         ))
         bid.isWinning = true
 
-        eventPublisher.publishEvent(AuctionCompletedEvent(this, lot.id, request.bidderId, price))
+        eventPublisher.publishEvent(AuctionBuyoutEvent(this, lot.id, request.bidderId, price))
 
         return PlaceBidResponse(
             bid = bid.toProviderBid(),
@@ -84,7 +83,7 @@ class InternalAuctionBidService(
         }
 
         val triggersBuyout = buyoutCapEnabled && lot.buyoutPrice != null && request.amount >= lot.buyoutPrice
-        val effectiveAmount = if (triggersBuyout) lot.buyoutPrice!! else request.amount
+        val effectiveAmount = if (triggersBuyout) lot.buyoutPrice else request.amount
 
         if (!bidRepository.advanceBid(lot.id, effectiveAmount, triggersBuyout)) {
             return rejected(request, "Bid rejected: a concurrent bid already met or exceeded your amount", minBid)
@@ -101,7 +100,7 @@ class InternalAuctionBidService(
         bid.isWinning = true
 
         if (triggersBuyout) {
-            eventPublisher.publishEvent(AuctionCompletedEvent(this, lot.id, request.bidderId, effectiveAmount))
+            eventPublisher.publishEvent(AuctionBuyoutEvent(this, lot.id, request.bidderId, effectiveAmount))
         }
 
         return PlaceBidResponse(

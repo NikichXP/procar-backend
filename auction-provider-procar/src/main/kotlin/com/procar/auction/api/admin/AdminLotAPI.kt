@@ -3,16 +3,20 @@ package com.procar.auction.api.admin
 import com.procar.auction.document.LotEntity
 import com.procar.auction.document.VehicleImageDocument
 import com.procar.auction.service.InternalAuctionLotService
+import com.procar.auction.service.LotStateService
 import com.procar.provider.admin.*
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
 import org.springframework.core.convert.ConversionService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 class AdminLotAPI(
     private val lotService: InternalAuctionLotService,
+    private val lotStateService: LotStateService,
     private val conversionService: ConversionService
 ) : AdminLotController {
 
@@ -36,7 +40,17 @@ class AdminLotAPI(
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val existingLot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
-        
+
+        val newStatus = request.status
+        if (newStatus != null && newStatus != existingLot.status) {
+            if (!lotStateService.canMigrateToStatus(existingLot, newStatus)) {
+                throw ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Status transition from ${existingLot.status} to ${newStatus} is not allowed"
+                )
+            }
+        }
+
         val updatedLot = conversionService.convert(Pair(request, existingLot), LotEntity::class.java)!!
         val savedLot = lotService.updateLot(lotId, updatedLot)
         val adminResponse = conversionService.convert(savedLot, AdminLotResponse::class.java)!!
@@ -56,6 +70,16 @@ class AdminLotAPI(
         lotId: String,
         request: AdminUpdateStatusRequest
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val existingLot = lotService.getLotById(lotId)
+            ?: return ResponseEntity.notFound().build()
+
+        if (!lotStateService.canMigrateToStatus(existingLot, request.status)) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Status transition from ${existingLot.status} to ${request.status} is not allowed"
+            )
+        }
+
         val updatedLot = lotService.updateLotStatus(lotId, request.status)
             ?: return ResponseEntity.notFound().build()
         val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
@@ -111,5 +135,14 @@ class AdminLotAPI(
             ?: return ResponseEntity.notFound().build()
         val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(ApiResponse(adminResponse, "Image removed successfully"))
+    }
+
+    override suspend fun getPossibleStatuses(
+        lotId: String
+    ): ResponseEntity<ApiResponse<List<LotStatus>>> {
+        val lot = lotService.getLotById(lotId)
+            ?: return ResponseEntity.notFound().build()
+        val statuses = lotStateService.getPossibleStatuses(lot)
+        return ResponseEntity.ok(ApiResponse(statuses))
     }
 }

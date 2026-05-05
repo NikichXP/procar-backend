@@ -2,6 +2,7 @@ package com.procar.auction.service
 
 import com.procar.auction.document.LotEntity
 import com.procar.auction.repository.LotRepository
+import com.procar.provider.bid.BidStatus
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.LotType
 import org.springframework.context.annotation.Lazy
@@ -70,30 +71,26 @@ class LotStateService(
         }
     }
 
-
     private fun isAwaitingPaymentPossible(lotEntity: LotEntity): Boolean {
-        TODO()
+        val bids = bidService.getAllBidsForLot(lotEntity.id)
+        val hasWonBid = bids.any { it.status == BidStatus.WON }
+        if (hasWonBid) return true
 
+        val auction = lotEntity.auction ?: return false
+        if (auction.endTime.isBefore(LocalDateTime.now())) {
+            return bids.any { it.status == BidStatus.ACCEPTED }
+        }
+        return false
     }
 
-    private fun isAwaitingShipmentPossible(lotEntity: LotEntity): Boolean {
-        TODO()
+    private fun isAwaitingShipmentPossible(lotEntity: LotEntity): Boolean = isAwaitingPaymentPossible(lotEntity)
 
-    }
+    private fun isInTransitPossible(lotEntity: LotEntity): Boolean = isAwaitingPaymentPossible(lotEntity)
 
-    private fun isInTransitPossible(lotEntity: LotEntity): Boolean {
-        TODO()
-
-    }
-
-    private fun isCompletedPossible(lotEntity: LotEntity): Boolean {
-        TODO()
-
-    }
+    private fun isCompletedPossible(lotEntity: LotEntity): Boolean = isAwaitingPaymentPossible(lotEntity)
 
     private fun isHiddenPossible(lotEntity: LotEntity): Boolean {
-        TODO()
-
+        return bidService.getAllBidsForLot(lotEntity.id).isEmpty()
     }
 
     private fun isAuctionCanBeActive(lotEntity: LotEntity): Boolean {

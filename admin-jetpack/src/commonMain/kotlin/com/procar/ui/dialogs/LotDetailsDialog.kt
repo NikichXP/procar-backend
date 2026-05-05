@@ -7,8 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.procar.api.fetchPossibleStatuses
 import com.procar.api.updateLot
+import com.procar.api.updateLotStatus
 import com.procar.gateway.api.dto.AdminLotResponse
+import com.procar.gateway.api.dto.AdminLotStatus
 import com.procar.ui.components.SectionEditState
 import com.procar.ui.lot.AuctionSection
 import com.procar.ui.lot.GeneralSection
@@ -29,6 +32,19 @@ fun LotDetailsDialog(
     val editState = rememberLotEditState(lot)
     var error by remember { mutableStateOf<String?>(null) }
     var savingSection by remember { mutableStateOf<String?>(null) }
+    var possibleStatuses by remember { mutableStateOf<List<String>>(emptyList()) }
+    var loadingStatuses by remember { mutableStateOf(false) }
+
+    LaunchedEffect(lot.id) {
+        loadingStatuses = true
+        try {
+            possibleStatuses = fetchPossibleStatuses(lot.id)
+        } catch (e: Exception) {
+            error = "Failed to load possible statuses: ${e.message}"
+        } finally {
+            loadingStatuses = false
+        }
+    }
 
     fun trySave(name: String, section: SectionEditState) {
         val validationError = section.validate()
@@ -41,7 +57,12 @@ fun LotDetailsDialog(
             onFinish = { savingSection = null },
             onError = { error = "Error updating $name: ${it.message}" },
         ) {
-            updateLot(lot.id, section.buildRequest())
+            val general = editState.general
+            if (general.isOnlyStatusModified) {
+                updateLotStatus(lot.id, AdminLotStatus.valueOf(general.status.current))
+            } else {
+                updateLot(lot.id, section.buildRequest())
+            }
             section.commit()
             onSaved()
         }
@@ -60,6 +81,7 @@ fun LotDetailsDialog(
                 GeneralSection(
                     lot = lot,
                     state = editState.general,
+                    statusOptions = possibleStatuses,
                     saving = savingSection == "General",
                     onSave = { trySave("General", editState.general) },
                 )

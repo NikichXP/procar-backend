@@ -88,6 +88,10 @@ class AdminLotConnectorService(
         return adminLotController.getAllLots(cursor, limit, status)
     }
 
+    suspend fun getPossibleStatuses(lotId: String): ResponseEntity<ApiResponse<List<LotStatus>>> {
+        return adminLotController.getPossibleStatuses(lotId)
+    }
+
     suspend fun setHiddenStatus(lotId: String, request: AdminHiddenRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotController.setHiddenStatus(lotId, request)
     }

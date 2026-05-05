@@ -7,6 +7,11 @@ enum class AdminLotStatus {
     DRAFT,
     PENDING,
     ACTIVE,
+    AWAITING_PAYMENT,
+    AWAITING_SHIPMENT,
+    IN_TRANSIT,
+    COMPLETED,
+    HIDDEN,
     CLOSED,
     CANCELLED,
 }
@@ -157,6 +162,11 @@ data class AdminUpdateLotRequest(
     val status: AdminLotStatus? = null,
     val lotType: LotType? = null,
     val buyoutPrice: Double? = null,
+)
+
+@Serializable
+data class AdminUpdateStatusRequest(
+    val status: AdminLotStatus,
 )
 
 @Serializable

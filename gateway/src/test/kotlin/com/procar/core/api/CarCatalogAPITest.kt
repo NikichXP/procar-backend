@@ -37,14 +37,12 @@ class CarCatalogAPITest {
             Brand(
                 id = "bmw",
                 name = "BMW",
-                logoUrl = "https://cdn.procar.pl/brand/bmw.svg",
-                lotsCount = 42
+                logoUrl = "https://cdn.procar.pl/brand/bmw.svg"
             ),
             Brand(
                 id = "bentley",
                 name = "Bentley",
-                logoUrl = "https://cdn.procar.pl/brand/bentley.svg",
-                lotsCount = 5
+                logoUrl = "https://cdn.procar.pl/brand/bentley.svg"
             )
         )
         
@@ -58,7 +56,6 @@ class CarCatalogAPITest {
             .expectBody()
             .jsonPath("$[0].id").isEqualTo("bmw")
             .jsonPath("$[0].name").isEqualTo("BMW")
-            .jsonPath("$[0].lotsCount").isEqualTo(42)
             .jsonPath("$[1].id").isEqualTo("bentley")
 
         // Then
@@ -72,8 +69,7 @@ class CarCatalogAPITest {
             Brand(
                 id = "audi",
                 name = "Audi",
-                logoUrl = "https://cdn.procar.pl/brand/audi.svg",
-                lotsCount = 28
+                logoUrl = "https://cdn.procar.pl/brand/audi.svg"
             )
         )
         
@@ -99,14 +95,12 @@ class CarCatalogAPITest {
             Model(
                 id = "x5",
                 name = "X5",
-                brandId = brandId,
-                lotsCount = 12
+                brandId = brandId
             ),
             Model(
                 id = "x3",
                 name = "X3",
-                brandId = brandId,
-                lotsCount = 8
+                brandId = brandId
             )
         )
         
@@ -120,7 +114,6 @@ class CarCatalogAPITest {
             .expectBody()
             .jsonPath("$[0].id").isEqualTo("x5")
             .jsonPath("$[0].brandId").isEqualTo(brandId)
-            .jsonPath("$[0].lotsCount").isEqualTo(12)
 
         // Then
         verify(catalogService).getBrandModels(brandId, query)
@@ -134,8 +127,7 @@ class CarCatalogAPITest {
             Model(
                 id = "a4",
                 name = "A4",
-                brandId = brandId,
-                lotsCount = 15
+                brandId = brandId
             )
         )
         
