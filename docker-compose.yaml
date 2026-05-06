@@ -7,7 +7,7 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redis_data:/data
     networks:
@@ -25,7 +25,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?appName=${MONGO_APP_NAME}
-      REDIS_URI: redis://redis:6379
+      REDIS_URI: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       AUCTION_PROVIDER_PROCAR_URL: http://auction-provider-procar:8083
       AUTH_URL: http://auth:8082
       USER_URL: http://user:8084
@@ -59,7 +60,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?appName=${MONGO_APP_NAME}
-      REDIS_URI: redis://redis:6379
+      REDIS_URI: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
       - redis
     networks:
@@ -104,7 +106,8 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       MONGODB_URI: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DATABASE}?appName=${MONGO_APP_NAME}
-      REDIS_URI: redis://redis:6379
+      REDIS_URI: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
       - redis
     networks:

@@ -30,7 +30,13 @@ spec:
       containers:
         - name: redis
           image: redis:7.2-alpine
-          command: ["redis-server", "--appendonly", "yes"]
+          command: ["redis-server", "--appendonly", "yes", "--requirepass", "$(REDIS_PASSWORD)"]
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
           ports:
             - containerPort: 6379
           volumeMounts:

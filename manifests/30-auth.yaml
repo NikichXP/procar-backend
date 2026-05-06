@@ -23,8 +23,13 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: docker
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
             - name: REDIS_URI
-              value: redis://redis:6379
+              value: "redis://:$(REDIS_PASSWORD)@redis:6379"
             - name: MONGO_USERNAME
               valueFrom:
                 configMapKeyRef:
