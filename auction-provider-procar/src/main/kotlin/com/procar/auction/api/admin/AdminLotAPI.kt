@@ -3,7 +3,7 @@ package com.procar.auction.api.admin
 import com.procar.auction.document.LotEntity
 import com.procar.auction.document.VehicleImageDocument
 import com.procar.auction.service.InternalAuctionLotService
-import com.procar.auction.service.LotStateService
+import com.procar.auction.service.status.LotStatusHelper
 import com.procar.provider.admin.*
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
@@ -16,7 +16,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 class AdminLotAPI(
     private val lotService: InternalAuctionLotService,
-    private val lotStateService: LotStateService,
+    private val lotStatusHelper: LotStatusHelper,
     private val conversionService: ConversionService
 ) : AdminLotController {
 
@@ -43,7 +43,7 @@ class AdminLotAPI(
 
         val newStatus = request.status
         if (newStatus != null && newStatus != existingLot.status) {
-            if (!lotStateService.canMigrateToStatus(existingLot, newStatus)) {
+            if (!lotStatusHelper.canMigrateToStatus(existingLot, newStatus)) {
                 throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Status transition from ${existingLot.status} to ${newStatus} is not allowed"
@@ -73,7 +73,7 @@ class AdminLotAPI(
         val existingLot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
 
-        if (!lotStateService.canMigrateToStatus(existingLot, request.status)) {
+        if (!lotStatusHelper.canMigrateToStatus(existingLot, request.status)) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Status transition from ${existingLot.status} to ${request.status} is not allowed"
@@ -142,7 +142,7 @@ class AdminLotAPI(
     ): ResponseEntity<ApiResponse<List<LotStatus>>> {
         val lot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
-        val statuses = lotStateService.getPossibleStatuses(lot)
+        val statuses = lotStatusHelper.getPossibleStatuses(lot)
         return ResponseEntity.ok(ApiResponse(statuses))
     }
 }

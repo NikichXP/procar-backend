@@ -1,7 +1,8 @@
-package com.procar.auction.service
+package com.procar.auction.service.status
 
 import com.procar.auction.document.LotEntity
 import com.procar.auction.repository.LotRepository
+import com.procar.auction.service.InternalAuctionBidService
 import com.procar.provider.bid.BidStatus
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.LotType
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class LotStateService(
+class LotStatusHelper(
     @Lazy private val bidService: InternalAuctionBidService,
     private val lotRepository: LotRepository
 ) {
