@@ -22,9 +22,9 @@ class LotService(
 
     suspend fun getLots(request: LotSearchRequest): List<LotSummary> {
         val advancedRequest = AdvancedLotSearchRequest(
-            query = null, // TODO: Map query if needed
+            query = null,
             filters = LotSearchFilters(
-                status = request.status?.let { listOf(mapStatus(it)) },
+                status = request.statuses.map { mapStatus(it) },
                 priceRange = request.priceFrom?.let { from ->
                     request.priceTo?.let { to ->
                         PriceRange(from, to)

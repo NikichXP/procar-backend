@@ -18,9 +18,9 @@ class LotAPI(
     @GetMapping
     suspend fun getLots(
         @Parameter(
-            description = "Filter by lot status",
-            example = "ACTIVE"
-        ) @RequestParam(required = false) status: LotStatus?,
+            description = "Filter by lot status (comma-separated for multiple)",
+            example = "ACTIVE,PENDING"
+        ) @RequestParam(required = false) status: List<LotStatus>?,
         @Parameter(
             description = "Filter by auction source name",
             example = "Copart"
@@ -62,8 +62,11 @@ class LotAPI(
             example = "endTime,asc"
         ) @RequestParam(defaultValue = "endTime,asc") sort: String
     ): LotPage {
+
+        val actualStatuses = status?.filter { it in allowedStatuses }?.ifEmpty { allowedStatuses } ?: allowedStatuses
+
         val request = LotSearchRequest(
-            status = status,
+            statuses = actualStatuses,
             source = source,
             endsInMinutes = endsInMinutes,
             brandId = brandId,
@@ -100,5 +103,9 @@ class LotAPI(
         @Parameter(description = "Lot ID", example = "01956b0a-1234-7abc-9d2e-4f5a6b7c8d9e") @PathVariable lotId: String
     ): LotDetail {
         return lotService.getLotDetail(lotId)
+    }
+
+    companion object {
+        private val allowedStatuses = listOf(LotStatus.PENDING, LotStatus.ACTIVE)
     }
 }

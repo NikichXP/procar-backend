@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.procar.customer.api.GatewayConfig
 import com.procar.customer.ui.navigation.Screen
 import com.procar.customer.ui.screens.LotDetailScreen
 import com.procar.customer.ui.screens.LotFeedScreen
@@ -49,11 +50,24 @@ private fun AppNavigator() {
 private fun MainScaffold(onLotClick: (String) -> Unit) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var useRemoteBackend by remember { mutableStateOf(true) }
+
+    LaunchedEffect(useRemoteBackend) {
+        GatewayConfig.baseUrl = if (useRemoteBackend) {
+            "https://api.pc-dev.nikichxp.xyz"
+        } else {
+            "http://localhost:8080"
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            AppDrawer(onClose = { scope.launch { drawerState.close() } })
+            AppDrawer(
+                onClose = { scope.launch { drawerState.close() } },
+                useRemoteBackend = useRemoteBackend,
+                onUseRemoteBackendChange = { useRemoteBackend = it }
+            )
         },
     ) {
         Scaffold(
@@ -113,7 +127,11 @@ private fun ProfileButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun AppDrawer(onClose: () -> Unit) {
+private fun AppDrawer(
+    onClose: () -> Unit,
+    useRemoteBackend: Boolean,
+    onUseRemoteBackendChange: (Boolean) -> Unit
+) {
     ModalDrawerSheet {
         Column(
             modifier = Modifier
@@ -129,6 +147,24 @@ private fun AppDrawer(onClose: () -> Unit) {
                 onClick = onClose,
                 modifier = Modifier.padding(horizontal = 12.dp),
             )
+            Spacer(modifier = Modifier.weight(1f))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    if (useRemoteBackend) "Remote API" else "Localhost (8080)",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Switch(
+                    checked = useRemoteBackend,
+                    onCheckedChange = onUseRemoteBackendChange
+                )
+            }
         }
     }
 }

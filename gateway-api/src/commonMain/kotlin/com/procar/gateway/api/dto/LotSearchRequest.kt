@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LotSearchRequest(
-    val status: LotStatus?,
+    val statuses: List<LotStatus>,
     val source: String?,
     val endsInMinutes: Int?,
     val brandId: String?,
