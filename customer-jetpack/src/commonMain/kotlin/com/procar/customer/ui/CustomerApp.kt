@@ -3,6 +3,7 @@
 package com.procar.customer.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -83,7 +84,7 @@ private fun AppTopBar(onMenuClick: () -> Unit) {
             }
         },
         actions = {
-            ProfileButton()
+            ProfileButton(onClick = { /* TODO: Navigate to profile screen */ })
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
@@ -92,13 +93,14 @@ private fun AppTopBar(onMenuClick: () -> Unit) {
 }
 
 @Composable
-private fun ProfileButton() {
+private fun ProfileButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(end = 8.dp)
             .size(36.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primaryContainer),
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable { onClick() },
         contentAlignment = Alignment.Center,
     ) {
         Icon(
