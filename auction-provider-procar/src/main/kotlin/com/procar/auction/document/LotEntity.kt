@@ -16,166 +16,166 @@ data class LotEntity(
     val id: String = Uuid.generateV7().toString(),
 
     @Field("provider_id")
-    val providerId: String = "procar",
+    var providerId: String = "procar",
 
     @Field("provider_name")
-    val providerName: String = "Procar",
+    var providerName: String = "Procar",
 
     @Field("external_id")
-    val externalId: String,
+    var externalId: String,
 
     @Field("title")
-    val title: String,
+    var title: String,
 
     @Field("description")
-    val description: String,
+    var description: String,
 
     @Field("vehicle")
-    val vehicle: VehicleInfoDocument,
+    var vehicle: VehicleInfoDocument,
 
     @Field("auction")
-    val auction: AuctionInfoDocument?,
+    var auction: AuctionInfoDocument?,
 
     @Field("location")
-    val location: LocationInfoDocument,
+    var location: LocationInfoDocument,
 
     @Field("metadata")
-    val metadata: LotMetadataDocument,
+    var metadata: LotMetadataDocument,
 
     @Field("status")
-    val status: LotStatus,
+    var status: LotStatus,
 
     @Field("broker_org_id")
-    val brokerOrgId: String? = null,
+    var brokerOrgId: String? = null,
 
     @Field("created_at")
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    var createdAt: LocalDateTime = LocalDateTime.now(),
 
     @Field("updated_at")
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
 
     @Field("lot_type")
-    val lotType: LotType = LotType.AUCTION,
+    var lotType: LotType = LotType.AUCTION,
 
     @Field("buyout_price")
-    val buyoutPrice: Double? = null,
+    var buyoutPrice: Double? = null,
 )
 
 @Document
 data class VehicleInfoDocument(
     @Field("vin")
-    val vin: String?,
+    var vin: String?,
     
     @Field("make")
-    val make: String,
+    var make: String,
     
     @Field("model")
-    val model: String,
+    var model: String,
     
     @Field("year")
-    val year: Int,
+    var year: Int,
     
     @Field("trim")
-    val trim: String?,
+    var trim: String?,
     
     @Field("body_type")
-    val bodyType: String,
+    var bodyType: String,
     
     @Field("color")
-    val color: String?,
+    var color: String?,
     
     @Field("interior_color")
-    val interiorColor: String?,
+    var interiorColor: String?,
     
     @Field("mileage")
-    val mileage: Int?,
+    var mileage: Int?,
     
     @Field("engine")
-    val engine: EngineInfoDocument,
+    var engine: EngineInfoDocument,
     
     @Field("transmission")
-    val transmission: TransmissionType,
+    var transmission: TransmissionType,
     
     @Field("drivetrain")
-    val drivetrain: DrivetrainType,
+    var drivetrain: DrivetrainType,
     
     @Field("fuel_type")
-    val fuelType: FuelType,
+    var fuelType: FuelType,
     
     @Field("condition")
-    val condition: VehicleCondition,
+    var condition: VehicleCondition,
     
     @Field("features")
-    val features: List<String>,
+    var features: List<String>,
     
     @Field("images")
-    val images: List<VehicleImageDocument>,
+    var images: List<VehicleImageDocument>,
     
     @Field("documents")
-    val documents: List<DocumentDocument>,
+    var documents: List<DocumentDocument>,
     
     @Field("damage")
-    val damage: List<DamageInfoDocument>?
+    var damage: List<DamageInfoDocument>?
 )
 
 @Document
 data class EngineInfoDocument(
     @Field("type")
-    val type: String,
+    var type: String,
     
     @Field("displacement")
-    val displacement: Double?,
+    var displacement: Double?,
     
     @Field("cylinders")
-    val cylinders: Int?,
+    var cylinders: Int?,
     
     @Field("horsepower")
-    val horsepower: Int?,
+    var horsepower: Int?,
     
     @Field("torque")
-    val torque: Int?
+    var torque: Int?
 )
 
 @Document
 data class VehicleImageDocument(
     @Field("url")
-    val url: String,
+    var url: String,
     
     @Field("type")
-    val type: ImageType,
+    var type: ImageType,
     
     @Field("description")
-    val description: String?,
+    var description: String?,
     
     @Field("is_primary")
-    val isPrimary: Boolean
+    var isPrimary: Boolean
 )
 
 @Document
 data class DocumentDocument(
     @Field("type")
-    val type: DocumentType,
+    var type: DocumentType,
     
     @Field("url")
-    val url: String,
+    var url: String,
     
     @Field("description")
-    val description: String?
+    var description: String?
 )
 
 @Document
 data class DamageInfoDocument(
     @Field("area")
-    val area: String,
+    var area: String,
     
     @Field("severity")
-    val severity: DamageSeverity,
+    var severity: DamageSeverity,
     
     @Field("description")
-    val description: String,
+    var description: String,
     
     @Field("estimated_repair_cost")
-    val estimatedRepairCost: Double?
+    var estimatedRepairCost: Double?
 )
 
 @Document
@@ -184,161 +184,161 @@ data class AuctionInfoDocument(
     var currentBid: Double,
     
     @Field("starting_bid")
-    val startingBid: Double,
+    var startingBid: Double,
     
     @Field("reserve_price")
-    val reservePrice: Double?,
+    var reservePrice: Double?,
     
     @Field("bid_increment")
-    val bidIncrement: Double,
+    var bidIncrement: Double,
     
     @Field("total_bids")
     var totalBids: Int = 0,
     
     @Field("start_time")
-    val startTime: LocalDateTime,
+    var startTime: LocalDateTime,
     
     @Field("end_time")
-    val endTime: LocalDateTime,
+    var endTime: LocalDateTime,
     
     @Field("time_remaining")
-    val timeRemaining: Long?
+    var timeRemaining: Long?
 )
 
 @Document
 data class LocationInfoDocument(
     @Field("address")
-    val address: String,
+    var address: String,
     
     @Field("city")
-    val city: String,
+    var city: String,
     
     @Field("state")
-    val state: String,
+    var state: String,
     
     @Field("zip_code")
-    val zipCode: String,
+    var zipCode: String,
     
     @Field("country")
-    val country: String,
+    var country: String,
     
     @Field("coordinates")
-    val coordinates: GeoCoordinates?,
+    var coordinates: GeoCoordinates?,
     
     @Field("timezone")
-    val timezone: String
+    var timezone: String
 )
 
 @Document
 data class LotMetadataDocument(
     @Field("tags")
-    val tags: List<String>,
+    var tags: List<String>,
     
     @Field("categories")
-    val categories: List<String>,
+    var categories: List<String>,
     
     @Field("seller_info")
-    val sellerInfo: SellerInfoDocument,
+    var sellerInfo: SellerInfoDocument,
     
     @Field("inspection")
-    val inspection: InspectionInfoDocument?,
+    var inspection: InspectionInfoDocument?,
     
     @Field("history")
-    val history: VehicleHistoryDocument?,
+    var history: VehicleHistoryDocument?,
     
     @Field("fees")
-    val fees: List<FeeDocument>,
+    var fees: List<FeeDocument>,
     
     @Field("shipping")
-    val shipping: ShippingInfoDocument?
+    var shipping: ShippingInfoDocument?
 )
 
 @Document
 data class SellerInfoDocument(
     @Field("id")
-    val id: String,
+    var id: String,
     
     @Field("name")
-    val name: String,
+    var name: String,
     
     @Field("type")
-    val type: SellerType,
+    var type: SellerType,
     
     @Field("rating")
-    val rating: Double?,
+    var rating: Double?,
     
     @Field("total_sales")
-    val totalSales: Int?,
+    var totalSales: Int?,
     
     @Field("response_rate")
-    val responseRate: Double?
+    var responseRate: Double?
 )
 
 @Document
 data class InspectionInfoDocument(
     @Field("inspected")
-    val inspected: Boolean,
+    var inspected: Boolean,
     
     @Field("inspection_date")
-    val inspectionDate: LocalDateTime?,
+    var inspectionDate: LocalDateTime?,
     
     @Field("inspector")
-    val inspector: String?,
+    var inspector: String?,
     
     @Field("report_url")
-    val reportUrl: String?,
+    var reportUrl: String?,
     
     @Field("overall_condition")
-    val overallCondition: String?,
+    var overallCondition: String?,
     
     @Field("key_findings")
-    val keyFindings: List<String>
+    var keyFindings: List<String>
 )
 
 @Document
 data class VehicleHistoryDocument(
     @Field("accidents")
-    val accidents: Int,
+    var accidents: Int,
     
     @Field("owners")
-    val owners: Int,
+    var owners: Int,
     
     @Field("title_status")
-    val titleStatus: TitleStatus,
+    var titleStatus: TitleStatus,
     
     @Field("service_records")
-    val serviceRecords: Boolean,
+    var serviceRecords: Boolean,
     
     @Field("last_service_date")
-    val lastServiceDate: LocalDateTime?
+    var lastServiceDate: LocalDateTime?
 )
 
 @Document
 data class FeeDocument(
     @Field("type")
-    val type: FeeType,
+    var type: FeeType,
     
     @Field("amount")
-    val amount: Double,
+    var amount: Double,
     
     @Field("description")
-    val description: String,
+    var description: String,
     
     @Field("mandatory")
-    val mandatory: Boolean
+    var mandatory: Boolean
 )
 
 @Document
 data class ShippingInfoDocument(
     @Field("available")
-    val available: Boolean,
+    var available: Boolean,
     
     @Field("estimated_cost")
-    val estimatedCost: Double?,
+    var estimatedCost: Double?,
     
     @Field("methods")
-    val methods: List<ShippingMethod>,
+    var methods: List<ShippingMethod>,
     
     @Field("restrictions")
-    val restrictions: List<String>
+    var restrictions: List<String>
 )
