@@ -10,7 +10,8 @@ class StartLotTask : LotStatusUpdateTask {
     override fun fromStatus(): LotStatus = LotStatus.PENDING
     override fun toStatus(): LotStatus = LotStatus.ACTIVE
 
-    override fun execute(lotEntity: LotEntity) {
+    override fun modify(lotEntity: LotEntity): Boolean {
         lotEntity.status = LotStatus.ACTIVE
+        return true
     }
 }

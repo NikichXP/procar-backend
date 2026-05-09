@@ -82,8 +82,9 @@ class InternalAuctionBidService(
             return rejected(request, "Bid must be at least $minBid (current: ${auction.currentBid} + step: ${auction.bidIncrement})", minBid)
         }
 
-        val triggersBuyout = buyoutCapEnabled && lot.buyoutPrice != null && request.amount >= lot.buyoutPrice
-        val effectiveAmount = if (triggersBuyout) lot.buyoutPrice else request.amount
+        val buyoutPrice = lot.buyoutPrice
+        val triggersBuyout = buyoutCapEnabled && buyoutPrice != null && request.amount >= buyoutPrice
+        val effectiveAmount = if (triggersBuyout) buyoutPrice else request.amount
 
         if (!bidRepository.advanceBid(lot.id, effectiveAmount, triggersBuyout)) {
             return rejected(request, "Bid rejected: a concurrent bid already met or exceeded your amount", minBid)
@@ -146,8 +147,9 @@ class InternalAuctionBidService(
 
         val minBid = auction.currentBid + auction.bidIncrement
         val warnings = mutableListOf<String>()
-        if (lot.lotType == LotType.HYBRID && lot.buyoutPrice != null && request.amount >= lot.buyoutPrice) {
-            warnings.add("Bid meets or exceeds buyout price — this will trigger an instant purchase at ${lot.buyoutPrice}")
+        val buyoutPrice = lot.buyoutPrice
+        if (lot.lotType == LotType.HYBRID && buyoutPrice != null && request.amount >= buyoutPrice) {
+            warnings.add("Bid meets or exceeds buyout price — this will trigger an instant purchase at $buyoutPrice")
         }
 
         return ValidateBidResponse(
@@ -181,8 +183,9 @@ class InternalAuctionBidService(
             sorted.zipWithNext().map { (a, b) -> java.time.Duration.between(a.placedAt, b.placedAt).toMinutes().toDouble() }.average()
         else 0.0
         val lot = mongoTemplate.findById(lotId, LotEntity::class.java)
-        val lastMinuteBidding = lot?.auction != null &&
-            bids.any { it.placedAt.isAfter(lot.auction.endTime.minusMinutes(5)) }
+        val auction = lot?.auction
+        val lastMinuteBidding = auction != null &&
+            bids.any { it.placedAt.isAfter(auction.endTime.minusMinutes(5)) }
 
         return BidAnalyticsResponse(
             lotId = lotId,
@@ -212,11 +215,12 @@ class InternalAuctionBidService(
     fun deleteAllBidsForLot(lotId: String) {
         bidRepository.deleteByLotId(lotId)
         val lot = mongoTemplate.findById(lotId, LotEntity::class.java)
-        if (lot?.auction != null) {
+        val auction = lot?.auction
+        if (auction != null) {
             mongoTemplate.updateFirst(
                 Query(Criteria.where("_id").`is`(lotId)),
                 Update()
-                    .set("auction.currentBid", lot.auction.startingBid)
+                    .set("auction.currentBid", auction.startingBid)
                     .set("auction.totalBids", 0)
                     .set("updatedAt", LocalDateTime.now()),
                 LotEntity::class.java

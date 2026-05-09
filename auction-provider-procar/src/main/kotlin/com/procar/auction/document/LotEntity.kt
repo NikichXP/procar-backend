@@ -203,7 +203,11 @@ data class AuctionInfoDocument(
     
     @Field("time_remaining")
     var timeRemaining: Long?
-)
+) {
+    fun isActiveAt(date: LocalDateTime): Boolean {
+        return startTime.isBefore(date) && endTime.isAfter(date)
+    }
+}
 
 @Document
 data class LocationInfoDocument(

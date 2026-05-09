@@ -9,6 +9,6 @@ interface LotStatusUpdateTask {
 
     fun fromStatus(): LotStatus
     fun toStatus(): LotStatus
-    fun execute(lotEntity: LotEntity)
+    fun modify(lotEntity: LotEntity): Boolean
 
 }

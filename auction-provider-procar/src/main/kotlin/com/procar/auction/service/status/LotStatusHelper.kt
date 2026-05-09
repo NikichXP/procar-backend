@@ -96,9 +96,7 @@ class LotStatusHelper(
 
     private fun isAuctionCanBeActive(lotEntity: LotEntity): Boolean {
         val now = LocalDateTime.now()
-        return lotEntity.auction?.startTime != null
-                && now.isAfter(lotEntity.auction.startTime)
-                && now.isBefore(lotEntity.auction.endTime)
+        return lotEntity.auction?.isActiveAt(now) == true
     }
 
     companion object {
