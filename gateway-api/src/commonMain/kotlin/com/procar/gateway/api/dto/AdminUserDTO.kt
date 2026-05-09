@@ -29,3 +29,10 @@ data class UpdateUserRolesRequest(val roles: List<UserRole>)
 
 @Serializable
 data class UpdateUserBrokerRequest(val brokerOrgId: String? = null)
+
+@Serializable
+data class UserInfoDto(
+    val id: String,
+    val username: String,
+    val roles: List<UserRole>,
+)

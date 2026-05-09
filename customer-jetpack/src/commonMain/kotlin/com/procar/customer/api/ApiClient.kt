@@ -4,20 +4,31 @@ import coil3.ImageLoader
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.procar.customer.createHttpClient
 import com.procar.customer.getPlatformContext
+import com.procar.gateway.api.dto.AuthResult
 import com.procar.gateway.api.dto.CarCondition
+import com.procar.gateway.api.dto.GatewayUserRegisterRequest
 import com.procar.gateway.api.dto.LotDetail
 import com.procar.gateway.api.dto.LotPage
+import com.procar.gateway.api.dto.LotSummary
 import com.procar.gateway.api.dto.LotStatus
+import com.procar.gateway.api.dto.LoginRequest
+import com.procar.gateway.api.dto.UserBidPage
+import com.procar.gateway.api.dto.UserInfoDto
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
 object GatewayConfig {
     var baseUrl: String = "http://localhost:8080"
+}
+
+object AuthToken {
+    var accessToken: String? = null
 }
 
 val httpClient: HttpClient by lazy {
@@ -75,3 +86,62 @@ suspend fun fetchLots(
 
 suspend fun fetchLotDetail(lotId: String): LotDetail =
     httpClient.get("${GatewayConfig.baseUrl}/lots/$lotId").body()
+
+suspend fun login(request: LoginRequest): AuthResult =
+    httpClient.post("${GatewayConfig.baseUrl}/auth/login") {
+        contentType(ContentType.Application.Json)
+        setBody(request)
+    }.body()
+
+suspend fun register(request: GatewayUserRegisterRequest): AuthResult =
+    httpClient.post("${GatewayConfig.baseUrl}/auth/register") {
+        contentType(ContentType.Application.Json)
+        setBody(request)
+    }.body()
+
+suspend fun fetchCurrentUser(): UserInfoDto {
+    val token = AuthToken.accessToken
+        ?: throw IllegalStateException("Not authenticated")
+    return httpClient.get("${GatewayConfig.baseUrl}/users/me") {
+        header(HttpHeaders.Authorization, "Bearer $token")
+    }.body()
+}
+
+suspend fun fetchUserBids(
+    status: String? = null,
+    page: Int = 0,
+    size: Int = DEFAULT_PAGE_SIZE,
+): UserBidPage {
+    val token = AuthToken.accessToken
+        ?: throw IllegalStateException("Not authenticated")
+    return httpClient.get("${GatewayConfig.baseUrl}/users/me/bids") {
+        header(HttpHeaders.Authorization, "Bearer $token")
+        parameter("page", page)
+        parameter("size", size)
+        if (status != null) parameter("status", status)
+    }.body()
+}
+
+suspend fun fetchUserWatchlist(): List<LotSummary> {
+    val token = AuthToken.accessToken
+        ?: throw IllegalStateException("Not authenticated")
+    return httpClient.get("${GatewayConfig.baseUrl}/users/me/watchlist") {
+        header(HttpHeaders.Authorization, "Bearer $token")
+    }.body()
+}
+
+suspend fun addToWatchlist(lotId: String) {
+    val token = AuthToken.accessToken
+        ?: throw IllegalStateException("Not authenticated")
+    httpClient.put("${GatewayConfig.baseUrl}/users/me/watchlist/$lotId") {
+        header(HttpHeaders.Authorization, "Bearer $token")
+    }
+}
+
+suspend fun removeFromWatchlist(lotId: String) {
+    val token = AuthToken.accessToken
+        ?: throw IllegalStateException("Not authenticated")
+    httpClient.delete("${GatewayConfig.baseUrl}/users/me/watchlist/$lotId") {
+        header(HttpHeaders.Authorization, "Bearer $token")
+    }
+}

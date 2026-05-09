@@ -21,6 +21,7 @@ import com.procar.customer.api.GatewayConfig
 import com.procar.customer.ui.navigation.Screen
 import com.procar.customer.ui.screens.LotDetailScreen
 import com.procar.customer.ui.screens.LotFeedScreen
+import com.procar.customer.ui.screens.ProfileScreen
 import com.procar.customer.ui.theme.CustomerTheme
 import kotlinx.coroutines.launch
 
@@ -38,16 +39,24 @@ private fun AppNavigator() {
     when (val screen = currentScreen) {
         is Screen.Feed -> MainScaffold(
             onLotClick = { lotId -> currentScreen = Screen.LotDetail(lotId) },
+            onProfileClick = { currentScreen = Screen.Profile },
         )
         is Screen.LotDetail -> LotDetailScreen(
             lotId = screen.lotId,
             onBack = { currentScreen = Screen.Feed },
         )
+        is Screen.Profile -> ProfileScreen(
+            onBack = { currentScreen = Screen.Feed },
+            onLotClick = { lotId -> currentScreen = Screen.LotDetail(lotId) },
+        )
     }
 }
 
 @Composable
-private fun MainScaffold(onLotClick: (String) -> Unit) {
+private fun MainScaffold(
+    onLotClick: (String) -> Unit,
+    onProfileClick: () -> Unit,
+) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var useRemoteBackend by remember { mutableStateOf(true) }
@@ -72,7 +81,10 @@ private fun MainScaffold(onLotClick: (String) -> Unit) {
     ) {
         Scaffold(
             topBar = {
-                AppTopBar(onMenuClick = { scope.launch { drawerState.open() } })
+                AppTopBar(
+                    onMenuClick = { scope.launch { drawerState.open() } },
+                    onProfileClick = onProfileClick,
+                )
             },
             containerColor = MaterialTheme.colorScheme.background,
         ) { padding ->
@@ -84,7 +96,10 @@ private fun MainScaffold(onLotClick: (String) -> Unit) {
 }
 
 @Composable
-private fun AppTopBar(onMenuClick: () -> Unit) {
+private fun AppTopBar(
+    onMenuClick: () -> Unit,
+    onProfileClick: () -> Unit,
+) {
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -98,7 +113,7 @@ private fun AppTopBar(onMenuClick: () -> Unit) {
             }
         },
         actions = {
-            ProfileButton(onClick = { /* TODO: Navigate to profile screen */ })
+            ProfileButton(onClick = onProfileClick)
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
