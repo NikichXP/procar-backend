@@ -32,8 +32,6 @@ spec:
                 secretKeyRef:
                   name: redis-secret
                   key: REDIS_PASSWORD
-            - name: REDIS_URI
-              value: "redis://:$(REDIS_PASSWORD)@redis:6379"
             - name: MONGO_USERNAME
               valueFrom:
                 configMapKeyRef:
