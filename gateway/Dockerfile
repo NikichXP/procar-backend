@@ -3,14 +3,11 @@ FROM gradle:8.10-jdk21 AS builder
 
 WORKDIR /app
 
-# Copy source code
+# Copy source code (only dependencies needed for gateway)
 COPY gateway ./gateway
 COPY gateway-api ./gateway-api
-COPY auth ./auth
 COPY auth-api ./auth-api
 COPY auction-provider-api ./auction-provider-api
-COPY auction-provider-procar ./auction-provider-procar
-COPY user ./user
 COPY user-api ./user-api
 COPY commons ./commons
 

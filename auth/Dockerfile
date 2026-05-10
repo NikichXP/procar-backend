@@ -3,13 +3,10 @@ FROM gradle:8.5-jdk21 AS builder
 
 WORKDIR /app
 
-# Copy source code
+# Copy source code (only dependencies needed for auth)
 COPY auth ./auth
 COPY auth-api ./auth-api
 COPY commons ./commons
-COPY gateway ./gateway
-COPY auction-provider-api ./auction-provider-api
-COPY auction-provider-procar ./auction-provider-procar
 
 # Copy build configuration
 COPY build.gradle.kts .

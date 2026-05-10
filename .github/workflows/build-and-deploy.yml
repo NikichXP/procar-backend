@@ -58,7 +58,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=min,scope=${{ matrix.name }}
           provenance: false
-        continue-on-error: true
+        timeout-minutes: 30
 
       - name: Retry build and push ${{ matrix.name }}
         if: failure()
@@ -73,6 +73,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=min,scope=${{ matrix.name }}
           provenance: false
+        timeout-minutes: 30
 
   deploy:
     runs-on: self-hosted
