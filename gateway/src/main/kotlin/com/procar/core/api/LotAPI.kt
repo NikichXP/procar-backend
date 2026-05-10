@@ -1,5 +1,6 @@
 package com.procar.core.api
 
+import com.procar.core.config.NoAuth
 import com.procar.core.service.LotService
 import com.procar.gateway.api.dto.*
 import io.swagger.v3.oas.annotations.Operation
@@ -7,9 +8,10 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.web.bind.annotation.*
 
+@NoAuth
 @Tag(name = "lot-api", description = "Browse and search car auction lots")
 @RestController
-@RequestMapping("/lots")
+@RequestMapping("/api/lots")
 class LotAPI(
     private val lotService: LotService
 ) {

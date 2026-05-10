@@ -43,7 +43,7 @@ class LotAPITest {
         }
 
         // When
-        webTestClient.get().uri("/lots")
+        webTestClient.get().uri("/api/lots")
             .exchange()
             .expectStatus().isOk
 
@@ -70,7 +70,7 @@ class LotAPITest {
         }
 
         // When
-        webTestClient.get().uri("/lots")
+        webTestClient.get().uri("/api/lots")
             .exchange()
             .expectStatus().isOk
 
@@ -94,7 +94,7 @@ class LotAPITest {
         }
 
         // When
-        webTestClient.get().uri("/lots/{lotId}", lotId)
+        webTestClient.get().uri("/api/lots/{lotId}", lotId)
             .exchange()
             .expectStatus().isOk
 

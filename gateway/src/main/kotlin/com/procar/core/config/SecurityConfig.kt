@@ -5,7 +5,6 @@ import com.procar.core.service.TokenValidationCache
 import kotlinx.coroutines.reactor.mono
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
@@ -24,7 +23,8 @@ import org.springframework.web.server.ResponseStatusException
 @EnableScheduling
 class SecurityConfig(
     private val authService: AuthService,
-    private val tokenValidationCache: TokenValidationCache
+    private val tokenValidationCache: TokenValidationCache,
+    private val annotationAuthorizationManager: AnnotationAuthorizationManager
 ) {
 
     @Bean
@@ -46,11 +46,9 @@ class SecurityConfig(
                     .pathMatchers("/auth/**").permitAll()
                     .pathMatchers("/files/**").permitAll()
                     .pathMatchers("/api-docs").permitAll() // TODO disable some day
-                    .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
                     .pathMatchers("/api/admin/**").authenticated() // TODO with role ADMIN
-                    .pathMatchers("/api/lots**").permitAll()
-                    .anyExchange().authenticated()
+                    .anyExchange().access(annotationAuthorizationManager)
             }
             .addFilterBefore(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)
             .exceptionHandling {

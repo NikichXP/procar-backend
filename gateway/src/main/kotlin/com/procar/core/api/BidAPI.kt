@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 
 @Tag(name = "bid-api", description = "Place bids and view bid history for auction lots")
 @RestController
-@RequestMapping("/lots/{lotId}/bids")
+@RequestMapping("/api/lots/{lotId}/bids")
 class BidAPI(
     private val bidService: BidService
 ) {
