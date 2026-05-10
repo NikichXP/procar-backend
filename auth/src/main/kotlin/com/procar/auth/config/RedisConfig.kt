@@ -1,5 +1,8 @@
 package com.procar.auth.config
 
+import io.lettuce.core.resource.ClientResources
+import io.lettuce.core.resource.DnsResolvers
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,6 +28,14 @@ class RedisConfig {
         mapper.activateDefaultTyping(ptv, com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.EVERYTHING)
         
         return mapper
+    }
+
+    @Bean(destroyMethod = "shutdown")
+    @ConditionalOnMissingBean(ClientResources::class)
+    fun lettuceClientResources(): ClientResources {
+        return ClientResources.builder()
+            .dnsResolver(DnsResolvers.JVM_DEFAULT)
+            .build()
     }
 
     @Bean

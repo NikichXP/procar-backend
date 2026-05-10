@@ -1,4 +1,5 @@
 import org.gradle.jvm.tasks.Jar
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
 	kotlin("jvm")
@@ -9,7 +10,7 @@ apply(plugin = "org.springframework.boot")
 apply(plugin = "io.spring.dependency-management")
 
 // Enable bootJar task
-tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+tasks.named<BootJar>("bootJar") {
 	enabled = true
 	archiveClassifier.set("")
 }
