@@ -26,6 +26,8 @@ dependencies {
     implementation("org.slf4j:slf4j-api")
 
     compileOnly("org.springframework.security:spring-security-core")
+    compileOnly("org.springframework.boot:spring-boot-starter-data-mongodb")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

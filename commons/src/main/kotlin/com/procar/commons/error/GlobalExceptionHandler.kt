@@ -13,7 +13,9 @@ import org.springframework.web.server.ServerWebInputException
 
 @RestControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class GlobalExceptionHandler {
+class GlobalExceptionHandler(
+    private val exceptionLogger: ExceptionLogger? = null,
+) {
 
     private val log = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
@@ -59,6 +61,7 @@ class GlobalExceptionHandler {
         ex: Throwable,
         reasonOverride: String? = null,
     ): ResponseEntity<ErrorResponse> {
+        exceptionLogger?.log(status, ex)
         val body = ErrorResponse(
             type = ex::class.simpleName ?: ex::class.java.name,
             reason = reasonOverride ?: ex.message,
