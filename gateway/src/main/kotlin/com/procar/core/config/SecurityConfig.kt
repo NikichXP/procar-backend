@@ -44,11 +44,12 @@ class SecurityConfig(
                     .pathMatchers("/actuator/health").permitAll()
                     .pathMatchers("/actuator/info").permitAll()
                     .pathMatchers("/auth/**").permitAll()
+                    .pathMatchers("/files/**").permitAll()
                     .pathMatchers("/api-docs").permitAll() // TODO disable some day
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
                     .pathMatchers("/api/admin/**").authenticated() // TODO with role ADMIN
-                    .pathMatchers("/files/**").permitAll()
+                    .pathMatchers("/api/lots**").permitAll()
                     .anyExchange().authenticated()
             }
             .addFilterBefore(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)
