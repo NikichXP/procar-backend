@@ -12,6 +12,7 @@ import software.amazon.awssdk.core.async.AsyncResponseTransformer
 import software.amazon.awssdk.services.s3.S3AsyncClient
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -67,5 +68,29 @@ class StorageService(
         }
 
         return contentType to dataFlow
+    }
+
+    suspend fun fileExists(key: String): Boolean {
+        val request = HeadObjectRequest.builder()
+            .bucket(props.bucket)
+            .key(key)
+            .build()
+        return try {
+            s3.headObject(request).await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun uploadBytes(key: String, bytes: ByteArray, contentType: String) {
+        val request = PutObjectRequest.builder()
+            .bucket(props.bucket)
+            .key(key)
+            .contentType(contentType)
+            .contentLength(bytes.size.toLong())
+            .build()
+
+        s3.putObject(request, AsyncRequestBody.fromBytes(bytes)).await()
     }
 }

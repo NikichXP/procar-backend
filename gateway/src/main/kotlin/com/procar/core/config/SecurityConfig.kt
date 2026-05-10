@@ -48,6 +48,7 @@ class SecurityConfig(
                     .pathMatchers(HttpMethod.GET, "/lots/**").permitAll()
                     .pathMatchers("/catalog/**").permitAll()
                     .pathMatchers("/api/admin/**").authenticated() // TODO with role ADMIN
+                    .pathMatchers("/files/**").permitAll()
                     .anyExchange().authenticated()
             }
             .addFilterBefore(authFilter, SecurityWebFiltersOrder.AUTHENTICATION)
