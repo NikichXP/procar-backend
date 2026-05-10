@@ -57,7 +57,7 @@ data class LotSummary(
     @ApiDoc(example = "14") val bidsCount: Int? = null,
     @ApiDoc(example = "2025-06-01T10:00:00Z") val startTime: String? = null,
     @ApiDoc(example = "2025-06-08T18:00:00Z") val endTime: String? = null,
-    val source: LotSource,
+    val photos: List<String> = emptyList(),
     val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
 )
