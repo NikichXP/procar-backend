@@ -1,5 +1,6 @@
 package com.procar.core.api
 
+import com.procar.core.config.NoAuth
 import com.procar.gateway.api.dto.Bid
 import com.procar.gateway.api.dto.BidPage
 import com.procar.gateway.api.dto.BidRequest
@@ -20,6 +21,7 @@ class BidAPI(
     private val bidService: BidService
 ) {
 
+    @NoAuth
     @Operation(summary = "Get bid history", description = "Retrieve paginated bid history for a specific lot.")
     @GetMapping
     fun getBidHistory(

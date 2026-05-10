@@ -1,6 +1,7 @@
 package com.procar.core.api
 
 import com.procar.gateway.api.dto.UserBidPage
+import com.procar.core.config.AnnotationAuthorizationManager
 import com.procar.core.config.SecurityConfig
 import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
@@ -16,7 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 
 @WebFluxTest(controllers = [UserAPI::class])
-@Import(SecurityConfig::class, TestSecurityConfig::class)
+@Import(SecurityConfig::class, TestSecurityConfig::class, AnnotationAuthorizationManager::class)
 class UserAPITest {
 
     @Autowired
