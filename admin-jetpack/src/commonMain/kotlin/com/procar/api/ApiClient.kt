@@ -181,9 +181,11 @@ val imageLoader: ImageLoader by lazy {
         .build()
 }
 
-fun absoluteImageUrl(url: String): String =
-    if (url.startsWith("http://") || url.startsWith("https://")) url
-    else "$GATEWAY_BASE_URL$url"
+fun absoluteImageUrl(url: String): String = when {
+    url.startsWith("http://") || url.startsWith("https://") -> url
+    url.startsWith("/") -> "$GATEWAY_BASE_URL$url"
+    else -> "$GATEWAY_BASE_URL/files/$url"
+}
 
 suspend fun fetchWarehouses(): List<AdminWarehouseResponse> =
     getEnveloped("$GATEWAY_BASE_URL/api/admin/warehouses")

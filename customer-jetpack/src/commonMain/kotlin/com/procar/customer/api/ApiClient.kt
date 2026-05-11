@@ -52,9 +52,11 @@ val imageLoader: ImageLoader by lazy {
         .build()
 }
 
-fun absoluteImageUrl(url: String): String =
-    if (url.startsWith("http://") || url.startsWith("https://")) url
-    else "${GatewayConfig.baseUrl}$url"
+fun absoluteImageUrl(url: String): String = when {
+    url.startsWith("http://") || url.startsWith("https://") -> url
+    url.startsWith("/") -> "${GatewayConfig.baseUrl}$url"
+    else -> "${GatewayConfig.baseUrl}/files/$url"
+}
 
 const val DEFAULT_PAGE_SIZE: Int = 20
 
