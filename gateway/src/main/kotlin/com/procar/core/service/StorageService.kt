@@ -1,10 +1,18 @@
 package com.procar.core.service
 
 import com.procar.core.config.StorageProperties
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.withContext
+import org.bytedeco.javacv.FFmpegFrameGrabber
+import org.bytedeco.javacv.Java2DFrameConverter
+import java.awt.image.BufferedImage
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import javax.imageio.ImageIO
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.stereotype.Service
 import software.amazon.awssdk.core.async.AsyncRequestBody
@@ -34,9 +42,19 @@ class StorageService(
 
         val extension = filePart.filename().substringAfterLast('.', missingDelimiterValue = "")
         val isHeic = extension.equals("heic", ignoreCase = true) || extension.equals("heif", ignoreCase = true)
-        
+                || contentType.equals("image/heic", ignoreCase = true) || contentType.equals("image/heif", ignoreCase = true)
+
         if (isHeic) {
-            throw IllegalArgumentException("HEIC/HEIF files are not supported. Please convert to JPEG before uploading.")
+            val jpegBytes = withContext(Dispatchers.IO) { convertHeicToJpeg(bytes) }
+            val key = "${Uuid.generateV7()}.jpg"
+            val request = PutObjectRequest.builder()
+                .bucket(props.bucket)
+                .key(key)
+                .contentType("image/jpeg")
+                .contentLength(jpegBytes.size.toLong())
+                .build()
+            s3.putObject(request, AsyncRequestBody.fromBytes(jpegBytes)).await()
+            return key
         }
 
         val key = if (extension.isNotEmpty()) "${Uuid.generateV7()}.$extension" else "${Uuid.generateV7()}"
@@ -50,6 +68,21 @@ class StorageService(
 
         s3.putObject(request, AsyncRequestBody.fromBytes(bytes)).await()
         return key
+    }
+
+    private fun convertHeicToJpeg(heicBytes: ByteArray): ByteArray {
+        val grabber = FFmpegFrameGrabber(ByteArrayInputStream(heicBytes))
+        grabber.start()
+        return try {
+            val frame = grabber.grabImage() ?: throw IllegalStateException("Could not decode HEIC image")
+            val converter = Java2DFrameConverter()
+            val image: BufferedImage = converter.convert(frame)
+                ?: throw IllegalStateException("Could not convert HEIC frame to BufferedImage")
+            ByteArrayOutputStream().also { ImageIO.write(image, "JPEG", it) }.toByteArray()
+        } finally {
+            grabber.stop()
+            grabber.release()
+        }
     }
 
     suspend fun delete(key: String) {
