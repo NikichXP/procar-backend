@@ -14,9 +14,10 @@ COPY commons ./commons
 # Copy build configuration
 COPY build.gradle.kts .
 COPY settings.gradle.kts .
+COPY gradle.properties .
 
 # Build the application
-RUN gradle gateway:bootJar -x test --no-daemon
+RUN gradle gateway:bootJar -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine

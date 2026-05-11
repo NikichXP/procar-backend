@@ -19,9 +19,9 @@ COPY settings.gradle.kts .
 COPY admin-jetpack ./admin-jetpack
 COPY gateway-api ./gateway-api
 
-ENV GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
+ENV GRADLE_OPTS="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
-RUN gradle :admin-jetpack:wasmJsBrowserDistribution --no-daemon -Dkotlin.daemon.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+RUN gradle :admin-jetpack:wasmJsBrowserDistribution --no-daemon -Dkotlin.daemon.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 RUN rm -rf /app/admin-jetpack/build/compileSync \
            /app/admin-jetpack/build/kotlin \
