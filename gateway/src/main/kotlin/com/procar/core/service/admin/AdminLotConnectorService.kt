@@ -103,21 +103,17 @@ class AdminLotConnectorService(
     suspend fun deleteLotImage(lotId: String, url: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val response = adminLotController.deleteLotImage(lotId, url)
         if (response.statusCode.is2xxSuccessful) {
-            val prefix = "/files/"
-            if (url.startsWith(prefix)) {
-                runCatching { storageService.delete(url.removePrefix(prefix)) }
-            }
+            runCatching { storageService.delete(url) }
         }
         return response
     }
 
     suspend fun uploadLotPhoto(lotId: String, filePart: FilePart): ResponseEntity<ApiResponse<AdminLotResponse>> {
         val key = storageService.upload(filePart)
-        val url = "/files/$key"
         return adminLotController.addLotImage(
             lotId,
             AdminAddImageRequest(
-                url = url,
+                url = key,
                 description = filePart.filename()
             )
         )
