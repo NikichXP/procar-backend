@@ -33,6 +33,12 @@ class StorageService(
         buf.read(bytes)
 
         val extension = filePart.filename().substringAfterLast('.', missingDelimiterValue = "")
+        val isHeic = extension.equals("heic", ignoreCase = true) || extension.equals("heif", ignoreCase = true)
+        
+        if (isHeic) {
+            throw IllegalArgumentException("HEIC/HEIF files are not supported. Please convert to JPEG before uploading.")
+        }
+
         val key = if (extension.isNotEmpty()) "${Uuid.generateV7()}.$extension" else "${Uuid.generateV7()}"
 
         val request = PutObjectRequest.builder()
