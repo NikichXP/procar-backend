@@ -38,8 +38,6 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.7.0")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("software.amazon.awssdk:s3:2.29.52")
-	implementation("org.bytedeco:javacv:1.5.10")
-	implementation("org.bytedeco:ffmpeg-platform:6.1.1-1.5.10")
 	
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.springframework.boot", module = "spring-boot-starter-web")
