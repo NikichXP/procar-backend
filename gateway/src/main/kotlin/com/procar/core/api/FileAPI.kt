@@ -1,5 +1,6 @@
 package com.procar.core.api
 
+import com.procar.core.service.ImageService
 import com.procar.core.service.StorageService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -14,45 +15,14 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
-import java.awt.Image
-import java.awt.image.BufferedImage
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import javax.imageio.ImageIO
 
 @Tag(name = "file-api", description = "File upload and download")
 @RestController
 @RequestMapping("/files")
 class FileAPI(
+    private val imageService: ImageService,
     private val storageService: StorageService
 ) {
-
-    private fun resizeImage(bytes: ByteArray, size: Int, formatName: String): ByteArray {
-        val originalImage = ImageIO.read(ByteArrayInputStream(bytes))
-        val originalWidth = originalImage.width
-        val originalHeight = originalImage.height
-
-        val scaledWidth: Int
-        val scaledHeight: Int
-
-        if (originalWidth > originalHeight) {
-            scaledWidth = size
-            scaledHeight = (size * originalHeight.toDouble() / originalWidth).toInt()
-        } else {
-            scaledHeight = size
-            scaledWidth = (size * originalWidth.toDouble() / originalHeight).toInt()
-        }
-
-        val scaledImage = originalImage.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH)
-        val resizedImage = BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_RGB)
-        val graphics = resizedImage.createGraphics()
-        graphics.drawImage(scaledImage, 0, 0, null)
-        graphics.dispose()
-
-        val outputStream = ByteArrayOutputStream()
-        ImageIO.write(resizedImage, formatName, outputStream)
-        return outputStream.toByteArray()
-    }
 
     @Operation(summary = "Upload a file")
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
@@ -77,41 +47,34 @@ class FileAPI(
     }
 
     @Operation(summary = "Download a resized image by key and size")
-    @GetMapping("/{key}/{size}")
+    @GetMapping("/{originalKey}/{size}")
     suspend fun downloadResized(
-        @PathVariable key: String,
+        @PathVariable originalKey: String,
         @PathVariable size: String
     ): ResponseEntity<Flow<DataBuffer>> {
         val sizeInt = size.toIntOrNull()
             ?: return ResponseEntity.notFound().build()
 
-        val lastDotIndex = key.lastIndexOf('.')
+        val lastDotIndex = originalKey.lastIndexOf('.')
         if (lastDotIndex == -1) {
             return ResponseEntity.notFound().build()
         }
 
-        val baseName = key.substring(0, lastDotIndex)
-        val extension = key.substring(lastDotIndex + 1)
+        val baseName = originalKey.substring(0, lastDotIndex)
+        val extension = originalKey.substring(lastDotIndex + 1)
         val resizedKey = "$baseName.$size.$extension"
         val formatName = extension.lowercase()
 
         if (storageService.fileExists(resizedKey)) {
-            val (contentType, dataFlow) = storageService.download(resizedKey)
-            val bufferFlow = dataFlow.map { bytes ->
-                DefaultDataBufferFactory.sharedInstance.wrap(bytes) as DataBuffer
-            }
-            return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(bufferFlow)
+            return download(resizedKey)
         }
 
-        if (storageService.fileExists(key)) {
-            val (contentType, dataFlow) = storageService.download(key)
-            val originalBytes = dataFlow.map { it }.toList().first()
-            val resizedBytes = resizeImage(originalBytes, sizeInt, formatName)
+        if (storageService.fileExists(originalKey)) {
+            val (contentType, dataFlow) = storageService.download(originalKey)
+            val resizedBytes = imageService.resizeImage(dataFlow, sizeInt, formatName)
             storageService.uploadBytes(resizedKey, resizedBytes, contentType)
 
-            val bufferFlow = flow<ByteArray> {
+            val bufferFlow = flow {
                 emit(resizedBytes)
             }.map { bytes ->
                 DefaultDataBufferFactory.sharedInstance.wrap(bytes) as DataBuffer
