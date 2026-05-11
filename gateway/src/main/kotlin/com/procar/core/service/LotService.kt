@@ -119,6 +119,7 @@ class LotService(
             bidsCount = vehicleLot.auction?.totalBids,
             startTime = vehicleLot.auction?.startTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
             endTime = vehicleLot.auction?.endTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            photos = vehicleLot.vehicle.images.map { it.url },
             source = LotSource(
                 name = vehicleLot.providerName,
                 lotUrl = "https://example.com/lot/${vehicleLot.id}" // TODO: Generate proper URL

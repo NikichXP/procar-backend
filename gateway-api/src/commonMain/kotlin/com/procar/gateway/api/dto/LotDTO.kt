@@ -73,6 +73,7 @@ data class LotDetail(
     @ApiDoc(example = "14") val bidsCount: Int? = null,
     @ApiDoc(example = "2025-06-01T10:00:00Z") val startTime: String? = null,
     @ApiDoc(example = "2025-06-08T18:00:00Z") val endTime: String? = null,
+    val photos: List<String> = emptyList(),
     val source: LotSource,
     val location: LotLocation,
     val fees: LotFees,
