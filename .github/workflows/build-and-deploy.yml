@@ -2,7 +2,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [main, ui]
   workflow_dispatch:
 
 concurrency:
@@ -15,22 +15,33 @@ env:
   NAMESPACE: procar
 
 jobs:
+  setup:
+    runs-on: self-hosted
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      services: ${{ steps.set-matrix.outputs.services }}
+    steps:
+      - id: set-matrix
+        shell: bash
+        run: |
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo 'matrix={"include":[{"name":"gateway","dockerfile":"gateway/Dockerfile"},{"name":"auth","dockerfile":"auth/Dockerfile"},{"name":"user","dockerfile":"user/Dockerfile"},{"name":"auction-provider-procar","dockerfile":"auction-provider-procar/Dockerfile"}]}' >> $GITHUB_OUTPUT
+            echo 'services=gateway auth user auction-provider-procar' >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref_name }}" == "ui" ]]; then
+            echo 'matrix={"include":[{"name":"admin-jetpack","dockerfile":"admin-jetpack/Dockerfile"}]}' >> $GITHUB_OUTPUT
+            echo 'services=admin-jetpack' >> $GITHUB_OUTPUT
+          else
+            # Default to main services for workflow_dispatch on other branches if needed, or empty
+            echo 'matrix={"include":[{"name":"gateway","dockerfile":"gateway/Dockerfile"},{"name":"auth","dockerfile":"auth/Dockerfile"},{"name":"user","dockerfile":"user/Dockerfile"},{"name":"auction-provider-procar","dockerfile":"auction-provider-procar/Dockerfile"}]}' >> $GITHUB_OUTPUT
+            echo 'services=gateway auth user auction-provider-procar' >> $GITHUB_OUTPUT
+          fi
+
   build:
+    needs: [setup]
     runs-on: self-hosted
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - name: admin-jetpack
-            dockerfile: admin-jetpack/Dockerfile
-          - name: gateway
-            dockerfile: gateway/Dockerfile
-          - name: auth
-            dockerfile: auth/Dockerfile
-          - name: user
-            dockerfile: user/Dockerfile
-          - name: auction-provider-procar
-            dockerfile: auction-provider-procar/Dockerfile
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,10 +88,11 @@ jobs:
 
   deploy:
     runs-on: self-hosted
-    needs: [build]
+    needs: [setup, build]
     env:
       KUBECONFIG: ${{ github.workspace }}/.kube/config
       IMAGE_TAG: ${{ github.sha }}
+      SERVICES: ${{ needs.setup.outputs.services }}
     steps:
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
@@ -99,7 +111,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for svc in gateway auth user auction-provider-procar admin-jetpack; do
+          for svc in $SERVICES; do
             kubectl -n "$NAMESPACE" set image "deployment/$svc" \
               "$svc=$IMAGE_PREFIX/$svc:$IMAGE_TAG" --record=false
           done
@@ -108,7 +120,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for svc in gateway auth user auction-provider-procar admin-jetpack; do
+          for svc in $SERVICES; do
             kubectl -n "$NAMESPACE" rollout status "deployment/$svc" --timeout=300s
           done
 
