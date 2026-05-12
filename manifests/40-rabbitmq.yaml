@@ -60,7 +60,7 @@ metadata:
   name: rabbitmq
   namespace: procar
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: rabbitmq
   ports:
