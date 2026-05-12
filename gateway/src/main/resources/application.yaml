@@ -8,6 +8,11 @@ spring:
       uri: ${MONGODB_URI:mongodb://localhost:27017/procar-gateway}
     redis:
       uri: ${REDIS_URI:redis://localhost:6379}
+    rabbitmq:
+      host: ${RABBITMQ_HOST:localhost}
+      port: ${RABBITMQ_PORT:5672}
+      username: ${RABBITMQ_USERNAME:spring_app}
+      password: ${RABBITMQ_PASSWORD:}
 
 connector:
   auction-provider-procar-url: ${AUCTION_PROVIDER_PROCAR_URL:http://localhost:8083}

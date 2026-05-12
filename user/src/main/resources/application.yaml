@@ -7,6 +7,11 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://localhost:27017/procar-user}
       database: procar-user
+    rabbitmq:
+      host: ${RABBITMQ_HOST:localhost}
+      port: ${RABBITMQ_PORT:5672}
+      username: ${RABBITMQ_USERNAME:spring_app}
+      password: ${RABBITMQ_PASSWORD:}
 
 server:
   port: 8084

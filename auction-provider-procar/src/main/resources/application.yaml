@@ -13,6 +13,11 @@ spring:
       auto-index-creation: true
     redis:
       uri: ${REDIS_URI:redis://localhost:6379}
+    rabbitmq:
+      host: ${RABBITMQ_HOST:localhost}
+      port: ${RABBITMQ_PORT:5672}
+      username: ${RABBITMQ_USERNAME:spring_app}
+      password: ${RABBITMQ_PASSWORD:}
 
 # Server Configuration
 server:

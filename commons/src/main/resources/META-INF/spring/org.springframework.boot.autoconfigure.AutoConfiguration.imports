@@ -1,1 +1,2 @@
 com.procar.commons.error.ErrorHandlingAutoConfiguration
+com.procar.commons.config.RabbitMQConfig
