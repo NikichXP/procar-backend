@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -96,7 +95,7 @@ private fun LotDetailContent(lot: LotDetail) {
         verticalArrangement = Arrangement.spacedBy(0.dp),
         modifier = Modifier.fillMaxSize(),
     ) {
-        item { PhotoGallery(lot.car.images) }
+        item { PhotoGallery(lot.photos) }
         item { LotHeroSection(lot) }
         item { HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp)) }
         item { VehicleDetailsSection(lot) }

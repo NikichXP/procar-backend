@@ -65,7 +65,7 @@ class LotService(
                     vin = vehicleLot.vehicle.vin,
                     color = vehicleLot.vehicle.color,
                     description = vehicleLot.description,
-                    images = vehicleLot.vehicle.images.filter { it.isPrimary }.map { it.url }
+                    images = vehicleLot.vehicle.images.map { it.url }
                 ),
                 status = mapStatusToGateway(vehicleLot.status),
                 currentBid = vehicleLot.auction?.currentBid,
