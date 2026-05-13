@@ -18,6 +18,7 @@ dependencies {
     // JUnit 5
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
     testImplementation("org.junit.platform:junit-platform-suite:1.11.3")
+    testImplementation("org.assertj:assertj-core:3.26.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // Ktor Client
@@ -27,6 +28,14 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-logging:$ktorVersion")
+
+    // Logging
+    implementation("org.slf4j:slf4j-api:2.0.16")
+    testImplementation("ch.qos.logback:logback-classic:1.5.12")
+
+    // Missing transitive dependencies for commons that Cucumber scans
+    testRuntimeOnly("org.springframework.boot:spring-boot-starter-data-mongodb")
+    testRuntimeOnly("org.springframework.amqp:spring-rabbit")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")

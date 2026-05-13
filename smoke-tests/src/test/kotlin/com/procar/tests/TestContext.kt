@@ -30,4 +30,6 @@ class TestContext {
 
     var lastResponse: HttpResponse? = null
     var lastResponseBody: String? = null
+    var authToken: String? = null
+    val variables = mutableMapOf<String, String>()
 }
