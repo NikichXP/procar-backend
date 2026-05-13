@@ -1,14 +1,18 @@
 package com.procar.tests
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.cucumber.java.en.Given
 import io.cucumber.java.en.When
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class RequestStepDef(private val context: TestContext) {
+
+    private val log = LoggerFactory.getLogger(RequestStepDef::class.java)
 
     @Given("the backend is up on {string}")
     fun gatewayIsUp(url: String) {
@@ -17,35 +21,37 @@ class RequestStepDef(private val context: TestContext) {
 
     @Given("I am authenticated with credentials {string} and {string}")
     fun authenticate(username: String, password: String) = runBlocking {
-        val loginPath = "/auth/login"
-        val url = if (loginPath.startsWith("http")) loginPath 
-                  else "${context.baseUrl.removeSuffix("/")}/${loginPath.removePrefix("/")}"
+        val loginBody = jacksonObjectMapper().writeValueAsString(mapOf(
+            "username" to username,
+            "password" to password
+        ))
         
-        val response = context.client.post(url) {
-            contentType(ContentType.Application.Json)
-            setBody(mapOf("username" to username, "password" to password))
-        }
+        val response = doRequest(HttpMethod.Post, "/auth/login", loginBody, addAuth = false)
         
         if (response.status == HttpStatusCode.OK) {
-            val body = response.bodyAsText()
-            val json = com.fasterxml.jackson.module.kotlin.jacksonObjectMapper().readTree(body)
-            context.authToken = json.get("accessToken")?.asText()
+            val json = jacksonObjectMapper().readTree(context.lastResponseBody)
+            context.authToken = json.at("/accessToken/token").asText()
         } else {
-            throw IllegalStateException("Authentication failed with status ${response.status}: ${response.bodyAsText()}")
+            throw IllegalStateException("Authentication failed with status ${response.status}: ${context.lastResponseBody}")
         }
     }
 
     @When("I request {word} {string}")
     fun requestMethod(method: String, path: String) = runBlocking {
-        executeRequest(method, path, null)
+        doRequest(HttpMethod.parse(method.uppercase()), path, null)
     }
 
     @When("I request {word} {string} with body:")
     fun requestWithBody(method: String, path: String, body: String) = runBlocking {
-        executeRequest(method, path, body)
+        doRequest(HttpMethod.parse(method.uppercase()), path, body)
     }
 
-    private suspend fun executeRequest(method: String, path: String, body: String?) {
+    private suspend fun doRequest(
+        method: HttpMethod,
+        path: String,
+        body: String? = null,
+        addAuth: Boolean = true
+    ): HttpResponse {
         val resolvedPath = resolveVariables(path)
         val resolvedBody = body?.let { resolveVariables(it) }
 
@@ -53,21 +59,26 @@ class RequestStepDef(private val context: TestContext) {
                   else "${context.baseUrl.removeSuffix("/")}/${resolvedPath.removePrefix("/")}"
 
         val response = context.client.request(url) {
-            this.method = HttpMethod.parse(method.uppercase())
+            this.method = method
             if (resolvedBody != null) {
                 contentType(ContentType.Application.Json)
                 setBody(resolvedBody)
             }
-            // Add authorization if available in context
-            context.authToken?.let {
-                header(HttpHeaders.Authorization, "Bearer $it")
-            }
-            context.variables["accessToken"]?.let {
-                header(HttpHeaders.Authorization, "Bearer $it")
+            if (addAuth) {
+                context.authToken?.let {
+                    header(HttpHeaders.Authorization, "Bearer $it")
+                }
+                context.variables["accessToken"]?.let {
+                    header(HttpHeaders.Authorization, "Bearer $it")
+                }
             }
         }
+        
         context.lastResponse = response
-        context.lastResponseBody = response.bodyAsText()
+        val bodyText = response.bodyAsText()
+        context.lastResponseBody = bodyText
+        log.info("Response: {} {} -> {} - {}", method.value.uppercase(), resolvedPath, response.status, bodyText)
+        return response
     }
 
     private fun resolveVariables(input: String): String {
