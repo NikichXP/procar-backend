@@ -1,0 +1,69 @@
+### Procar Backend API Calls
+
+### Register new user - gateway
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+
+
+### Register User (Auth Service)
+# Creates authentication credentials for the user
+POST http://localhost:8082/auth/register
+Content-Type: application/json
+
+{
+  "userId": "admin-user-id",
+  "username": "admin",
+  "password": "admin"
+}
+
+###
+
+### Create User Profile (User Service)
+# Creates the user profile with roles - should be called after auth registration
+POST http://localhost:8084/api/admin/users
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "roles": ["ADMIN"]
+}
+
+###
+
+### Login (Auth Service)
+# Test login with created credentials
+POST http://localhost:8082/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin"
+}
+
+###
+
+### Get All Users (User Service)
+# Verify user profile was created
+GET http://localhost:8084/api/admin/users
+
+###
+
+### Get Current User (User Service)
+# Get current user info (requires auth token)
+GET http://localhost:8084/api/me
+Authorization: Bearer {{auth_token}}
+
+###
+
+### Validate Token (Auth Service)
+# Validate access token
+GET http://localhost:8082/auth/validate
+Authorization: Bearer {{auth_token}}
+
+###
