@@ -13,6 +13,13 @@ spring:
     username: ${RABBITMQ_USERNAME:spring_app}
     password: ${RABBITMQ_PASSWORD:}
 
+procar:
+  auth:
+    url: ${PROCAR_AUTH_URL:http://localhost:8082}
+  default-user:
+    username: ${PROCAR_DEFAULT_USER_USERNAME:admin}
+    password: ${PROCAR_DEFAULT_USER_PASSWORD:admin}
+
 server:
   port: 8084
 

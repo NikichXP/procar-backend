@@ -15,6 +15,10 @@ spec:
     spec:
       imagePullSecrets:
         - name: registry-pull-secret
+      initContainers:
+        - name: wait-for-auth
+          image: busybox:1.35
+          command: ['sh', '-c', 'until nc -z auth 8082; do echo "waiting for auth..."; sleep 2; done']
       containers:
         - name: user
           image: registry.pc-dev.nikichxp.xyz/procar/user:latest
@@ -61,6 +65,12 @@ spec:
                   key: MONGO_APP_NAME
             - name: MONGODB_URI
               value: "mongodb+srv://$(MONGO_USERNAME):$(MONGO_PASSWORD)@$(MONGO_HOST)/$(MONGO_DATABASE)?appName=$(MONGO_APP_NAME)"
+            - name: PROCAR_AUTH_URL
+              value: "http://auth:8082"
+            - name: PROCAR_DEFAULT_USER_USERNAME
+              value: "admin"
+            - name: PROCAR_DEFAULT_USER_PASSWORD
+              value: "admin"
           livenessProbe:
             httpGet:
               path: /actuator/health
