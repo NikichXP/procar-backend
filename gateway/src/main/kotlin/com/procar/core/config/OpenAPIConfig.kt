@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.Paths
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -39,8 +40,8 @@ class OpenAPIConfig {
     }
 
     @Bean
-    fun openAPICustomizer(): org.springdoc.core.customizers.OpenApiCustomizer {
-        return org.springdoc.core.customizers.OpenApiCustomizer { openAPI ->
+    fun openAPICustomizer(): OpenApiCustomizer {
+        return OpenApiCustomizer { openAPI ->
             val paths = Paths()
 
             openAPI.paths?.forEach { (path, pathItem) ->
@@ -65,8 +66,7 @@ class OpenAPIConfig {
     companion object {
         private val nonExposableEndpoints = listOf(
             "/actuator",
-            "/internal",
-            "/api/admin"
+            "/internal"
         )
     }
 }
