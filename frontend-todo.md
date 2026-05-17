@@ -3,37 +3,36 @@
 This document outlines the tasks required to align the Procar Backend API with the current frontend product model.
 
 ## 1. User Roles & Profile (Priority 1)
-- [ ] Update `UserRole` enum: `CUSTOMER`, `BROKER`, `ADMIN`
-- [ ] Implement `UserStatus`: `ACTIVE`, `BLOCKED`
-- [ ] Implement `CompanyStatus`: `NOT_STARTED`, `PENDING`, `VERIFIED`, `REJECTED`
-- [ ] Implement `DepositStatus`: `NOT_PAID`, `PENDING`, `ACTIVE`, `FORFEITED`
-- [ ] Update `User` entity/DTO with new fields:
-    - `role`, `companyName`, `country`, `status`, `companyStatus`, `depositStatus`, `brokerId` (for BROKER role)
-- [ ] Update `GET /users/me` to return full Procar profile
+- [x] Update `UserRole` enum: `CUSTOMER`, `BROKER`, `ADMIN`
+- [x] Implement `UserStatus`: `ACTIVE`, `BLOCKED`
+- [x] Implement `CompanyStatus`: `NOT_STARTED`, `PENDING`, `VERIFIED`, `REJECTED`
+- [x] Implement `DepositStatus`: `NOT_PAID`, `PENDING`, `ACTIVE`, `FORFEITED`
+- [x] Update `User` entity/DTO with new fields:
+    - `roles`, `companyName`, `country`, `status`, `companyStatus`, `depositStatus`, `brokerId` (for BROKER role)
+- [x] Update `GET /users/me` to return full Procar profile
 - [ ] Update registration/auth logic for new roles
-- [ ] Create corresponding .feature files in smoke-tests to validate user roles and profiles
+- [x] Create corresponding .feature files in smoke-tests to validate user roles and profiles
 
 ## 2. Broker Organizations (Priority 2)
-- [ ] Enhance existing `Broker` model:
+- [x] Enhance existing `Broker` model:
     - Add `status`: `ACTIVE`, `BLOCKED`
     - Add `displayName`, `country`, `contactEmail` fields
     - Ensure `name` is used as `companyName`
-- [ ] Implement status update endpoint:
-    - `POST /admin/brokers/{id}/status` (accepting `BrokerStatus` enum: `ACTIVE`, `BLOCKED`)
-- [ ] Change `PUT /admin/brokers/{id}` to `PATCH /admin/brokers/{id}`
-- [ ] Create corresponding .feature files in smoke-tests to validate broker organization management
-- [ ] Implement logic to hide `SELECT` lots when a broker is blocked
+- [x] Implement status update endpoint:
+    `POST /admin/brokers/{id}/status` (accepting `BrokerStatus` enum: `ACTIVE`, `BLOCKED`)
+- [x] Change `PUT /admin/brokers/{id}` to `PATCH /admin/brokers/{id}`
+- [x] Create corresponding .feature files in smoke-tests to validate broker organization management
 
 ## 3. User Management (Priority 2)
-- [ ] Implement missing Admin endpoints:
-    - `DELETE /admin/users/{id}` (Missing in current API)
-    - `POST /admin/users/{id}/status` (accepting `UserStatus` enum: `ACTIVE`, `BLOCKED`)
-    - `PATCH /admin/users/{id}` (Generic update instead of multiple specific endpoints)
-- [ ] Update `POST /admin/users`:
-    - Ensure it handles `brokerId` for `BROKER` role
-- [ ] Create corresponding .feature files in smoke-tests to validate admin user management
+- [x] Implement missing Admin endpoints:
+    `DELETE /admin/users/{id}` (Missing in current API)
+    `POST /admin/users/{id}/status` (accepting `UserStatus` enum: `ACTIVE`, `BLOCKED`)
+    `PATCH /admin/users/{id}` (Generic update instead of multiple specific endpoints)
+- [x] Update `POST /admin/users`:
+    Ensure it handles `brokerId` for `BROKER` role
+- [x] Create corresponding .feature files in smoke-tests to validate admin user management
     - Set initial `companyStatus` and `depositStatus`
-- [ ] Add self-protection for `ADMIN` (prevent self-block/delete)
+- [x] Add self-protection for `ADMIN` (prevent self-block/delete)
 
 ## 4. Lots: Dual Lane & Sale Mode (Priority 3)
 - [ ] Update `Lot` model with `brand` (`AUCTIONS`, `SELECT`) and `saleMode` (`OFFER`, `AUCTION`)

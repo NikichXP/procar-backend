@@ -11,13 +11,13 @@ Feature: Admin User Management
       """
       {
         "username": "test_user_lifecycle",
-        "role": "CUSTOMER"
+        "roles": ["CUSTOMER"]
       }
       """
     Then the status code should be 200
     And the field "id" is not empty
     And the field "username" is "test_user_lifecycle"
-    And the field "role" is "CUSTOMER"
+    And the field "roles/0" is "CUSTOMER"
     And I save the field "id" as "id"
 
     # Update status
@@ -34,12 +34,12 @@ Feature: Admin User Management
     When I request PATCH "/api/admin/users/${id}" with body:
       """
       {
-        "role": "BROKER",
+        "roles": ["BROKER"],
         "companyName": "Test Broker Ltd"
       }
       """
     Then the status code should be 200
-    And the field "role" is "BROKER"
+    And the field "roles/0" is "BROKER"
     And the field "companyName" is "Test Broker Ltd"
 
     # Delete user
@@ -49,3 +49,30 @@ Feature: Admin User Management
     # Verify user is gone
     When I request GET "/api/admin/users/${id}"
     Then the status code should be 404
+
+  Scenario: Admin self-protection (prevent self-block and self-delete)
+    When I request GET "/users/me"
+    Then the status code should be 200
+    And I save the field "id" as "admin_id"
+
+    # Try to block self via status endpoint
+    When I request POST "/api/admin/users/${admin_id}/status" with body:
+      """
+      {
+        "status": "BLOCKED"
+      }
+      """
+    Then the status code should be 400
+
+    # Try to block self via patch endpoint
+    When I request PATCH "/api/admin/users/${admin_id}" with body:
+      """
+      {
+        "status": "BLOCKED"
+      }
+      """
+    Then the status code should be 400
+
+    # Try to delete self
+    When I request DELETE "/api/admin/users/${admin_id}"
+    Then the status code should be 400

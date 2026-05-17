@@ -1,7 +1,10 @@
 package com.procar.core.service.admin
 
 import com.procar.user.api.UserAdminAPI
-import com.procar.user.api.dto.*
+import com.procar.user.api.dto.CreateUserRequest
+import com.procar.user.api.dto.PatchUserRequest
+import com.procar.user.api.dto.UpdateUserStatusRequest
+import com.procar.user.api.dto.UserDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
