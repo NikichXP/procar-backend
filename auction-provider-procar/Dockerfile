@@ -1,20 +1,26 @@
 # Stage 1: Build stage using Gradle image
-FROM gradle:8.5-jdk21 AS builder
+FROM gradle:8.10-jdk21 AS builder
 
 WORKDIR /app
 
-# Copy source code (only dependencies needed for auction-provider-procar)
-COPY auction-provider-procar ./auction-provider-procar
+# Copy gradle configuration first to cache dependencies
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY auction-provider-api/build.gradle.kts ./auction-provider-api/
+COPY commons/build.gradle.kts ./commons/
+COPY auction-provider-procar/build.gradle.kts ./auction-provider-procar/
+
+# Cache gradle dependencies
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle auction-provider-procar:dependencies --no-daemon
+
+# Copy source code
 COPY auction-provider-api ./auction-provider-api
 COPY commons ./commons
-
-# Copy build configuration
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
-COPY gradle.properties .
+COPY auction-provider-procar ./auction-provider-procar
 
 # Build the application
-RUN gradle auction-provider-procar:bootJar -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle auction-provider-procar:bootJar -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine

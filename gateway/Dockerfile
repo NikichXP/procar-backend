@@ -3,21 +3,30 @@ FROM gradle:8.10-jdk21 AS builder
 
 WORKDIR /app
 
-# Copy source code (only dependencies needed for gateway)
-COPY gateway ./gateway
+# Copy gradle configuration first to cache dependencies
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY gateway-api/build.gradle.kts ./gateway-api/
+COPY auth-api/build.gradle.kts ./auth-api/
+COPY auction-provider-api/build.gradle.kts ./auction-provider-api/
+COPY user-api/build.gradle.kts ./user-api/
+COPY commons/build.gradle.kts ./commons/
+COPY gateway/build.gradle.kts ./gateway/
+
+# Cache gradle dependencies
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle gateway:dependencies --no-daemon
+
+# Copy source code
 COPY gateway-api ./gateway-api
 COPY auth-api ./auth-api
 COPY auction-provider-api ./auction-provider-api
 COPY user-api ./user-api
 COPY commons ./commons
-
-# Copy build configuration
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
-COPY gradle.properties .
+COPY gateway ./gateway
 
 # Build the application
-RUN gradle gateway:bootJar -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle gateway:bootJar -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine
