@@ -32,7 +32,7 @@ class UserAPI(
     @Operation(summary = "Get user bids", description = "Returns a paginated list of bids placed by the current user.")
     @GetMapping("/bids")
     @PreAuthorize("isAuthenticated()")
-    fun getUserBids(
+    suspend fun getUserBids(
         @Parameter(
             description = "Filter by bid status",
             example = "WINNING"

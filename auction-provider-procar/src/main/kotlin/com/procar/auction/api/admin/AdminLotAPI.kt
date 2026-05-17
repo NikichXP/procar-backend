@@ -2,6 +2,7 @@ package com.procar.auction.api.admin
 
 import com.procar.auction.document.LotEntity
 import com.procar.auction.document.VehicleImageDocument
+import com.procar.auction.service.InternalAuctionBidService
 import com.procar.auction.service.InternalAuctionLotService
 import com.procar.auction.service.status.LotStatusTransitionService
 import com.procar.provider.admin.*
@@ -16,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 class AdminLotAPI(
     private val lotService: InternalAuctionLotService,
+    private val bidService: InternalAuctionBidService,
     private val lotStatusTransitionService: LotStatusTransitionService,
     private val conversionService: ConversionService
 ) : AdminLotController {
@@ -177,5 +179,17 @@ class AdminLotAPI(
             ?: return ResponseEntity.notFound().build()
         val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
         return ResponseEntity.ok(ApiResponse(adminResponse, "Availability confirmed successfully"))
+    }
+
+    override suspend fun endAuction(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val lot = lotService.getLotById(lotId) ?: return ResponseEntity.notFound().build()
+        if (lot.status != LotStatus.ACTIVE) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ACTIVE lots can have their auction ended")
+        }
+        val updatedLot = lotService.updateLotStatus(lotId, LotStatus.AWAIT_SELLER_CONFIRMATION)
+            ?: return ResponseEntity.notFound().build()
+        bidService.finishAuction(lotId)
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Auction ended successfully"))
     }
 }

@@ -21,6 +21,15 @@ class RequestStepDef(private val context: TestContext) {
 
     @Given("I am authenticated with credentials {string} and {string}")
     fun authenticate(username: String, password: String) = runBlocking {
+        context.authToken = loginAndGetToken(username, password)
+    }
+
+    @When("I switch to user {string} with password {string}")
+    fun switchUser(username: String, password: String) = runBlocking {
+        context.authToken = loginAndGetToken(username, password)
+    }
+
+    private suspend fun loginAndGetToken(username: String, password: String): String {
         val loginBody = jacksonObjectMapper().writeValueAsString(mapOf(
             "username" to username,
             "password" to password
@@ -30,7 +39,7 @@ class RequestStepDef(private val context: TestContext) {
         
         if (response.status == HttpStatusCode.OK) {
             val json = jacksonObjectMapper().readTree(context.lastResponseBody)
-            context.authToken = json.at("/accessToken/token").asText()
+            return json.at("/accessToken/token").asText()
         } else {
             throw IllegalStateException("Authentication failed with status ${response.status}: ${context.lastResponseBody}")
         }

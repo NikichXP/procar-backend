@@ -50,29 +50,17 @@ This document outlines the tasks required to align the Procar Backend API with t
     - Apply visibility rules (only published lots from active brokers)
 - [x] Update Admin endpoints - verify we have all the endpoints for statuses handling
 
-## 5. Offers (Priority 4)
-- [ ] Create `Offer` entity and repository
-- [ ] Implement `OfferStatus`: `SUBMITTED`, `ACCEPTED`, `REJECTED`, `CANCELLED`
-- [ ] Implement `OfferSource`: `MANUAL_OFFER`, `AUCTION_WINNER`
-- [ ] Implement endpoints:
-    - `POST /lots/{lotId}/offers` (CUSTOMER makes offer)
-- [ ] Create corresponding .feature files in smoke-tests to validate offer flow (manual and auction winner)
-    - `GET /users/me/offers` (CUSTOMER sees their offers)
-    - `GET /admin/offers` (ADMIN/BROKER sees relevant offers)
-    - `POST /admin/offers/{id}/accept`
-    - `POST /admin/offers/{id}/reject` (with `rejectionReason`)
-
-## 6. Bids & Auction Lifecycle (Priority 5)
-- [ ] Update `Bid` model and statuses (`winning`, `outbid`, `won_pending_seller`, etc.)
-- [ ] Create corresponding .feature files in smoke-tests to validate auction lifecycle and bid transitions
-- [ ] Implement `POST /admin/lots/{lotId}/end-auction` logic:
-    - Mark auction as `seller_decision`
-    - Create `auction_winner` offer from highest bid
-    - Update bid statuses
-- [ ] Ensure Bids and Offers are handled as distinct but related entities
+## 5. Bids & Auction Lifecycle (Priority 4)
+- [x] Refine `BidStatus`: `WINNING`, `OUTBID`, `WON`, `LOST`
+- [x] Update `FinishAuctionTask` to trigger bid finalization:
+    - Sets highest bid to `WON`
+    - Sets all other bids to `LOST`
+- [x] Implement Buyout bid logic:
+    - Immediately sets bid to `WON`
+    - Triggers lot transition to `AWAITING_PAYMENT` (as price is pre-agreed)
 - [ ] Create corresponding .feature files in smoke-tests to validate auction lifecycle and bid transitions
 
-## 7. Deals & Payments (Priority 4 & 6)
+## 6. Deals & Payments (Priority 5)
 - [ ] Create `Deal` entity and repository
 - [ ] Implement `DealStatus`: `CREATED`, `CONFIRMED`, `PAID`, `COMPLETED`, `CANCELLED`
 - [ ] Implement `VehiclePaymentStatus`: `PENDING`, `INSTRUCTIONS_READY`, `PAID`

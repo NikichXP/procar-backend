@@ -71,4 +71,7 @@ interface AdminLotController {
 
     @PostExchange("/{lotId}/confirm-availability")
     suspend fun confirmAvailability(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
+
+    @PostExchange("/{lotId}/end-auction")
+    suspend fun endAuction(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
 }

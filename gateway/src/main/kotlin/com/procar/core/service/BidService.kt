@@ -35,7 +35,8 @@ class BidService(
                     amount = internalBid.amount,
                     bidderId = internalBid.bidderId,
                     placedAt = internalBid.placedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-                    isWinning = internalBid.isWinning
+                    isWinning = internalBid.isWinning,
+                    status = com.procar.gateway.api.dto.BidStatus.valueOf(internalBid.status.name)
                 )
             }
         )
@@ -62,6 +63,7 @@ class BidService(
             amount = bidRequest.amount,
             bidderId = bidderId
         )
+        val placeRequestWithSource = placeRequest // Ensure it's correctly built if needed
         val placeResponse: ResponseEntity<ApiResponse<PlaceBidResponse>> = internalBidAPI.placeBid(placeRequest)
         val placeApiResult = placeResponse.body ?: throw RuntimeException("Failed to place bid")
         val placedBid = placeApiResult.data
@@ -72,7 +74,8 @@ class BidService(
             amount = placedBid.bid.amount,
             bidderId = placedBid.bid.bidderId,
             placedAt = placedBid.bid.placedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-            isWinning = placedBid.bid.isWinning
+            isWinning = placedBid.bid.isWinning,
+            status = com.procar.gateway.api.dto.BidStatus.valueOf(placedBid.bid.status.name)
         )
     }
 
@@ -80,7 +83,8 @@ class BidService(
         val body = internalBidAPI.buyout(BuyoutRequest(lotId, bidderId)).body
             ?: throw RuntimeException("Failed to buyout")
         val data = body.data
-        if (data.status != BidStatus.ACCEPTED) {
+        // We allow both WON and ACCEPTED for backward compatibility, but we transition to WON
+        if (data.status != BidStatus.WON && data.status != BidStatus.ACCEPTED) {
             throw org.springframework.web.server.ResponseStatusException(
                 org.springframework.http.HttpStatus.CONFLICT,
                 data.message ?: "Buyout rejected",
@@ -90,6 +94,7 @@ class BidService(
             lotId = data.lotId,
             price = data.price,
             purchasedAt = data.purchasedAt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            status = com.procar.gateway.api.dto.BidStatus.valueOf(data.status.name)
         )
     }
 }

@@ -98,23 +98,7 @@ class LotService(
         // Convert internal response to gateway DTO
         return LotDetail(
             id = vehicleLot.id,
-            car = CarInfo(
-                brandId = vehicleLot.vehicle.make,
-                brandName = vehicleLot.vehicle.make,
-                modelId = vehicleLot.vehicle.model,
-                modelName = vehicleLot.vehicle.model,
-                year = vehicleLot.vehicle.year,
-                condition = mapCondition(vehicleLot.vehicle.condition),
-                mileage = vehicleLot.vehicle.mileage,
-                vin = vehicleLot.vehicle.vin,
-                color = vehicleLot.vehicle.color,
-                description = vehicleLot.description,
-                images = vehicleLot.vehicle.images.map { it.url },
-                documents = CarDocuments(
-                    hasTitle = vehicleLot.vehicle.documents.any { it.type == DocumentType.TITLE },
-                    titleState = null // TODO: Extract from document data
-                )
-            ),
+            car = mapCarInfo(vehicleLot),
             status = mapStatusToGateway(vehicleLot.status),
             currentBid = vehicleLot.auction?.currentBid,
             startingBid = vehicleLot.auction?.startingBid,
@@ -144,6 +128,48 @@ class LotService(
             lotType = mapLotType(vehicleLot.lotType),
             buyoutPrice = vehicleLot.buyoutPrice,
             brand = mapBrand(vehicleLot.brand),
+        )
+    }
+
+    suspend fun getLotSummary(lotId: String): LotSummary {
+        val response: ResponseEntity<ApiResponse<VehicleLot>> = internalLotAPI.getLotDetail(lotId)
+        val apiResponse = response.body ?: throw RuntimeException("Failed to get lot summary")
+        val vehicleLot = apiResponse.data
+
+        return LotSummary(
+            id = vehicleLot.id,
+            car = mapCarInfo(vehicleLot),
+            status = mapStatusToGateway(vehicleLot.status),
+            currentBid = vehicleLot.auction?.currentBid,
+            startingBid = vehicleLot.auction?.startingBid,
+            bidStep = vehicleLot.auction?.bidIncrement,
+            bidsCount = vehicleLot.auction?.totalBids,
+            startTime = vehicleLot.auction?.startTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            endTime = vehicleLot.auction?.endTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            photos = vehicleLot.vehicle.images.map { it.url },
+            lotType = mapLotType(vehicleLot.lotType),
+            buyoutPrice = vehicleLot.buyoutPrice,
+            brand = mapBrand(vehicleLot.brand),
+        )
+    }
+
+    private fun mapCarInfo(vehicleLot: VehicleLot): CarInfo {
+        return CarInfo(
+            brandId = vehicleLot.vehicle.make,
+            brandName = vehicleLot.vehicle.make,
+            modelId = vehicleLot.vehicle.model,
+            modelName = vehicleLot.vehicle.model,
+            year = vehicleLot.vehicle.year,
+            condition = mapCondition(vehicleLot.vehicle.condition),
+            mileage = vehicleLot.vehicle.mileage,
+            vin = vehicleLot.vehicle.vin,
+            color = vehicleLot.vehicle.color,
+            description = vehicleLot.description,
+            images = vehicleLot.vehicle.images.map { it.url },
+            documents = CarDocuments(
+                hasTitle = vehicleLot.vehicle.documents.any { it.type == DocumentType.TITLE },
+                titleState = null
+            )
         )
     }
 

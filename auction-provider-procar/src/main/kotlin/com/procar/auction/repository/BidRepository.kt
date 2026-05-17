@@ -11,5 +11,7 @@ interface BidRepository : MongoRepository<BidEntity, String>, BidRepositoryCusto
 
     fun findByLotIdOrderByPlacedAtDesc(lotId: String): List<BidEntity>
 
+    fun findByBidderIdOrderByPlacedAtDesc(bidderId: String): List<BidEntity>
+
     fun deleteByLotId(lotId: String)
 }
