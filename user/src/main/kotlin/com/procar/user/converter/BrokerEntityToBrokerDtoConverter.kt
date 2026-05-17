@@ -9,9 +9,13 @@ import org.springframework.stereotype.Component
 class BrokerEntityToBrokerDtoConverter : Converter<BrokerEntity, BrokerDto> {
     override fun convert(source: BrokerEntity): BrokerDto = BrokerDto(
         id = source.id,
-        name = source.name,
+        companyName = source.companyName,
+        displayName = source.displayName,
         address = source.address,
+        country = source.country,
+        contactEmail = source.contactEmail,
         phones = source.phones,
-        emails = source.emails
+        emails = source.emails,
+        status = source.status
     )
 }

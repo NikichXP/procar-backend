@@ -9,10 +9,10 @@ import androidx.compose.ui.unit.dp
 import com.procar.api.createBroker
 import com.procar.api.deleteBroker
 import com.procar.api.fetchBrokers
-import com.procar.api.updateBroker
+import com.procar.api.patchBroker
 import com.procar.gateway.api.dto.BrokerDto
 import com.procar.gateway.api.dto.CreateBrokerRequest
-import com.procar.gateway.api.dto.UpdateBrokerRequest
+import com.procar.gateway.api.dto.PatchBrokerRequest
 import com.procar.ui.components.DataTable
 import com.procar.ui.state.launchWithState
 import com.procar.ui.state.rememberScreenState
@@ -50,18 +50,19 @@ fun BrokersScreen() {
             }
         } else {
             DataTable(
-                headers = listOf("ID", "Name", "Address", "Phones", "Emails", "Actions"),
+                headers = listOf("ID", "Company Name", "Display Name", "Address", "Phones", "Emails", "Actions"),
                 rows = brokers,
                 rowKey = { it.id },
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 cellContent = { b, col ->
                     when (col) {
                         0 -> Text(b.id)
-                        1 -> Text(b.name)
-                        2 -> Text(b.address)
-                        3 -> Text(b.phones.joinToString(", "))
-                        4 -> Text(b.emails.joinToString(", "))
-                        5 -> TextButton(onClick = { selectedBroker = b }) { Text("Edit") }
+                        1 -> Text(b.companyName)
+                        2 -> Text(b.displayName)
+                        3 -> Text(b.address)
+                        4 -> Text(b.phones.joinToString(", "))
+                        5 -> Text(b.emails.joinToString(", "))
+                        6 -> TextButton(onClick = { selectedBroker = b }) { Text("Edit") }
                     }
                 }
             )
@@ -100,8 +101,11 @@ private fun parseList(text: String): List<String> =
 @Composable
 private fun BrokerFormColumn(
     error: String?,
-    name: String, onNameChange: (String) -> Unit, nameLabel: String = "Name",
+    companyName: String, onCompanyNameChange: (String) -> Unit,
+    displayName: String, onDisplayNameChange: (String) -> Unit,
     address: String, onAddressChange: (String) -> Unit,
+    country: String, onCountryChange: (String) -> Unit,
+    contactEmail: String, onContactEmailChange: (String) -> Unit,
     phones: String, onPhonesChange: (String) -> Unit,
     emails: String, onEmailsChange: (String) -> Unit,
     header: @Composable () -> Unit = {},
@@ -112,8 +116,11 @@ private fun BrokerFormColumn(
     ) {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         header()
-        OutlinedTextField(name, { onNameChange(it.replace("\t", "")) }, label = { Text(nameLabel) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(companyName, { onCompanyNameChange(it.replace("\t", "")) }, label = { Text("Company Name *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(displayName, { onDisplayNameChange(it.replace("\t", "")) }, label = { Text("Display Name *") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         OutlinedTextField(address, { onAddressChange(it.replace("\t", "")) }, label = { Text("Address") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(country, { onCountryChange(it.replace("\t", "")) }, label = { Text("Country") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+        OutlinedTextField(contactEmail, { onContactEmailChange(it.replace("\t", "")) }, label = { Text("Contact Email") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         OutlinedTextField(phones, { onPhonesChange(it.replace("\t", "")) }, label = { Text("Phones (comma-separated)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
         OutlinedTextField(emails, { onEmailsChange(it.replace("\t", "")) }, label = { Text("Emails (comma-separated)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
     }
@@ -123,8 +130,11 @@ private fun BrokerFormColumn(
 private fun CreateBrokerDialog(onDismiss: () -> Unit, onCreated: (BrokerDto) -> Unit) {
     val scope = rememberCoroutineScope()
     var id by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
+    var companyName by remember { mutableStateOf("") }
+    var displayName by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
+    var country by remember { mutableStateOf("") }
+    var contactEmail by remember { mutableStateOf("") }
     var phones by remember { mutableStateOf("") }
     var emails by remember { mutableStateOf("") }
     var saving by remember { mutableStateOf(false) }
@@ -136,8 +146,11 @@ private fun CreateBrokerDialog(onDismiss: () -> Unit, onCreated: (BrokerDto) -> 
         text = {
             BrokerFormColumn(
                 error = error,
-                name = name, onNameChange = { name = it }, nameLabel = "Name *",
+                companyName = companyName, onCompanyNameChange = { companyName = it },
+                displayName = displayName, onDisplayNameChange = { displayName = it },
                 address = address, onAddressChange = { address = it },
+                country = country, onCountryChange = { country = it },
+                contactEmail = contactEmail, onContactEmailChange = { contactEmail = it },
                 phones = phones, onPhonesChange = { phones = it },
                 emails = emails, onEmailsChange = { emails = it },
             ) {
@@ -158,15 +171,19 @@ private fun CreateBrokerDialog(onDismiss: () -> Unit, onCreated: (BrokerDto) -> 
                         error = "ID is required and must match [a-z0-9-]+"
                         return@Button
                     }
-                    if (name.isBlank()) { error = "Name is required"; return@Button }
+                    if (companyName.isBlank()) { error = "Company Name is required"; return@Button }
+                    if (displayName.isBlank()) { error = "Display Name is required"; return@Button }
                     scope.launch {
                         saving = true
                         error = null
                         try {
                             val created = createBroker(CreateBrokerRequest(
                                 id = id,
-                                name = name,
+                                companyName = companyName,
+                                displayName = displayName,
                                 address = address,
+                                country = country,
+                                contactEmail = contactEmail,
                                 phones = parseList(phones),
                                 emails = parseList(emails),
                             ))
@@ -195,8 +212,11 @@ private fun EditBrokerDialog(
     onDeleted: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var name by remember(broker.id) { mutableStateOf(broker.name) }
+    var companyName by remember(broker.id) { mutableStateOf(broker.companyName) }
+    var displayName by remember(broker.id) { mutableStateOf(broker.displayName) }
     var address by remember(broker.id) { mutableStateOf(broker.address) }
+    var country by remember(broker.id) { mutableStateOf(broker.country) }
+    var contactEmail by remember(broker.id) { mutableStateOf(broker.contactEmail) }
     var phones by remember(broker.id) { mutableStateOf(broker.phones.joinToString(", ")) }
     var emails by remember(broker.id) { mutableStateOf(broker.emails.joinToString(", ")) }
     var working by remember { mutableStateOf(false) }
@@ -208,8 +228,11 @@ private fun EditBrokerDialog(
         text = {
             BrokerFormColumn(
                 error = error,
-                name = name, onNameChange = { name = it },
+                companyName = companyName, onCompanyNameChange = { companyName = it },
+                displayName = displayName, onDisplayNameChange = { displayName = it },
                 address = address, onAddressChange = { address = it },
+                country = country, onCountryChange = { country = it },
+                contactEmail = contactEmail, onContactEmailChange = { contactEmail = it },
                 phones = phones, onPhonesChange = { phones = it },
                 emails = emails, onEmailsChange = { emails = it },
             )
@@ -223,9 +246,12 @@ private fun EditBrokerDialog(
                             working = true
                             error = null
                             try {
-                                val updated = updateBroker(broker.id, UpdateBrokerRequest(
-                                    name = name,
+                                val updated = patchBroker(broker.id, PatchBrokerRequest(
+                                    companyName = companyName,
+                                    displayName = displayName,
                                     address = address,
+                                    country = country,
+                                    contactEmail = contactEmail,
                                     phones = parseList(phones),
                                     emails = parseList(emails),
                                 ))

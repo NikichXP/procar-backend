@@ -6,6 +6,7 @@ WORKDIR /app
 # Copy source code (only dependencies needed for user)
 COPY user ./user
 COPY user-api ./user-api
+COPY auth-api ./auth-api
 COPY commons ./commons
 
 # Copy build configuration

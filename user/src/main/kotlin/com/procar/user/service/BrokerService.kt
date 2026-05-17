@@ -1,8 +1,9 @@
 package com.procar.user.service
 
 import com.procar.user.api.dto.BrokerDto
+import com.procar.user.api.dto.BrokerStatus
 import com.procar.user.api.dto.CreateBrokerRequest
-import com.procar.user.api.dto.UpdateBrokerRequest
+import com.procar.user.api.dto.PatchBrokerRequest
 import com.procar.user.entity.BrokerEntity
 import com.procar.user.repo.BrokerRepository
 import org.springframework.core.convert.ConversionService
@@ -35,21 +36,37 @@ class BrokerService(
         }
         val entity = BrokerEntity(
             id = request.id,
-            name = request.name,
+            companyName = request.companyName,
+            displayName = request.displayName,
             address = request.address,
+            country = request.country,
+            contactEmail = request.contactEmail,
             phones = request.phones,
             emails = request.emails
         )
         return brokerRepository.save(entity).toDto()
     }
 
-    fun updateBroker(id: String, request: UpdateBrokerRequest): BrokerDto? {
+    fun patchBroker(id: String, request: PatchBrokerRequest): BrokerDto? {
         val existing = brokerRepository.findById(id) ?: return null
         val updated = existing.copy(
-            name = request.name ?: existing.name,
+            companyName = request.companyName ?: existing.companyName,
+            displayName = request.displayName ?: existing.displayName,
             address = request.address ?: existing.address,
+            country = request.country ?: existing.country,
+            contactEmail = request.contactEmail ?: existing.contactEmail,
             phones = request.phones ?: existing.phones,
             emails = request.emails ?: existing.emails,
+            status = request.status ?: existing.status,
+            updatedAt = Instant.now()
+        )
+        return brokerRepository.save(updated).toDto()
+    }
+
+    fun updateBrokerStatus(id: String, status: BrokerStatus): BrokerDto? {
+        val existing = brokerRepository.findById(id) ?: return null
+        val updated = existing.copy(
+            status = status,
             updatedAt = Instant.now()
         )
         return brokerRepository.save(updated).toDto()

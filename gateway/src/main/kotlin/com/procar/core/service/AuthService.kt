@@ -30,7 +30,7 @@ class AuthService(
     suspend fun register(request: GatewayUserRegisterRequest): AuthResult {
         val createUserRequest = CreateUserRequest(
             username = request.username,
-            roles = listOf(UserRole.USER)
+            roles = listOf(UserRole.CUSTOMER)
         )
         val createdUser = adminUserConnectorService.createUser(createUserRequest)
         

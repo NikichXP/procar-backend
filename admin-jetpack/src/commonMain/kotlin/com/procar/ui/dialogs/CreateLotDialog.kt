@@ -74,7 +74,7 @@ fun CreateLotDialog(onDismiss: () -> Unit, onCreated: () -> Unit) {
     var bidIncrement by remember { mutableStateOf("100") }
 
     // Create a mapping of broker display names to broker objects
-    val brokerOptions = brokers.associateBy { "${it.name} (${it.id})" }
+    val brokerOptions = brokers.associateBy { "${it.displayName} (${it.id})" }
     var selectedBrokerDisplay by remember { mutableStateOf("") }
 
     // Create a mapping of warehouse display names to warehouse objects

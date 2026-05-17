@@ -45,4 +45,7 @@ interface AuthController {
 
     @PostExchange("/password")
     suspend fun changePassword(@Valid @RequestBody request: ChangePasswordRequest)
+
+    @PostExchange("/delete")
+    suspend fun deleteAuthRecords(@RequestParam userId: String)
 }

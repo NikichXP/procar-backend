@@ -204,22 +204,10 @@ suspend fun createUser(request: CreateUserRequest): UserDto =
         setBody(request)
     }.body()
 
-suspend fun blockUser(id: String, blocked: Boolean): UserDto =
-    httpClient.post("$GATEWAY_BASE_URL/api/admin/users/$id/block") {
+suspend fun patchUser(id: String, request: PatchUserRequest): UserDto =
+    httpClient.patch("$GATEWAY_BASE_URL/api/admin/users/$id") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
-        setBody(BlockUserRequest(blocked))
-    }.body()
-
-suspend fun updateUserRoles(id: String, roles: List<UserRole>): UserDto =
-    httpClient.post("$GATEWAY_BASE_URL/api/admin/users/$id/roles") {
-        header(HttpHeaders.ContentType, ContentType.Application.Json)
-        setBody(UpdateUserRolesRequest(roles))
-    }.body()
-
-suspend fun updateUserBroker(id: String, brokerOrgId: String?): UserDto =
-    httpClient.post("$GATEWAY_BASE_URL/api/admin/users/$id/broker") {
-        header(HttpHeaders.ContentType, ContentType.Application.Json)
-        setBody(UpdateUserBrokerRequest(brokerOrgId))
+        setBody(request)
     }.body()
 
 // --- Brokers ---
@@ -233,8 +221,8 @@ suspend fun createBroker(request: CreateBrokerRequest): BrokerDto =
         setBody(request)
     }.body()
 
-suspend fun updateBroker(id: String, request: UpdateBrokerRequest): BrokerDto =
-    httpClient.put("$GATEWAY_BASE_URL/api/admin/brokers/$id") {
+suspend fun patchBroker(id: String, request: PatchBrokerRequest): BrokerDto =
+    httpClient.patch("$GATEWAY_BASE_URL/api/admin/brokers/$id") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         setBody(request)
     }.body()

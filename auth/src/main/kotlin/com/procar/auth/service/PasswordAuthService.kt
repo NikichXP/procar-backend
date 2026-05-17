@@ -111,4 +111,8 @@ class PasswordAuthService(
         val computedHash = hashPassword(password, salt)
         return computedHash == storedHash
     }
+
+    fun deleteByUserId(userId: String): Boolean {
+        return passwordAuthRepository.deleteByUserId(userId)
+    }
 }

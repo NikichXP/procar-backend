@@ -52,7 +52,7 @@ class AdminLotConnectorService(
                 categories = request.metadata.categories,
                 sellerInfo = AdminSellerInfoRequest(
                     id = broker.id,
-                    name = broker.name,
+                    name = broker.companyName,
                     type = SellerType.DEALER,
                 ),
                 inspection = request.metadata.inspection,

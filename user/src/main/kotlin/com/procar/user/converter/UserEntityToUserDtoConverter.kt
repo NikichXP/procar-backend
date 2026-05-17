@@ -11,9 +11,13 @@ class UserEntityToUserDtoConverter : Converter<UserEntity, UserDto> {
         return UserDto(
             id = source.id,
             username = source.username,
-            blocked = source.blocked,
             roles = source.roles,
-            brokerOrgId = source.brokerOrgId
+            status = source.status,
+            verificationStatus = source.verificationStatus,
+            depositStatus = source.depositStatus,
+            brokerId = source.brokerId,
+            companyName = source.companyName,
+            country = source.country
         )
     }
 }

@@ -1,12 +1,9 @@
 package com.procar.core.api.admin
 
 import com.procar.core.service.admin.AdminUserConnectorService
-import com.procar.user.api.dto.BlockUserRequest
-import com.procar.user.api.dto.CreateUserRequest
-import com.procar.user.api.dto.UpdateUserBrokerRequest
-import com.procar.user.api.dto.UpdateUserRolesRequest
-import com.procar.user.api.dto.UserDto
+import com.procar.user.api.dto.*
 import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.bind.annotation.RestController
 
@@ -31,27 +28,25 @@ class AdminUserController(
         return adminUserConnectorService.createUser(request)
     }
 
-    @PostMapping("/{id}/block")
-    suspend fun blockUser(
+    @PostMapping("/{id}/status")
+    suspend fun updateUserStatus(
         @PathVariable id: String,
-        @Valid @RequestBody request: BlockUserRequest
+        @Valid @RequestBody request: UpdateUserStatusRequest
     ): UserDto {
-        return adminUserConnectorService.blockUser(id, request)
+        return adminUserConnectorService.updateUserStatus(id, request)
     }
 
-    @PostMapping("/{id}/roles")
-    suspend fun updateUserRoles(
+    @PatchMapping("/{id}")
+    suspend fun patchUser(
         @PathVariable id: String,
-        @Valid @RequestBody request: UpdateUserRolesRequest
+        @Valid @RequestBody request: PatchUserRequest
     ): UserDto {
-        return adminUserConnectorService.updateUserRoles(id, request)
+        return adminUserConnectorService.patchUser(id, request)
     }
 
-    @PostMapping("/{id}/broker")
-    suspend fun updateUserBroker(
-        @PathVariable id: String,
-        @Valid @RequestBody request: UpdateUserBrokerRequest
-    ): UserDto {
-        return adminUserConnectorService.updateUserBroker(id, request)
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    suspend fun deleteUser(@PathVariable id: String) {
+        adminUserConnectorService.deleteUser(id)
     }
 }

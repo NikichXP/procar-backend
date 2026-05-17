@@ -1,9 +1,7 @@
 package com.procar.core.service.admin
 
 import com.procar.user.api.BrokerAdminAPI
-import com.procar.user.api.dto.BrokerDto
-import com.procar.user.api.dto.CreateBrokerRequest
-import com.procar.user.api.dto.UpdateBrokerRequest
+import com.procar.user.api.dto.*
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
@@ -19,8 +17,11 @@ class AdminBrokerConnectorService(
     suspend fun createBroker(request: CreateBrokerRequest): BrokerDto =
         brokerController.createBroker(request)
 
-    suspend fun updateBroker(id: String, request: UpdateBrokerRequest): BrokerDto =
-        brokerController.updateBroker(id, request)
+    suspend fun updateBrokerStatus(id: String, request: UpdateBrokerStatusRequest): BrokerDto =
+        brokerController.updateBrokerStatus(id, request)
+
+    suspend fun patchBroker(id: String, request: PatchBrokerRequest): BrokerDto =
+        brokerController.patchBroker(id, request)
 
     suspend fun deleteBroker(id: String) = brokerController.deleteBroker(id)
 }
