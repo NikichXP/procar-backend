@@ -62,4 +62,13 @@ interface AdminLotController {
     suspend fun getPossibleStatuses(
         @PathVariable lotId: String
     ): ResponseEntity<ApiResponse<List<LotStatus>>>
+
+    @PostExchange("/{lotId}/publish")
+    suspend fun publishLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
+
+    @PostExchange("/{lotId}/unpublish")
+    suspend fun unpublishLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
+
+    @PostExchange("/{lotId}/confirm-availability")
+    suspend fun confirmAvailability(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>>
 }

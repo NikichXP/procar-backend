@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit
 @Component
 class StartLotTask(
     lotRepository: LotRepository,
-    lotStatusHelper: LotStatusHelper
-) : LotStatusUpdateTask(lotRepository, lotStatusHelper) {
+    lotStatusTransitionService: LotStatusTransitionService
+) : LotStatusUpdateTask(lotRepository, lotStatusTransitionService) {
 
     override fun fromStatus(): LotStatus = LotStatus.PENDING
     override fun toStatus(): LotStatus = LotStatus.ACTIVE

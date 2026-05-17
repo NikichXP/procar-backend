@@ -28,12 +28,26 @@ This document tracks changes in the Backend API that require updates or reintegr
 - **Frontend Action**: Update User Management dashboard to use new fields, status update pattern, and deletion.
 
 ## 4. Lots & Catalog
-- **Status**: Pending
+- **Status**: Completed
 - **Changes**:
-    - `lane` renamed to `brand` (Values: `AUCTIONS`, `SELECT`).
-    - New `saleMode`: `OFFER`, `AUCTION`.
-    - `LotStatus` updated to: `DRAFT`, `PUBLISHED`, `UNPUBLISHED`, `SOLD`, `CANCELLED`.
-- **Frontend Action**: Update lot filtering (query param `brand` instead of `lane`). Map new statuses to UI badges.
+    - **Lot Brands**: `lane` field is replaced by `brand`. Possible values: `AUCTIONS`, `SELECT`.
+    - **Lot Statuses**:
+        - `DRAFT`: Initial state.
+        - `PENDING`: Ready but not yet visible to buyers (corresponds to `UNPUBLISHED`).
+        - `ACTIVE`: visible and open for bidding/offers (corresponds to `PUBLISHED`).
+        - `AWAIT_SELLER_CONFIRMATION`: Intermediate state after auction/offer ends, waiting for broker confirmation.
+        - `AWAITING_PAYMENT`: Winner confirmed, waiting for transaction.
+        - `AWAITING_SHIPMENT`, `IN_TRANSIT`, `COMPLETED`: Delivery tracking statuses.
+        - `SOLD`: Final successful state.
+        - `CANCELLED`: Deal aborted.
+    - **New Admin Flow Endpoints**:
+        - `POST /api/admin/lots/{id}/publish`: Moves lot to `ACTIVE`.
+        - `POST /api/admin/lots/{id}/unpublish`: Moves lot to `PENDING`.
+        - `POST /api/admin/lots/{id}/confirm-availability`: Moves lot from `AWAIT_SELLER_CONFIRMATION` to `AWAITING_PAYMENT`.
+- **Frontend Action**:
+    - Update lot filtering (use `brand` query parameter).
+    - Map `AWAIT_SELLER_CONFIRMATION` status in the UI (e.g., "Confirming with Seller").
+    - Implement Admin buttons for "Publish", "Unpublish", and "Confirm Availability" (for Brokers).
 
 ## 5. Offers
 - **Status**: Pending

@@ -96,4 +96,19 @@ class AdminLotController(
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.uploadLotPhoto(lotId, filePart)
     }
+
+    @PostMapping("/{lotId}/publish")
+    suspend fun publishLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.publishLot(lotId)
+    }
+
+    @PostMapping("/{lotId}/unpublish")
+    suspend fun unpublishLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.unpublishLot(lotId)
+    }
+
+    @PostMapping("/{lotId}/confirm-availability")
+    suspend fun confirmAvailability(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.confirmAvailability(lotId)
+    }
 }

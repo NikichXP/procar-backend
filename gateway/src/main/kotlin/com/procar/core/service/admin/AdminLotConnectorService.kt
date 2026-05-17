@@ -64,6 +64,7 @@ class AdminLotConnectorService(
             brokerOrgId = broker.id,
             lotType = request.lotType,
             buyoutPrice = request.buyoutPrice,
+            brand = request.brand,
         )
         return adminLotController.createLot(providerRequest)
     }
@@ -90,6 +91,18 @@ class AdminLotConnectorService(
 
     suspend fun getPossibleStatuses(lotId: String): ResponseEntity<ApiResponse<List<LotStatus>>> {
         return adminLotController.getPossibleStatuses(lotId)
+    }
+
+    suspend fun publishLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotController.publishLot(lotId)
+    }
+
+    suspend fun unpublishLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotController.unpublishLot(lotId)
+    }
+
+    suspend fun confirmAvailability(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotController.confirmAvailability(lotId)
     }
 
     suspend fun setHiddenStatus(lotId: String, request: AdminHiddenRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {

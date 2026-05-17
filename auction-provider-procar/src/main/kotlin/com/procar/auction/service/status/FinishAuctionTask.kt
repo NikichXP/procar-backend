@@ -10,14 +10,14 @@ import java.util.concurrent.TimeUnit
 @Component
 class FinishAuctionTask(
     lotRepository: LotRepository,
-    lotStatusHelper: LotStatusHelper
-) : LotStatusUpdateTask(lotRepository, lotStatusHelper) {
+    lotStatusTransitionService: LotStatusTransitionService
+) : LotStatusUpdateTask(lotRepository, lotStatusTransitionService) {
 
     override fun fromStatus(): LotStatus = LotStatus.ACTIVE
-    override fun toStatus(): LotStatus = LotStatus.AWAITING_PAYMENT
+    override fun toStatus(): LotStatus = LotStatus.AWAIT_SELLER_CONFIRMATION
 
     override fun modify(lotEntity: LotEntity): Boolean {
-        lotEntity.status = LotStatus.AWAITING_PAYMENT
+        lotEntity.status = LotStatus.AWAIT_SELLER_CONFIRMATION
         return true
     }
 

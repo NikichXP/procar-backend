@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.format.DateTimeFormatter
+import com.procar.provider.lot.LotBrand as ProviderLotBrand
 import com.procar.provider.lot.LotStatus as ProviderLotStatus
+import com.procar.provider.lot.LotType as ProviderLotType
 import com.procar.provider.lot.VehicleCondition as ProviderVehicleCondition
 
 @Service
@@ -77,6 +79,7 @@ class LotService(
                 photos = vehicleLot.vehicle.images.map { it.url },
                 lotType = mapLotType(vehicleLot.lotType),
                 buyoutPrice = vehicleLot.buyoutPrice,
+                brand = mapBrand(vehicleLot.brand),
             )
         }
     }
@@ -140,6 +143,7 @@ class LotService(
             recentBids = emptyList(), // TODO: Fetch recent bids from bid API
             lotType = mapLotType(vehicleLot.lotType),
             buyoutPrice = vehicleLot.buyoutPrice,
+            brand = mapBrand(vehicleLot.brand),
         )
     }
 
@@ -147,6 +151,7 @@ class LotService(
         return when (status) {
             LotStatus.PENDING -> ProviderLotStatus.PENDING
             LotStatus.ACTIVE -> ProviderLotStatus.ACTIVE
+            LotStatus.AWAIT_SELLER_CONFIRMATION -> ProviderLotStatus.AWAIT_SELLER_CONFIRMATION
             LotStatus.AWAITING_PAYMENT -> ProviderLotStatus.AWAITING_PAYMENT
             LotStatus.AWAITING_SHIPMENT -> ProviderLotStatus.AWAITING_SHIPMENT
             LotStatus.IN_TRANSIT -> ProviderLotStatus.IN_TRANSIT
@@ -160,6 +165,7 @@ class LotService(
             ProviderLotStatus.DRAFT -> LotStatus.INVALID
             ProviderLotStatus.PENDING -> LotStatus.PENDING
             ProviderLotStatus.ACTIVE -> LotStatus.ACTIVE
+            ProviderLotStatus.AWAIT_SELLER_CONFIRMATION -> LotStatus.AWAIT_SELLER_CONFIRMATION
             ProviderLotStatus.AWAITING_PAYMENT -> LotStatus.AWAITING_PAYMENT
             ProviderLotStatus.AWAITING_SHIPMENT -> LotStatus.AWAITING_SHIPMENT
             ProviderLotStatus.IN_TRANSIT -> LotStatus.IN_TRANSIT
@@ -179,9 +185,14 @@ class LotService(
         }
     }
 
-    private fun mapLotType(t: com.procar.provider.lot.LotType): LotType = when (t) {
-        com.procar.provider.lot.LotType.AUCTION -> LotType.AUCTION
-        com.procar.provider.lot.LotType.BUYOUT  -> LotType.BUYOUT
-        com.procar.provider.lot.LotType.HYBRID  -> LotType.HYBRID
+    private fun mapLotType(t: ProviderLotType): LotType = when (t) {
+        ProviderLotType.AUCTION -> LotType.AUCTION
+        ProviderLotType.BUYOUT  -> LotType.BUYOUT
+        ProviderLotType.HYBRID  -> LotType.HYBRID
+    }
+
+    private fun mapBrand(b: ProviderLotBrand): LotBrand = when (b) {
+        ProviderLotBrand.PARTNER -> LotBrand.PARTNER
+        ProviderLotBrand.SELECT -> LotBrand.SELECT
     }
 }

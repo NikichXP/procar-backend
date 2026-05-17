@@ -4,7 +4,7 @@ import com.procar.auction.document.BidEntity
 import com.procar.auction.document.LotEntity
 import com.procar.auction.event.AuctionBuyoutEvent
 import com.procar.auction.repository.BidRepository
-import com.procar.auction.service.status.LotStatusHelper
+import com.procar.auction.service.status.LotStatusTransitionService
 import com.procar.provider.bid.*
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.LotType
@@ -22,7 +22,7 @@ class InternalAuctionBidService(
     private val bidRepository: BidRepository,
     private val mongoTemplate: MongoTemplate,
     private val eventPublisher: ApplicationEventPublisher,
-    @Lazy private val lotStatusHelper: LotStatusHelper
+    @Lazy private val lotStatusTransitionService: LotStatusTransitionService
 ) {
 
     fun placeBid(request: PlaceBidRequest): PlaceBidResponse {
@@ -44,7 +44,7 @@ class InternalAuctionBidService(
         val price = lot.buyoutPrice
             ?: return rejected(request, "Lot has no buyout price configured", 0.0)
 
-        if (!lotStatusHelper.lockForPayment(lot.id)) {
+        if (!lotStatusTransitionService.lockForPayment(lot.id)) {
             return rejected(request, "Lot is no longer available for purchase", 0.0)
         }
 

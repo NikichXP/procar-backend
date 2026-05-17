@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 abstract class LotStatusUpdateTask(
     protected val lotRepository: LotRepository,
-    protected val lotStatusHelper: LotStatusHelper
+    protected val lotStatusTransitionService: LotStatusTransitionService
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -22,9 +22,7 @@ abstract class LotStatusUpdateTask(
         val lots = lotRepository.findByStatus(fromStatus())
 
         for (lot in lots) {
-            val possibleTargetStatuses = lotStatusHelper.getPossibleStatuses(lot)
-
-            if (toStatus() in possibleTargetStatuses) {
+            if (lotStatusTransitionService.canMigrateToStatus(lot, toStatus())) {
                 logger.info("Applying task {} to lot {}", this::class.simpleName, lot.id)
                 if (modify(lot)) {
                     lotRepository.save(lot)

@@ -10,6 +10,7 @@ data class AdvancedLotSearchRequest(
 )
 
 data class LotSearchFilters(
+    val brand: LotBrand? = null,
     val providers: List<String>? = null,
     val status: List<LotStatus>? = null,
     val priceRange: PriceRange? = null,

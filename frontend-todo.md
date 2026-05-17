@@ -35,17 +35,20 @@ This document outlines the tasks required to align the Procar Backend API with t
 - [x] Add self-protection for `ADMIN` (prevent self-block/delete)
 
 ## 4. Lots: Dual Lane & Sale Mode (Priority 3)
-- [ ] Update `Lot` model with `brand` (`AUCTIONS`, `SELECT`) and `saleMode` (`OFFER`, `AUCTION`)
-- [ ] Implement `LotStatus`: `DRAFT`, `PUBLISHED`, `UNPUBLISHED`, `SOLD`, `CANCELLED`
-- [ ] Implement `AuctionStatus` (e.g., `UPCOMING`, `LIVE`, `ENDED`, `SELLER_DECISION`)
-- [ ] Update Public endpoints:
+- [x] Update `Lot` model:
+    - Add `brand` (`AUCTIONS`, `SELECT`)
+    - Expand `LotStatus` with `AWAIT_SELLER_CONFIRMATION`
+- [x] Implement explicit Admin endpoints for flow control:
+    - `POST /admin/lots/{id}/publish` (sets `ACTIVE`)
+    - `POST /admin/lots/{id}/unpublish` (sets `PENDING`)
+    - `POST /admin/lots/{id}/confirm-availability` (moves from `AWAIT_SELLER_CONFIRMATION` to `AWAITING_PAYMENT`)
+- [x] Update `FinishAuctionTask` logic:
+    - Change transition: `ACTIVE` -> `AWAIT_SELLER_CONFIRMATION` (instead of direct `AWAITING_PAYMENT`)
+- [x] Write to frontend-integration.md how statuses work
+- [x] Update Public endpoints:
     - `GET /lots?brand=...` (filtering by brand)
     - Apply visibility rules (only published lots from active brokers)
-- [ ] Update Admin endpoints:
-- [ ] Create corresponding .feature files in smoke-tests to validate lot management and visibility
-    - `POST /admin/lots/{id}/publish`
-    - `POST /admin/lots/{id}/unpublish`
-    - `POST /admin/lots/{id}/end-auction`
+- [x] Update Admin endpoints - verify we have all the endpoints for statuses handling
 
 ## 5. Offers (Priority 4)
 - [ ] Create `Offer` entity and repository

@@ -22,6 +22,7 @@ class AdminCreateLotRequestToLotDocumentConverter : Converter<AdminCreateLotRequ
             brokerOrgId = source.brokerOrgId,
             lotType = source.lotType,
             buyoutPrice = source.buyoutPrice,
+            brand = source.brand,
         )
     }
     
@@ -188,6 +189,7 @@ class AdminUpdateLotRequestToLotDocumentConverter : Converter<Pair<AdminUpdateLo
             brokerOrgId = request.brokerOrgId,
             lotType = request.lotType ?: existing.lotType,
             buyoutPrice = request.buyoutPrice ?: existing.buyoutPrice,
+            brand = request.brand ?: existing.brand,
             updatedAt = LocalDateTime.now()
         )
     }
