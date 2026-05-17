@@ -29,6 +29,7 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import com.procar.customer.api.absoluteImageUrl
 import com.procar.customer.api.imageLoader
+import com.procar.gateway.api.dto.LotBrand
 import com.procar.gateway.api.dto.LotStatus
 import com.procar.gateway.api.dto.LotSummary
 import com.procar.gateway.api.dto.LotType
@@ -111,6 +112,7 @@ private fun LotCardImage(lot: LotSummary) {
 
         LotStatusChip(
             status = lot.status,
+            brand = lot.brand,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(10.dp),
@@ -207,9 +209,10 @@ private fun PriceBlock(label: String, amount: Double) {
 }
 
 @Composable
-fun LotStatusChip(status: LotStatus, modifier: Modifier = Modifier) {
+fun LotStatusChip(status: LotStatus, brand: LotBrand, modifier: Modifier = Modifier) {
     val (label, containerColor) = when (status) {
-        LotStatus.ACTIVE -> "Live" to Color(0xFF2E7D32)
+        LotStatus.ACTIVE -> (if (brand == LotBrand.SELECT) "Live · SELECT" else "Live") to Color(0xFF2E7D32)
+        LotStatus.AWAIT_SELLER_CONFIRMATION -> "Review" to Color(0xFFFBC02D)
         LotStatus.PENDING -> "Soon" to Color(0xFFF57F17)
         LotStatus.AWAITING_PAYMENT -> "Won" to Color(0xFF1565C0)
         LotStatus.AWAITING_SHIPMENT -> "Paid" to Color(0xFF6A1B9A)

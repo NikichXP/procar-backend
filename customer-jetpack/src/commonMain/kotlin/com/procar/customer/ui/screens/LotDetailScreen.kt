@@ -184,7 +184,7 @@ private fun LotHeroSection(lot: LotDetail) {
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
-            LotStatusChip(status = lot.status, modifier = Modifier.padding(start = 8.dp))
+            LotStatusChip(status = lot.status, brand = lot.brand, modifier = Modifier.padding(start = 8.dp))
         }
 
         Spacer(Modifier.height(16.dp))

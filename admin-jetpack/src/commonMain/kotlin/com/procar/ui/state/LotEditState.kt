@@ -12,9 +12,10 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
     val description = FieldState(lot.description)
     val status = FieldState(lot.status.name)
     val lotType = FieldState(lot.lotType.name)
+    val brand = FieldState(lot.brand.name)
     val buyoutPrice = FieldState(lot.buyoutPrice?.toString() ?: "")
 
-    private val fields: List<FieldState<*>> = listOf(title, description, status, lotType, buyoutPrice)
+    private val fields: List<FieldState<*>> = listOf(title, description, status, lotType, brand, buyoutPrice)
 
     override val isModified: Boolean get() = fields.any { it.isModified }
     val isOnlyStatusModified: Boolean get() = status.isModified && fields.filterNot { it === status }.none { it.isModified }
@@ -34,6 +35,7 @@ class GeneralEditState(lot: AdminLotResponse) : SectionEditState {
         description = if (description.isModified) description.current else null,
         status = if (status.isModified) AdminLotStatus.valueOf(status.current) else null,
         lotType = if (lotType.isModified) LotType.valueOf(lotType.current) else null,
+        brand = if (brand.isModified) LotBrand.valueOf(brand.current) else null,
         buyoutPrice = if (buyoutPrice.isModified) buyoutPrice.current.toDoubleOrNull() else null,
     )
 }
