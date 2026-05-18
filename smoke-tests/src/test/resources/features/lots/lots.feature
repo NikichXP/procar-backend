@@ -6,16 +6,16 @@ Feature: Lot Browsing
   Background:
 
   Scenario: List lots with default filters
-    When I request GET "/api/lots"
+    When I request GET "/lots"
     Then the status code should be 200
     And the field "content" is a list
     And the field "totalElements" is a number
 
   Scenario: Get lot details
     # We first get a lot ID from the list
-    When I request GET "/api/lots"
+    When I request GET "/lots"
     And I save the first "content" ID as "firstLotId"
-    When I request GET "/api/lots/${firstLotId}"
+    When I request GET "/lots/${firstLotId}"
     Then the status code should be 200
     And the field "/data/id" is "${firstLotId}"
     And the field "/data/car/brandName" is not empty

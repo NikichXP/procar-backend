@@ -72,7 +72,7 @@ suspend fun fetchLots(
     priceFrom: Double? = null,
     priceTo: Double? = null,
     sort: String = "endTime,asc",
-): LotPage = httpClient.get("${GatewayConfig.baseUrl}/api/lots") {
+): LotPage = httpClient.get("${GatewayConfig.baseUrl}/lots") {
     parameter("page", page)
     parameter("size", size)
     parameter("sort", sort)
@@ -87,7 +87,7 @@ suspend fun fetchLots(
 }.body()
 
 suspend fun fetchLotDetail(lotId: String): LotDetail =
-    httpClient.get("${GatewayConfig.baseUrl}/api/lots/$lotId").body()
+    httpClient.get("${GatewayConfig.baseUrl}/lots/$lotId").body()
 
 suspend fun login(request: LoginRequest): AuthResult =
     httpClient.post("${GatewayConfig.baseUrl}/auth/login") {

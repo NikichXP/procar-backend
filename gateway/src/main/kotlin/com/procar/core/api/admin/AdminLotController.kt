@@ -11,7 +11,7 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/admin/lots")
+@RequestMapping("/admin/lots")
 class AdminLotController(
     private val adminLotConnectorService: AdminLotConnectorService
 ) {

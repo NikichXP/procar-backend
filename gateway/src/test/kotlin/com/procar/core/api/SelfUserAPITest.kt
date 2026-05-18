@@ -44,7 +44,7 @@ class SelfUserAPITest {
         runBlocking { whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage) }
 
         // When
-        webTestClient.mutateWith(mockUser()).get().uri("/api/users/me/bids")
+        webTestClient.mutateWith(mockUser()).get().uri("/users/me/bids")
             .exchange()
             .expectStatus().isOk
 
@@ -66,7 +66,7 @@ class SelfUserAPITest {
         runBlocking { whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage) }
 
         // When
-        webTestClient.mutateWith(mockUser()).get().uri("/api/users/me/bids")
+        webTestClient.mutateWith(mockUser()).get().uri("/users/me/bids")
             .exchange()
             .expectStatus().isOk
 
@@ -80,7 +80,7 @@ class SelfUserAPITest {
         whenever(userService.getUserWatchlist()).thenReturn(emptyList())
 
         // When
-        webTestClient.mutateWith(mockUser()).get().uri("/api/users/me/watchlist")
+        webTestClient.mutateWith(mockUser()).get().uri("/users/me/watchlist")
             .exchange()
             .expectStatus().isOk
 
@@ -96,7 +96,7 @@ class SelfUserAPITest {
         whenever(userService.removeFromWatchlist(lotId)).thenAnswer {}
 
         // When
-        webTestClient.mutateWith(mockUser()).delete().uri("/api/users/me/watchlist/{lotId}", lotId)
+        webTestClient.mutateWith(mockUser()).delete().uri("/users/me/watchlist/{lotId}", lotId)
             .exchange()
             .expectStatus().isNoContent
 

@@ -134,22 +134,22 @@ suspend fun fetchLots(
     cursor: String? = null,
     limit: Int = DEFAULT_LOTS_PAGE_SIZE,
 ): AdminPaginatedLotsResponse =
-    getEnveloped("$GATEWAY_BASE_URL/api/admin/lots") {
+    getEnveloped("$GATEWAY_BASE_URL/admin/lots") {
         parameter("limit", limit)
         if (cursor != null) parameter("cursor", cursor)
     }
 
 suspend fun createLot(request: AdminCreateLotRequest): AdminLotResponse =
-    postEnveloped("$GATEWAY_BASE_URL/api/admin/lots", request)
+    postEnveloped("$GATEWAY_BASE_URL/admin/lots", request)
 
 suspend fun updateLot(lotId: String, request: AdminUpdateLotRequest): AdminLotResponse =
-    putEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId", request)
+    putEnveloped("$GATEWAY_BASE_URL/admin/lots/$lotId", request)
 
 suspend fun updateLotStatus(lotId: String, status: AdminLotStatus): AdminLotResponse =
-    postEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId/status", AdminUpdateStatusRequest(status))
+    postEnveloped("$GATEWAY_BASE_URL/admin/lots/$lotId/status", AdminUpdateStatusRequest(status))
 
 suspend fun fetchPossibleStatuses(lotId: String): List<String> =
-    getEnveloped("$GATEWAY_BASE_URL/api/admin/lots/$lotId/possible-statuses")
+    getEnveloped("$GATEWAY_BASE_URL/admin/lots/$lotId/possible-statuses")
 
 suspend fun uploadLotPhoto(
     lotId: String,
@@ -157,7 +157,7 @@ suspend fun uploadLotPhoto(
     contentType: String,
     bytes: ByteArray,
 ): AdminLotResponse =
-    httpClient.post("$GATEWAY_BASE_URL/api/admin/lots/$lotId/photo") {
+    httpClient.post("$GATEWAY_BASE_URL/admin/lots/$lotId/photo") {
         setBody(MultiPartFormDataContent(formData {
             append("file", bytes, Headers.build {
                 append(HttpHeaders.ContentType, contentType)
@@ -167,7 +167,7 @@ suspend fun uploadLotPhoto(
     }.body<ApiResponse<AdminLotResponse>>().data
 
 suspend fun deleteLotPhoto(lotId: String, url: String): AdminLotResponse =
-    httpClient.delete("$GATEWAY_BASE_URL/api/admin/lots/$lotId/images") {
+    httpClient.delete("$GATEWAY_BASE_URL/admin/lots/$lotId/images") {
         parameter("url", url)
     }.body<ApiResponse<AdminLotResponse>>().data
 
@@ -188,24 +188,24 @@ fun absoluteImageUrl(url: String): String = when {
 }
 
 suspend fun fetchWarehouses(): List<AdminWarehouseResponse> =
-    getEnveloped("$GATEWAY_BASE_URL/api/admin/warehouses")
+    getEnveloped("$GATEWAY_BASE_URL/admin/warehouses")
 
 suspend fun createWarehouse(request: AdminCreateWarehouseRequest): AdminWarehouseResponse =
-    postEnveloped("$GATEWAY_BASE_URL/api/admin/warehouses", request)
+    postEnveloped("$GATEWAY_BASE_URL/admin/warehouses", request)
 
 // --- Users ---
 
 suspend fun fetchUsers(): List<UserDto> =
-    httpClient.get("$GATEWAY_BASE_URL/api/admin/users").body()
+    httpClient.get("$GATEWAY_BASE_URL/admin/users").body()
 
 suspend fun createUser(request: CreateUserRequest): UserDto =
-    httpClient.post("$GATEWAY_BASE_URL/api/admin/users") {
+    httpClient.post("$GATEWAY_BASE_URL/admin/users") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         setBody(request)
     }.body()
 
 suspend fun patchUser(id: String, request: PatchUserRequest): UserDto =
-    httpClient.patch("$GATEWAY_BASE_URL/api/admin/users/$id") {
+    httpClient.patch("$GATEWAY_BASE_URL/admin/users/$id") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         setBody(request)
     }.body()
@@ -213,20 +213,20 @@ suspend fun patchUser(id: String, request: PatchUserRequest): UserDto =
 // --- Brokers ---
 
 suspend fun fetchBrokers(): List<BrokerDto> =
-    httpClient.get("$GATEWAY_BASE_URL/api/admin/brokers").body()
+    httpClient.get("$GATEWAY_BASE_URL/admin/brokers").body()
 
 suspend fun createBroker(request: CreateBrokerRequest): BrokerDto =
-    httpClient.post("$GATEWAY_BASE_URL/api/admin/brokers") {
+    httpClient.post("$GATEWAY_BASE_URL/admin/brokers") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         setBody(request)
     }.body()
 
 suspend fun patchBroker(id: String, request: PatchBrokerRequest): BrokerDto =
-    httpClient.patch("$GATEWAY_BASE_URL/api/admin/brokers/$id") {
+    httpClient.patch("$GATEWAY_BASE_URL/admin/brokers/$id") {
         header(HttpHeaders.ContentType, ContentType.Application.Json)
         setBody(request)
     }.body()
 
 suspend fun deleteBroker(id: String) {
-    httpClient.delete("$GATEWAY_BASE_URL/api/admin/brokers/$id")
+    httpClient.delete("$GATEWAY_BASE_URL/admin/brokers/$id")
 }

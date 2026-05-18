@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*
 @NoAuth
 @Tag(name = "lot-api", description = "Browse and search car auction lots")
 @RestController
-@RequestMapping("/api/lots")
+@RequestMapping("/lots")
 class LotAPI(
     private val lotService: LotService
 ) {

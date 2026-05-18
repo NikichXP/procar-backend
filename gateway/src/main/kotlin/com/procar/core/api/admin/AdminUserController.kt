@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-@RequestMapping("/api/admin/users")
+@RequestMapping("/admin/users")
 class AdminUserController(
     private val adminUserConnectorService: AdminUserConnectorService,
     private val userService: UserService

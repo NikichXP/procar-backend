@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/admin/brokers")
+@RequestMapping("/admin/brokers")
 class AdminBrokerController(
     private val adminBrokerConnectorService: AdminBrokerConnectorService
 ) {

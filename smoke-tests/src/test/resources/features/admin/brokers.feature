@@ -7,7 +7,7 @@ Feature: Admin Broker Management
     Given I am authenticated with credentials "admin" and "admin"
 
   Scenario: Create and manage a broker organization
-    When I request POST "/api/admin/brokers" with body:
+    When I request POST "/admin/brokers" with body:
       """
       {
         "id": "test-broker-${uuid}",
@@ -24,7 +24,7 @@ Feature: Admin Broker Management
     And I save the field "id" as "broker_id"
 
     # Update broker status
-    When I request POST "/api/admin/brokers/${broker_id}/status" with body:
+    When I request POST "/admin/brokers/${broker_id}/status" with body:
       """
       {
         "status": "BLOCKED"
@@ -34,7 +34,7 @@ Feature: Admin Broker Management
     And the field "status" is "BLOCKED"
 
     # Patch broker
-    When I request PATCH "/api/admin/brokers/${broker_id}" with body:
+    When I request PATCH "/admin/brokers/${broker_id}" with body:
       """
       {
         "displayName": "Updated Test Broker",
@@ -46,9 +46,9 @@ Feature: Admin Broker Management
     And the field "country" is "Poland"
 
     # Delete broker
-    When I request DELETE "/api/admin/brokers/${broker_id}"
+    When I request DELETE "/admin/brokers/${broker_id}"
     Then the status code should be 204
 
     # Verify broker is gone
-    When I request GET "/api/admin/brokers/${broker_id}"
+    When I request GET "/admin/brokers/${broker_id}"
     Then the status code should be 404

@@ -29,7 +29,7 @@ Feature: Auction Bidding Lifecycle
     And I save the field "username" as "user2_name"
 
     # 2. Create an ACTIVE lot as admin
-    When I request POST "/api/admin/lots" with body:
+    When I request POST "/admin/lots" with body:
       """
       {
         "warehouseId": "019d35be-83e0-72ae-9d7b-297d54aca296",
@@ -65,7 +65,7 @@ Feature: Auction Bidding Lifecycle
 
     # 3. First bidder places a bid
     When I switch to user "${user1_name}" with password "password"
-    And I request POST "/api/lots/${lot_id}/bids" with body:
+    And I request POST "/lots/${lot_id}/bids" with body:
       """
       { "amount": 6000 }
       """
@@ -75,7 +75,7 @@ Feature: Auction Bidding Lifecycle
 
     # 4. Second bidder outbids
     When I switch to user "${user2_name}" with password "password"
-    And I request POST "/api/lots/${lot_id}/bids" with body:
+    And I request POST "/lots/${lot_id}/bids" with body:
       """
       { "amount": 7000 }
       """
@@ -85,39 +85,39 @@ Feature: Auction Bidding Lifecycle
 
     # 5. Check first bidder's history - should be OUTBID
     When I switch to user "${user1_name}" with password "password"
-    And I request GET "/api/users/me/bids"
+    And I request GET "/users/me/bids"
     Then the status code should be 200
     And the field "/data/content/0/bidStatus" is "OUTBID"
     And the field "/data/content/0/isWinning" is boolean "false"
 
     # 6. Admin ends the auction
     When I switch to user "admin" with password "admin"
-    And I request POST "/api/admin/lots/${lot_id}/end-auction"
+    And I request POST "/admin/lots/${lot_id}/end-auction"
     Then the status code should be 200
     And the field "/data/status" is "AWAIT_SELLER_CONFIRMATION"
 
     # 7. Check final bid statuses
     When I switch to user "${user2_name}" with password "password"
-    And I request GET "/api/users/me/bids"
+    And I request GET "/users/me/bids"
     Then the status code should be 200
     And the field "/data/content/0/bidStatus" is "WON"
     And the field "/data/content/0/isWinning" is boolean "true"
 
     When I switch to user "${user1_name}" with password "password"
-    And I request GET "/api/users/me/bids"
+    And I request GET "/users/me/bids"
     Then the status code should be 200
     And the field "/data/content/0/bidStatus" is "LOST"
     And the field "/data/content/0/isWinning" is boolean "false"
 
     # Cleanup
     When I switch to user "admin" with password "admin"
-    And I request DELETE "/api/admin/lots/${lot_id}"
+    And I request DELETE "/admin/lots/${lot_id}"
     Then the status code should be 200
 
   Scenario: Instant Buyout
     # 1. Create a HYBRID lot as admin
     Given I am authenticated with credentials "admin" and "admin"
-    When I request POST "/api/admin/lots" with body:
+    When I request POST "/admin/lots" with body:
       """
       {
         "warehouseId": "019d35be-83e0-72ae-9d7b-297d54aca296",
@@ -165,7 +165,7 @@ Feature: Auction Bidding Lifecycle
 
     # 3. Buyer performs buyout via bid at buyout price
     When I switch to user "${buyer_name}" with password "password"
-    And I request POST "/api/lots/${buyout_lot_id}/bids" with body:
+    And I request POST "/lots/${buyout_lot_id}/bids" with body:
       """
       { "amount": 15000 }
       """
@@ -174,25 +174,25 @@ Feature: Auction Bidding Lifecycle
     And the field "/data/status" is "WON"
 
     # 4. Check lot status - should be AWAITING_PAYMENT
-    When I request GET "/api/lots/${buyout_lot_id}"
+    When I request GET "/lots/${buyout_lot_id}"
     Then the status code should be 200
     And the field "/data/status" is "AWAITING_PAYMENT"
 
     # 5. Check bid status - should be WON
-    When I request GET "/api/users/me/bids"
+    When I request GET "/users/me/bids"
     Then the status code should be 200
     And the field "/data/content/0/bidStatus" is "WON"
     And the field "/data/content/0/isWinning" is boolean "true"
 
     # Cleanup
     When I switch to user "admin" with password "admin"
-    And I request DELETE "/api/admin/lots/${buyout_lot_id}"
+    And I request DELETE "/admin/lots/${buyout_lot_id}"
     Then the status code should be 200
 
   Scenario: Bidding after buyout fails
     # 1. Create a lot
     Given I am authenticated with credentials "admin" and "admin"
-    When I request POST "/api/admin/lots" with body:
+    When I request POST "/admin/lots" with body:
       """
       {
         "warehouseId": "019d35be-83e0-72ae-9d7b-297d54aca296",
@@ -250,7 +250,7 @@ Feature: Auction Bidding Lifecycle
 
     # 3. User 1 performs buyout via bid at buyout price
     When I switch to user "${user1}" with password "password"
-    And I request POST "/api/lots/${after_buyout_lot_id}/bids" with body:
+    And I request POST "/lots/${after_buyout_lot_id}/bids" with body:
       """
       { "amount": 30000 }
       """
@@ -259,7 +259,7 @@ Feature: Auction Bidding Lifecycle
 
     # 4. User 2 tries to place a higher bid - should fail
     When I switch to user "${user2}" with password "password"
-    And I request POST "/api/lots/${after_buyout_lot_id}/bids" with body:
+    And I request POST "/lots/${after_buyout_lot_id}/bids" with body:
       """
       { "amount": 40000 }
       """
@@ -269,5 +269,5 @@ Feature: Auction Bidding Lifecycle
 
     # Cleanup
     When I switch to user "admin" with password "admin"
-    And I request DELETE "/api/admin/lots/${after_buyout_lot_id}"
+    And I request DELETE "/admin/lots/${after_buyout_lot_id}"
     Then the status code should be 200

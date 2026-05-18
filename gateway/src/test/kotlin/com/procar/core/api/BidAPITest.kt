@@ -63,7 +63,7 @@ class BidAPITest {
         runBlocking { whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage) }
 
         // When
-        webTestClient.get().uri("/api/lots/{lotId}/bids?page=0&size=20", lotId)
+        webTestClient.get().uri("/lots/{lotId}/bids?page=0&size=20", lotId)
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +90,7 @@ class BidAPITest {
         runBlocking { whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage) }
 
         // When
-        webTestClient.get().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.get().uri("/lots/{lotId}/bids", lotId)
             .exchange()
             .expectStatus().isOk
 
@@ -116,7 +116,7 @@ class BidAPITest {
         runBlocking { whenever(bidService.placeBid(lotId, bidRequest, "user")).thenReturn(mockResult) }
 
         // When
-        webTestClient.mutateWith(mockUser()).post().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.mutateWith(mockUser()).post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(objectMapper.writeValueAsString(bidRequest))
             .exchange()
@@ -138,7 +138,7 @@ class BidAPITest {
         val bidRequest = BidRequest(amount = 16000.0)
 
         // When & Then
-        webTestClient.post().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(objectMapper.writeValueAsString(bidRequest))
             .exchange()
@@ -152,7 +152,7 @@ class BidAPITest {
         val invalidRequest = """{"amount": -1000}"""
 
         // When & Then
-        webTestClient.mutateWith(mockUser()).post().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.mutateWith(mockUser()).post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(invalidRequest)
             .exchange()

@@ -8,7 +8,7 @@ Feature: Admin Lot Management
 
   Scenario: Full lot lifecycle flow (Draft -> Pending -> Active -> Confirm -> Payment)
     # 1. Create a broker first
-    When I request POST "/api/admin/brokers" with body:
+    When I request POST "/admin/brokers" with body:
       """
       {
         "id": "lot-test-broker-${uuid}",
@@ -23,7 +23,7 @@ Feature: Admin Lot Management
     And I save the field "id" as "broker_id"
 
     # 2. Create a lot in DRAFT
-    When I request POST "/api/admin/lots" with body:
+    When I request POST "/admin/lots" with body:
       """
       {
         "brokerId": "${broker_id}",
@@ -61,7 +61,7 @@ Feature: Admin Lot Management
     And I save the field "/data/id" as "lot_id"
 
     # 3. Move to PENDING (Unpublished)
-    When I request POST "/api/admin/lots/${lot_id}/status" with body:
+    When I request POST "/admin/lots/${lot_id}/status" with body:
       """
       { "status": "PENDING" }
       """
@@ -69,21 +69,21 @@ Feature: Admin Lot Management
     And the field "/data/status" is "PENDING"
 
     # 4. Explicitly Publish
-    When I request POST "/api/admin/lots/${lot_id}/publish"
+    When I request POST "/admin/lots/${lot_id}/publish"
     Then the status code should be 200
     And the field "/data/status" is "ACTIVE"
 
     # 5. Explicitly Unpublish
-    When I request POST "/api/admin/lots/${lot_id}/unpublish"
+    When I request POST "/admin/lots/${lot_id}/unpublish"
     Then the status code should be 200
     And the field "/data/status" is "PENDING"
 
     # 6. Back to Active for finishing
-    When I request POST "/api/admin/lots/${lot_id}/publish"
+    When I request POST "/admin/lots/${lot_id}/publish"
     Then the status code should be 200
 
     # 7. Move to confirmation status (Simulating end of auction or manual move)
-    When I request POST "/api/admin/lots/${lot_id}/status" with body:
+    When I request POST "/admin/lots/${lot_id}/status" with body:
       """
       { "status": "AWAIT_SELLER_CONFIRMATION" }
       """
@@ -91,12 +91,12 @@ Feature: Admin Lot Management
     And the field "/data/status" is "AWAIT_SELLER_CONFIRMATION"
 
     # 8. Confirm Availability
-    When I request POST "/api/admin/lots/${lot_id}/confirm-availability"
+    When I request POST "/admin/lots/${lot_id}/confirm-availability"
     Then the status code should be 200
     And the field "/data/status" is "AWAITING_PAYMENT"
 
     # 9. Final cleanup
-    When I request DELETE "/api/admin/lots/${lot_id}"
+    When I request DELETE "/admin/lots/${lot_id}"
     Then the status code should be 200
-    When I request DELETE "/api/admin/brokers/${broker_id}"
+    When I request DELETE "/admin/brokers/${broker_id}"
     Then the status code should be 204
