@@ -8,8 +8,13 @@ data class CreateBrokerRequest(
     @field:Pattern(regexp = "[a-z0-9\\-]+", message = "id must match [a-z0-9\\-]+")
     val id: String,
     @field:NotBlank
-    val name: String,
+    val companyName: String,
+    @field:NotBlank
+    val displayName: String,
     val address: String = "",
+    val country: String = "",
+    @field:NotBlank
+    val contactEmail: String,
     val phones: List<String> = emptyList(),
     val emails: List<String> = emptyList()
 )

@@ -26,6 +26,7 @@ class LotDocumentToProviderLotConverter : Converter<LotEntity, VehicleLot> {
             updatedAt = source.updatedAt,
             lotType = source.lotType,
             buyoutPrice = source.buyoutPrice,
+            brand = source.brand,
         )
     }
 

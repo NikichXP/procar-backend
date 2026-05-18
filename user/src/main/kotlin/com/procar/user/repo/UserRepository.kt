@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.remove
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -29,5 +30,10 @@ class UserRepository(private val mongoTemplate: MongoTemplate) {
 
     suspend fun findAll(): List<UserEntity> {
         return mongoTemplate.findAll(UserEntity::class.java)
+    }
+
+    suspend fun deleteById(id: String) {
+        val query = Query(Criteria.where("id").`is`(id))
+        mongoTemplate.remove<UserEntity>(query)
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.http.codec.multipart.FilePart
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/api/admin/lots")
+@RequestMapping("/admin/lots")
 class AdminLotController(
     private val adminLotConnectorService: AdminLotConnectorService
 ) {
@@ -95,5 +95,25 @@ class AdminLotController(
         @RequestPart("file") filePart: FilePart
     ): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.uploadLotPhoto(lotId, filePart)
+    }
+
+    @PostMapping("/{lotId}/publish")
+    suspend fun publishLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.publishLot(lotId)
+    }
+
+    @PostMapping("/{lotId}/unpublish")
+    suspend fun unpublishLot(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.unpublishLot(lotId)
+    }
+
+    @PostMapping("/{lotId}/confirm-availability")
+    suspend fun confirmAvailability(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.confirmAvailability(lotId)
+    }
+
+    @PostMapping("/{lotId}/end-auction")
+    suspend fun endAuction(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.endAuction(lotId)
     }
 }

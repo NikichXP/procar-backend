@@ -60,6 +60,7 @@ data class LotSummary(
     val photos: List<String> = emptyList(),
     val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
+    val brand: LotBrand = LotBrand.PARTNER,
 )
 
 @Serializable
@@ -80,6 +81,7 @@ data class LotDetail(
     val recentBids: List<Bid>,
     val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
+    val brand: LotBrand = LotBrand.PARTNER,
 )
 
 @Serializable
@@ -100,6 +102,7 @@ enum class CarCondition {
 enum class LotStatus {
     PENDING,
     ACTIVE,
+    AWAIT_SELLER_CONFIRMATION,
     AWAITING_PAYMENT,
     AWAITING_SHIPMENT,
     IN_TRANSIT,
@@ -108,11 +111,7 @@ enum class LotStatus {
 }
 
 @Serializable
-enum class LotType { AUCTION, BUYOUT, HYBRID }
+enum class LotBrand { PARTNER, SELECT }
 
 @Serializable
-data class BuyoutResult(
-    val lotId: String,
-    val price: Double,
-    val purchasedAt: String,
-)
+enum class LotType { AUCTION, BUYOUT, HYBRID }

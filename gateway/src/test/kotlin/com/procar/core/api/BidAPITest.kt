@@ -4,12 +4,14 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.procar.gateway.api.dto.Bid
 import com.procar.gateway.api.dto.BidPage
 import com.procar.gateway.api.dto.BidRequest
-import com.procar.gateway.api.dto.BuyoutResult
+import com.procar.gateway.api.dto.BidStatus
+import com.procar.gateway.api.dto.PlaceBidResult
 import com.procar.core.config.AnnotationAuthorizationManager
 import com.procar.core.config.SecurityConfig
 import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
 import com.procar.core.service.BidService
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
@@ -38,7 +40,7 @@ class BidAPITest {
     private val objectMapper = jacksonObjectMapper()
 
     @Test
-    fun `getBidHistory should call service with correct parameters`() {
+    fun `getBidHistory should call service with correct parameters`() = runBlocking {
         // Given
         val lotId = "test-lot-id"
         val mockBidPage = BidPage(
@@ -58,10 +60,10 @@ class BidAPITest {
             )
         )
 
-        whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage)
+        runBlocking { whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage) }
 
         // When
-        webTestClient.get().uri("/api/lots/{lotId}/bids?page=0&size=20", lotId)
+        webTestClient.get().uri("/lots/{lotId}/bids?page=0&size=20", lotId)
             .exchange()
             .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -70,7 +72,7 @@ class BidAPITest {
             .jsonPath("$.content[0].amount").isEqualTo(15000.0)
 
         // Then
-        verify(bidService).getBidHistory(lotId, 0, 20)
+        runBlocking { verify(bidService).getBidHistory(lotId, 0, 20) }
     }
 
     @Test
@@ -85,15 +87,15 @@ class BidAPITest {
             content = emptyList()
         )
 
-        whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage)
+        runBlocking { whenever(bidService.getBidHistory(lotId, 0, 20)).thenReturn(mockBidPage) }
 
         // When
-        webTestClient.get().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.get().uri("/lots/{lotId}/bids", lotId)
             .exchange()
             .expectStatus().isOk
 
         // Then
-        verify(bidService).getBidHistory(lotId, 0, 20)
+        runBlocking { verify(bidService).getBidHistory(lotId, 0, 20) }
     }
 
     @Test
@@ -109,23 +111,24 @@ class BidAPITest {
             placedAt = "2023-01-01T10:05:00Z",
             isWinning = true
         )
+        val mockResult = PlaceBidResult(bid = mockBid, status = BidStatus.WINNING)
 
-        whenever(bidService.placeBid(lotId, bidRequest, "user")).thenReturn(mockBid)
+        runBlocking { whenever(bidService.placeBid(lotId, bidRequest, "user")).thenReturn(mockResult) }
 
         // When
-        webTestClient.mutateWith(mockUser()).post().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.mutateWith(mockUser()).post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(objectMapper.writeValueAsString(bidRequest))
             .exchange()
-            .expectStatus().isCreated
+            .expectStatus().isOk
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
             .expectBody()
-            .jsonPath("$.id").isEqualTo("new-bid-id")
-            .jsonPath("$.lotId").isEqualTo(lotId)
-            .jsonPath("$.amount").isEqualTo(16000.0)
+            .jsonPath("$.data.bid.id").isEqualTo("new-bid-id")
+            .jsonPath("$.data.bid.lotId").isEqualTo(lotId)
+            .jsonPath("$.data.status").isEqualTo("WINNING")
 
         // Then
-        verify(bidService).placeBid(lotId, bidRequest, "user")
+        runBlocking { verify(bidService).placeBid(lotId, bidRequest, "user") }
     }
 
     @Test
@@ -135,7 +138,7 @@ class BidAPITest {
         val bidRequest = BidRequest(amount = 16000.0)
 
         // When & Then
-        webTestClient.post().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(objectMapper.writeValueAsString(bidRequest))
             .exchange()
@@ -149,49 +152,14 @@ class BidAPITest {
         val invalidRequest = """{"amount": -1000}"""
 
         // When & Then
-        webTestClient.mutateWith(mockUser()).post().uri("/api/lots/{lotId}/bids", lotId)
+        webTestClient.mutateWith(mockUser()).post().uri("/lots/{lotId}/bids", lotId)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(invalidRequest)
             .exchange()
-            .expectStatus().isCreated
+            .expectStatus().isOk
 
         // Then
-        verify(bidService).placeBid(any(), any(), any())
+        runBlocking { verify(bidService).placeBid(any(), any(), any()) }
     }
 
-    @Test
-    fun `buyout should call service with correct parameters`() {
-        // Given
-        val lotId = "test-lot-id"
-        val mockBuyoutResult = BuyoutResult(
-            lotId = lotId,
-            price = 25000.0,
-            purchasedAt = "2023-01-01T10:00:00Z"
-        )
-
-        whenever(bidService.buyout(lotId, "user")).thenReturn(mockBuyoutResult)
-
-        // When
-        webTestClient.mutateWith(mockUser()).post().uri("/api/lots/{lotId}/bids/buyout", lotId)
-            .exchange()
-            .expectStatus().isCreated
-            .expectHeader().contentType(MediaType.APPLICATION_JSON)
-            .expectBody()
-            .jsonPath("$.lotId").isEqualTo(lotId)
-            .jsonPath("$.price").isEqualTo(25000.0)
-
-        // Then
-        verify(bidService).buyout(lotId, "user")
-    }
-
-    @Test
-    fun `buyout should return 401 when not authenticated`() {
-        // Given
-        val lotId = "test-lot-id"
-
-        // When & Then
-        webTestClient.post().uri("/api/lots/{lotId}/bids/buyout", lotId)
-            .exchange()
-            .expectStatus().isUnauthorized
-    }
 }

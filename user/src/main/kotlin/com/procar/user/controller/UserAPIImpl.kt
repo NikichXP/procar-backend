@@ -27,7 +27,13 @@ class UserAPIImpl(private val userService: UserService) : UserAPI {
         return UserInfoDto(
             id = user.id,
             username = user.username,
-            roles = user.roles
+            roles = user.roles,
+            status = user.status,
+            verificationStatus = user.verificationStatus,
+            depositStatus = user.depositStatus,
+            brokerId = user.brokerId,
+            companyName = user.companyName,
+            country = user.country
         )
     }
 }

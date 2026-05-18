@@ -3,9 +3,6 @@ Feature: Authentication
   I want to login to the system
   So that I can access protected resources
 
-  Background:
-    Given the backend is up on "https://api.pc-dev.nikichxp.xyz/"
-
   Scenario: Successful login with admin credentials
     When I request POST "/auth/login" with body:
       """

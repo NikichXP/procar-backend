@@ -38,4 +38,12 @@ interface InternalBidAPI {
     fun buyout(
         @RequestBody request: BuyoutRequest
     ): ResponseEntity<ApiResponse<BuyoutResponse>>
+
+    @GetExchange("/user/{bidderId}")
+    fun getUserBids(
+        @PathVariable bidderId: String,
+        @RequestParam(required = false) status: BidStatus?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): ResponseEntity<ApiResponse<BidHistoryResponse>>
 }

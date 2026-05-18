@@ -4,12 +4,25 @@ import com.procar.auction.document.BidEntity
 import com.procar.auction.document.LotEntity
 import com.procar.auction.event.AuctionBuyoutEvent
 import com.procar.auction.repository.BidRepository
-import com.procar.auction.service.status.LotStatusHelper
-import com.procar.provider.bid.*
+import com.procar.auction.service.status.LotStatusTransitionService
+import com.procar.provider.bid.BidAnalytics
+import com.procar.provider.bid.BidAnalyticsResponse
+import com.procar.provider.bid.BidStatus
+import com.procar.provider.bid.BidTimeAnalytics
+import com.procar.provider.bid.BidType
+import com.procar.provider.bid.BiddingPattern
+import com.procar.provider.bid.PlaceBidRequest
+import com.procar.provider.bid.PlaceBidResponse
+import com.procar.provider.bid.ProviderBid
+import com.procar.provider.bid.ValidateBidRequest
+import com.procar.provider.bid.ValidateBidResponse
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.LotType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Lazy
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -22,7 +35,7 @@ class InternalAuctionBidService(
     private val bidRepository: BidRepository,
     private val mongoTemplate: MongoTemplate,
     private val eventPublisher: ApplicationEventPublisher,
-    @Lazy private val lotStatusHelper: LotStatusHelper
+    @Lazy private val lotStatusTransitionService: LotStatusTransitionService
 ) {
 
     fun placeBid(request: PlaceBidRequest): PlaceBidResponse {
@@ -44,7 +57,7 @@ class InternalAuctionBidService(
         val price = lot.buyoutPrice
             ?: return rejected(request, "Lot has no buyout price configured", 0.0)
 
-        if (!lotStatusHelper.lockForPayment(lot.id)) {
+        if (!lotStatusTransitionService.lockForPayment(lot.id)) {
             return rejected(request, "Lot is no longer available for purchase", 0.0)
         }
 
@@ -90,12 +103,19 @@ class InternalAuctionBidService(
             return rejected(request, "Bid rejected: a concurrent bid already met or exceeded your amount", minBid)
         }
 
+        // Mark previous winning bids as OUTBID
+        mongoTemplate.updateMulti(
+            Query(Criteria.where("lot_id").`is`(lot.id).and("status").`is`(BidStatus.WINNING)),
+            Update().set("status", BidStatus.OUTBID),
+            BidEntity::class.java
+        )
+
         val bid = bidRepository.save(BidEntity(
             lotId = lot.id,
             bidderId = request.bidderId,
             amount = effectiveAmount,
             bidType = if (triggersBuyout) BidType.INSTANT_BUY else request.bidType,
-            status = if (triggersBuyout) BidStatus.WON else BidStatus.ACCEPTED,
+            status = if (triggersBuyout) BidStatus.WON else BidStatus.WINNING,
             isAutoBid = request.bidType == BidType.AUTO
         ))
         bid.isWinning = true
@@ -106,7 +126,7 @@ class InternalAuctionBidService(
 
         return PlaceBidResponse(
             bid = bid.toProviderBid(),
-            status = BidStatus.ACCEPTED,
+            status = bid.status,
             message = if (triggersBuyout) "Buyout via bid accepted" else "Bid placed successfully",
             isWinning = true,
             nextMinimumBid = if (triggersBuyout) 0.0 else effectiveAmount + auction.bidIncrement
@@ -116,12 +136,19 @@ class InternalAuctionBidService(
     fun getAllBidsForLot(lotId: String): List<BidEntity> {
         val bids = bidRepository.findByLotIdOrderByPlacedAtDesc(lotId)
         val winningAmount = bids
-            .filter { it.status == BidStatus.ACCEPTED || it.status == BidStatus.WON }
+            .filter { it.status == BidStatus.WINNING || it.status == BidStatus.WON }
             .maxOfOrNull { it.amount }
         bids.forEach { bid ->
             bid.isWinning = bid.amount == winningAmount &&
-                (bid.status == BidStatus.ACCEPTED || bid.status == BidStatus.WON)
+                (bid.status == BidStatus.WINNING || bid.status == BidStatus.WON)
         }
+        return bids
+    }
+
+    fun getBidsByBidderId(bidderId: String): List<BidEntity> {
+        val bids = bidRepository.findByBidderIdOrderByPlacedAtDesc(bidderId)
+        // We might want to enrich them with isWinning status relative to the lot
+        // But for user history it's usually enough to show the status saved in DB
         return bids
     }
 
@@ -164,7 +191,7 @@ class InternalAuctionBidService(
 
     fun getBidAnalytics(lotId: String, timeRange: String?): BidAnalyticsResponse {
         val bids = bidRepository.findByLotIdOrderByPlacedAtDesc(lotId)
-            .filter { it.status == BidStatus.ACCEPTED || it.status == BidStatus.WON }
+            .filter { it.status == BidStatus.WINNING || it.status == BidStatus.OUTBID || it.status == BidStatus.WON }
 
         if (bids.isEmpty()) {
             return BidAnalyticsResponse(lotId = lotId, isSupported = false, analytics = null, message = "No bids found for analytics")
@@ -228,6 +255,29 @@ class InternalAuctionBidService(
         }
     }
 
+    fun finishAuction(lotId: String) {
+        val winningBid = mongoTemplate.findAndModify<BidEntity>(
+            Query(Criteria.where("lot_id").`is`(lotId).and("status").`is`(BidStatus.WINNING)),
+            Update().set("status", BidStatus.WON),
+            FindAndModifyOptions.options().returnNew(true),
+            BidEntity::class.java
+        )
+
+        if (winningBid != null) {
+            // All other bids for this lot that are not WON/OUTBID should probably be LOST
+            // But usually we only have WINNING and OUTBID.
+            // Let's just make sure everything else is LOST if it's not WON.
+            mongoTemplate.updateMulti(
+                Query(Criteria.where("lot_id").`is`(lotId).and("status").ne(BidStatus.WON)),
+                Update().set("status", BidStatus.LOST),
+                BidEntity::class.java
+            )
+        } else {
+            // No bids - auction finished with no winner
+            // We can leave it as is, lot status already moved to AWAIT_SELLER_CONFIRMATION or similar
+        }
+    }
+
     private fun rejected(request: PlaceBidRequest, message: String, nextMinimumBid: Double) = PlaceBidResponse(
         bid = ProviderBid(
             id = "error-${System.currentTimeMillis()}",
@@ -258,7 +308,7 @@ private fun BidEntity.toProviderBid() = ProviderBid(
     amount = amount,
     bidType = bidType,
     status = status,
-    isWinning = isWinning,
+    isWinning = isWinning || status == BidStatus.WINNING || status == BidStatus.WON,
     isAutoBid = isAutoBid,
     placedAt = placedAt
 )

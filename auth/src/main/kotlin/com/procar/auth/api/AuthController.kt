@@ -102,6 +102,10 @@ class AuthControllerImpl(
         if (!updated) throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Password update failed")
     }
 
+    override suspend fun deleteAuthRecords(userId: String) {
+        passwordAuthService.deleteByUserId(userId)
+    }
+
     private fun extractLoginRequest(
         loginRequest: LoginRequest?,
         username: String?,

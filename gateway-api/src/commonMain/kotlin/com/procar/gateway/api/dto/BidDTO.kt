@@ -15,6 +15,7 @@ data class Bid(
     @ApiDoc(example = "01956b0a-dead-7bee-cafe-112233445566") val bidderId: String,
     @ApiDoc(example = "2025-06-01T14:30:00Z") val placedAt: String,
     @ApiDoc(example = "true") val isWinning: Boolean,
+    val status: BidStatus = BidStatus.WINNING,
 )
 
 @Serializable
@@ -48,6 +49,13 @@ data class UserBidPage(
 )
 
 @Serializable
+data class PlaceBidResult(
+    val bid: Bid? = null,
+    val status: BidStatus,
+    val message: String? = null,
+)
+
+@Serializable
 enum class BidStatus {
-    WINNING, OUTBID, WON, LOST
+    WINNING, OUTBID, WON, LOST, REJECTED
 }

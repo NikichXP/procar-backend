@@ -24,6 +24,7 @@ class LotDocumentToAdminLotResponseConverter : Converter<LotEntity, AdminLotResp
             updatedAt = source.updatedAt,
             lotType = source.lotType,
             buyoutPrice = source.buyoutPrice,
+            brand = source.brand,
         )
     }
     

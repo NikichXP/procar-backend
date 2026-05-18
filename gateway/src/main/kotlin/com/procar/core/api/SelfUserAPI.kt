@@ -3,8 +3,9 @@ package com.procar.core.api
 import com.procar.gateway.api.dto.BidStatus
 import com.procar.gateway.api.dto.LotSummary
 import com.procar.gateway.api.dto.UserBidPage
+import com.procar.gateway.api.dto.UserInfoDto
 import com.procar.core.service.UserService
-import com.procar.user.api.dto.UserInfoDto
+import com.procar.provider.common.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/users/me")
-class UserAPI(
+class SelfUserAPI(
     private val userService: UserService
 ) {
 
@@ -32,15 +33,15 @@ class UserAPI(
     @Operation(summary = "Get user bids", description = "Returns a paginated list of bids placed by the current user.")
     @GetMapping("/bids")
     @PreAuthorize("isAuthenticated()")
-    fun getUserBids(
+    suspend fun getUserBids(
         @Parameter(
             description = "Filter by bid status",
             example = "WINNING"
         ) @RequestParam(required = false) status: BidStatus?,
         @Parameter(description = "Zero-based page number", example = "0") @RequestParam(defaultValue = "0") page: Int,
         @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") size: Int
-    ): UserBidPage {
-        return userService.getUserBids(status, page, size)
+    ): ApiResponse<UserBidPage> {
+        return ApiResponse(userService.getUserBids(status, page, size))
     }
 
     @Operation(summary = "Get watchlist", description = "Returns the list of lots the current user is watching.")

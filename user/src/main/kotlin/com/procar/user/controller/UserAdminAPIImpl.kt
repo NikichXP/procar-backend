@@ -1,11 +1,7 @@
 package com.procar.user.controller
 
 import com.procar.user.api.UserAdminAPI
-import com.procar.user.api.dto.BlockUserRequest
-import com.procar.user.api.dto.CreateUserRequest
-import com.procar.user.api.dto.UpdateUserBrokerRequest
-import com.procar.user.api.dto.UpdateUserRolesRequest
-import com.procar.user.api.dto.UserDto
+import com.procar.user.api.dto.*
 import com.procar.user.service.UserService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -30,27 +26,33 @@ class UserAdminAPIImpl(private val userService: UserService) : UserAdminAPI {
         return userService.createUser(request)
     }
 
-    override suspend fun blockUser(
-        @PathVariable id: String,
-        @Valid @RequestBody request: BlockUserRequest
-    ): UserDto {
-        return userService.blockUser(id, request)
+    override suspend fun updateUserStatus(id: String, @Valid @RequestBody request: UpdateUserStatusRequest): UserDto {
+        return userService.updateUserStatus(id, request.status)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
     }
 
-    override suspend fun updateUserRoles(
-        @PathVariable id: String,
-        @Valid @RequestBody request: UpdateUserRolesRequest
-    ): UserDto {
-        return userService.updateUserRoles(id, request)
+    override suspend fun patchUser(id: String, request: PatchUserRequest): UserDto {
+        return userService.patchUser(id, request)
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
     }
 
-    override suspend fun updateUserBroker(
-        @PathVariable id: String,
-        @Valid @RequestBody request: UpdateUserBrokerRequest
-    ): UserDto {
-        return userService.updateUserBroker(id, request)
+    override suspend fun deleteUser(id: String) {
+        userService.deleteUser(id)
+    }
+
+    override suspend fun blockUser(id: String, request: BlockUserRequest): UserDto {
+        val status = if (request.blocked) UserStatus.BLOCKED else UserStatus.ACTIVE
+        return userService.updateUserStatus(id, status)
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+    }
+
+    override suspend fun updateUserRoles(id: String, request: UpdateUserRolesRequest): UserDto {
+        return userService.patchUser(id, PatchUserRequest(roles = request.roles))
+            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
+    }
+
+    override suspend fun updateUserBroker(id: String, request: UpdateUserBrokerRequest): UserDto {
+        return userService.patchUser(id, PatchUserRequest(brokerId = request.brokerOrgId))
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "User not found")
     }
 }

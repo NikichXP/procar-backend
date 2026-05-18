@@ -30,6 +30,7 @@ data class AdminLotResponse(
     val updatedAt: String,
     val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
+    val brand: LotBrand = LotBrand.PARTNER,
 )
 
 @Serializable
@@ -102,6 +103,7 @@ data class AdminCreateLotRequest(
     val status: AdminLotStatus,
     val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
+    val brand: LotBrand = LotBrand.PARTNER,
 )
 
 @Serializable
@@ -162,6 +164,7 @@ data class AdminUpdateLotRequest(
     val status: AdminLotStatus? = null,
     val lotType: LotType? = null,
     val buyoutPrice: Double? = null,
+    val brand: LotBrand? = null,
 )
 
 @Serializable

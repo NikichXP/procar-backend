@@ -1,10 +1,9 @@
 package com.procar.core.service.admin
 
 import com.procar.user.api.UserAdminAPI
-import com.procar.user.api.dto.BlockUserRequest
 import com.procar.user.api.dto.CreateUserRequest
-import com.procar.user.api.dto.UpdateUserBrokerRequest
-import com.procar.user.api.dto.UpdateUserRolesRequest
+import com.procar.user.api.dto.PatchUserRequest
+import com.procar.user.api.dto.UpdateUserStatusRequest
 import com.procar.user.api.dto.UserDto
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
@@ -26,15 +25,15 @@ class AdminUserConnectorService(
         return userController.getUser(id)
     }
 
-    suspend fun blockUser(id: String, request: BlockUserRequest): UserDto {
-        return userController.blockUser(id, request)
+    suspend fun updateUserStatus(id: String, request: UpdateUserStatusRequest): UserDto {
+        return userController.updateUserStatus(id, request)
     }
 
-    suspend fun updateUserRoles(id: String, request: UpdateUserRolesRequest): UserDto {
-        return userController.updateUserRoles(id, request)
+    suspend fun patchUser(id: String, request: PatchUserRequest): UserDto {
+        return userController.patchUser(id, request)
     }
 
-    suspend fun updateUserBroker(id: String, request: UpdateUserBrokerRequest): UserDto {
-        return userController.updateUserBroker(id, request)
+    suspend fun deleteUser(id: String) {
+        userController.deleteUser(id)
     }
 }

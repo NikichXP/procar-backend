@@ -3,6 +3,7 @@ package com.procar.core.service
 import com.procar.auth.api.AuthController
 import com.procar.auth.api.dto.*
 import com.procar.gateway.api.dto.GatewayUserRegisterRequest
+import com.procar.gateway.api.dto.RegisterResult
 import com.procar.core.service.admin.AdminUserConnectorService
 import com.procar.user.api.dto.CreateUserRequest
 import com.procar.user.api.dto.UserRole
@@ -27,10 +28,10 @@ class AuthService(
     suspend fun logoutAllDevices(authorization: String?): Map<String, Any> =
         authClient.logoutAllDevices(authorization)
 
-    suspend fun register(request: GatewayUserRegisterRequest): AuthResult {
+    suspend fun register(request: GatewayUserRegisterRequest): RegisterResult {
         val createUserRequest = CreateUserRequest(
             username = request.username,
-            roles = listOf(UserRole.USER)
+            roles = listOf(UserRole.CUSTOMER)
         )
         val createdUser = adminUserConnectorService.createUser(createUserRequest)
         
@@ -42,7 +43,16 @@ class AuthService(
             password = request.password
         )
         
-        return authClient.register(authRegisterRequest)
+        val result = authClient.register(authRegisterRequest)
+        return RegisterResult(
+            username = request.username,
+            success = result.success,
+            message = result.message,
+            accessToken = result.accessToken?.let {
+                com.procar.gateway.api.dto.AccessToken(it.token, it.validUntil.toString())
+            },
+            refreshToken = result.refreshToken,
+        )
     }
 
     suspend fun validateToken(authorization: String): TokenValidationResult =

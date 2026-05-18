@@ -3,7 +3,11 @@ package com.procar.user.api.dto
 data class UserDto(
     val id: String,
     val username: String,
-    val blocked: Boolean,
     val roles: List<UserRole>,
-    val brokerOrgId: String? = null
+    val status: UserStatus = UserStatus.ACTIVE,
+    val verificationStatus: VerificationStatus = VerificationStatus.NOT_STARTED,
+    val depositStatus: DepositStatus = DepositStatus.NOT_PAID,
+    val brokerId: String? = null,
+    val companyName: String? = null,
+    val country: String? = null
 )

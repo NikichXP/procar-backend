@@ -23,7 +23,7 @@ class BidAPI(
         return try {
             val bids = bidService.getAllBidsForLot(lotId)
                 .mapNotNull { conversionService.convert(it, ProviderBid::class.java) }
-            val active = bids.filter { it.status == BidStatus.ACCEPTED || it.status == BidStatus.WON }
+            val active = bids.filter { it.status == BidStatus.WINNING || it.status == BidStatus.WON }
             val summary = BidSummary(
                 totalBids = bids.size,
                 currentBid = active.maxOfOrNull { it.amount } ?: 0.0,
@@ -87,6 +87,36 @@ class BidAPI(
                     e.message,
                 ),
             )
+        }
+    }
+
+    override fun getUserBids(
+        bidderId: String,
+        status: BidStatus?,
+        page: Int,
+        size: Int
+    ): ResponseEntity<ApiResponse<BidHistoryResponse>> {
+        return try {
+            val allBids = bidService.getBidsByBidderId(bidderId)
+            val filteredBids = if (status != null) {
+                allBids.filter { it.status == status }
+            } else {
+                allBids
+            }
+            
+            // Simple pagination (since we don't have it in repository yet)
+            val start = page * size
+            val pagedBids = filteredBids.drop(start).take(size)
+                .mapNotNull { conversionService.convert(it, ProviderBid::class.java) }
+
+            ResponseEntity.ok(ApiResponse(BidHistoryResponse(
+                lotId = "multiple",
+                bids = pagedBids,
+                pagination = PaginationResponse(hasNext = filteredBids.size > start + size, nextCursor = (page + 1).toString()),
+                summary = BidSummary(0, 0.0, filteredBids.size, 0.0, 0.0, 0.0)
+            )))
+        } catch (e: Exception) {
+            ResponseEntity.ok(ApiResponse(responseFactory.createEmptyBidHistoryResponse("error")))
         }
     }
 }

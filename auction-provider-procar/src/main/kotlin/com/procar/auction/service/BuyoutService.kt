@@ -54,7 +54,7 @@ class BuyoutService(
             bidderId = request.bidderId,
             price = price,
             purchasedAt = bid.placedAt,
-            status = BidStatus.ACCEPTED,
+            status = BidStatus.WON,
             message = "Buyout accepted",
         )
     }

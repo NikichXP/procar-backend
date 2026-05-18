@@ -3,36 +3,65 @@ package com.procar.gateway.api.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class UserRole { USER, BROKER, ADMIN }
+enum class UserRole { CUSTOMER, BROKER, ADMIN }
+
+@Serializable
+enum class UserStatus { ACTIVE, BLOCKED }
+
+@Serializable
+enum class VerificationStatus { NOT_STARTED, PENDING, VERIFIED, REJECTED }
+
+@Serializable
+enum class DepositStatus { NOT_PAID, PENDING, ACTIVE, FORFEITED }
 
 @Serializable
 data class UserDto(
     val id: String,
     val username: String,
-    val blocked: Boolean,
     val roles: List<UserRole>,
-    val brokerOrgId: String? = null,
+    val status: UserStatus = UserStatus.ACTIVE,
+    val verificationStatus: VerificationStatus = VerificationStatus.NOT_STARTED,
+    val depositStatus: DepositStatus = DepositStatus.NOT_PAID,
+    val brokerId: String? = null,
+    val companyName: String? = null,
+    val country: String? = null,
 )
 
 @Serializable
 data class CreateUserRequest(
     val username: String,
-    val brokerOrgId: String? = null,
-    val roles: List<UserRole>? = null,
+    val roles: List<UserRole>,
+    val brokerId: String? = null,
+    val companyName: String? = null,
+    val country: String? = null,
 )
 
 @Serializable
-data class BlockUserRequest(val blocked: Boolean)
+data class PatchUserRequest(
+    val username: String? = null,
+    val roles: List<UserRole>? = null,
+    val status: UserStatus? = null,
+    val verificationStatus: VerificationStatus? = null,
+    val depositStatus: DepositStatus? = null,
+    val brokerId: String? = null,
+    val companyName: String? = null,
+    val country: String? = null,
+)
 
 @Serializable
-data class UpdateUserRolesRequest(val roles: List<UserRole>)
-
-@Serializable
-data class UpdateUserBrokerRequest(val brokerOrgId: String? = null)
+data class UpdateUserStatusRequest(
+    val status: UserStatus
+)
 
 @Serializable
 data class UserInfoDto(
     val id: String,
     val username: String,
     val roles: List<UserRole>,
+    val status: UserStatus,
+    val verificationStatus: VerificationStatus,
+    val depositStatus: DepositStatus,
+    val brokerId: String? = null,
+    val companyName: String? = null,
+    val country: String? = null,
 )

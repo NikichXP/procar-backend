@@ -76,6 +76,23 @@ class AssertionStepDef(private val context: TestContext) {
             .isTrue()
     }
 
+    @And("the field {string} is boolean {string}")
+    fun checkBoolean(field: String, expectedValue: String) {
+        val body = context.lastResponseBody
+        assertThat(body).describedAs("Response body").isNotNull()
+        
+        val json = objectMapper.readTree(body)
+        val node = json.at(if (field.startsWith("/")) field else "/$field")
+        
+        assertThat(node.isBoolean)
+            .describedAs("Field '$field' should be a boolean")
+            .isTrue()
+            
+        assertThat(node.asBoolean().toString())
+            .describedAs("Field '$field' value")
+            .isEqualTo(expectedValue)
+    }
+
     @And("I save the field {string} as {string}")
     fun saveField(field: String, varName: String) {
         val body = context.lastResponseBody

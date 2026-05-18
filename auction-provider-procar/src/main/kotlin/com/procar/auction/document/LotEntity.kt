@@ -59,6 +59,9 @@ data class LotEntity(
 
     @Field("buyout_price")
     var buyoutPrice: Double? = null,
+
+    @Field("brand")
+    var brand: LotBrand = LotBrand.PARTNER,
 )
 
 @Document

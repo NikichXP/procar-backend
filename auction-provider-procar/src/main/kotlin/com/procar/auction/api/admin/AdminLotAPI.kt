@@ -2,8 +2,9 @@ package com.procar.auction.api.admin
 
 import com.procar.auction.document.LotEntity
 import com.procar.auction.document.VehicleImageDocument
+import com.procar.auction.service.InternalAuctionBidService
 import com.procar.auction.service.InternalAuctionLotService
-import com.procar.auction.service.status.LotStatusHelper
+import com.procar.auction.service.status.LotStatusTransitionService
 import com.procar.provider.admin.*
 import com.procar.provider.common.ApiResponse
 import com.procar.provider.lot.LotStatus
@@ -16,7 +17,8 @@ import org.springframework.web.server.ResponseStatusException
 @RestController
 class AdminLotAPI(
     private val lotService: InternalAuctionLotService,
-    private val lotStatusHelper: LotStatusHelper,
+    private val bidService: InternalAuctionBidService,
+    private val lotStatusTransitionService: LotStatusTransitionService,
     private val conversionService: ConversionService
 ) : AdminLotController {
 
@@ -43,7 +45,7 @@ class AdminLotAPI(
 
         val newStatus = request.status
         if (newStatus != null && newStatus != existingLot.status) {
-            if (!lotStatusHelper.canMigrateToStatus(existingLot, newStatus)) {
+            if (!lotStatusTransitionService.canMigrateToStatus(existingLot, newStatus)) {
                 throw ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "Status transition from ${existingLot.status} to ${newStatus} is not allowed"
@@ -73,7 +75,7 @@ class AdminLotAPI(
         val existingLot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
 
-        if (!lotStatusHelper.canMigrateToStatus(existingLot, request.status)) {
+        if (!lotStatusTransitionService.canMigrateToStatus(existingLot, request.status)) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Status transition from ${existingLot.status} to ${request.status} is not allowed"
@@ -142,7 +144,52 @@ class AdminLotAPI(
     ): ResponseEntity<ApiResponse<List<LotStatus>>> {
         val lot = lotService.getLotById(lotId)
             ?: return ResponseEntity.notFound().build()
-        val statuses = lotStatusHelper.getPossibleStatuses(lot)
+        val statuses = lotStatusTransitionService.getPossibleStatuses(lot)
         return ResponseEntity.ok(ApiResponse(statuses))
+    }
+
+    override suspend fun publishLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val lot = lotService.getLotById(lotId) ?: return ResponseEntity.notFound().build()
+        if (lot.status != LotStatus.PENDING) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PENDING lots can be published")
+        }
+        val updatedLot = lotService.updateLotStatus(lotId, LotStatus.ACTIVE)
+            ?: return ResponseEntity.notFound().build()
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Lot published successfully"))
+    }
+
+    override suspend fun unpublishLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val lot = lotService.getLotById(lotId) ?: return ResponseEntity.notFound().build()
+        if (lot.status != LotStatus.ACTIVE) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ACTIVE lots can be unpublished")
+        }
+        val updatedLot = lotService.updateLotStatus(lotId, LotStatus.PENDING)
+            ?: return ResponseEntity.notFound().build()
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Lot unpublished successfully"))
+    }
+
+    override suspend fun confirmAvailability(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val lot = lotService.getLotById(lotId) ?: return ResponseEntity.notFound().build()
+        if (lot.status != LotStatus.AWAIT_SELLER_CONFIRMATION) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Lot is not awaiting seller confirmation")
+        }
+        val updatedLot = lotService.updateLotStatus(lotId, LotStatus.AWAITING_PAYMENT)
+            ?: return ResponseEntity.notFound().build()
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Availability confirmed successfully"))
+    }
+
+    override suspend fun endAuction(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        val lot = lotService.getLotById(lotId) ?: return ResponseEntity.notFound().build()
+        if (lot.status != LotStatus.ACTIVE) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ACTIVE lots can have their auction ended")
+        }
+        val updatedLot = lotService.updateLotStatus(lotId, LotStatus.AWAIT_SELLER_CONFIRMATION)
+            ?: return ResponseEntity.notFound().build()
+        bidService.finishAuction(lotId)
+        val adminResponse = conversionService.convert(updatedLot, AdminLotResponse::class.java)!!
+        return ResponseEntity.ok(ApiResponse(adminResponse, "Auction ended successfully"))
     }
 }

@@ -7,7 +7,6 @@ dependencies {
     implementation(project(":user-api"))
     implementation(project(":gateway-api"))
     implementation(project(":auction-provider-api"))
-    implementation(project(":commons"))
 
     // Cucumber
     val cucumberVersion = "7.18.1"
@@ -32,10 +31,6 @@ dependencies {
     // Logging
     implementation("org.slf4j:slf4j-api:2.0.16")
     testImplementation("ch.qos.logback:logback-classic:1.5.12")
-
-    // Missing transitive dependencies for commons that Cucumber scans
-    testRuntimeOnly("org.springframework.boot:spring-boot-starter-data-mongodb")
-    testRuntimeOnly("org.springframework.amqp:spring-rabbit")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")

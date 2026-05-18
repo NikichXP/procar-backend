@@ -3,7 +3,7 @@ package com.procar.auction.service
 import com.procar.auction.document.LotEntity
 import com.procar.auction.document.VehicleImageDocument
 import com.procar.auction.repository.LotRepository
-import com.procar.auction.service.status.LotStatusHelper
+import com.procar.auction.service.status.LotStatusTransitionService
 import com.procar.provider.admin.AdminLotResponse
 import com.procar.provider.admin.AdminPaginatedLotsResponse
 import com.procar.provider.common.PaginationResponse
@@ -23,7 +23,7 @@ import java.time.LocalDateTime
 @Service
 class InternalAuctionLotService(
     private val lotRepository: LotRepository,
-    private val lotStatusHelper: LotStatusHelper,
+    private val lotStatusTransitionService: LotStatusTransitionService,
     private val mongoTemplate: MongoTemplate,
     private val conversionService: ConversionService
 ) {
@@ -130,6 +130,9 @@ class InternalAuctionLotService(
             location = lotEntity.location,
             metadata = lotEntity.metadata,
             status = lotEntity.status,
+            lotType = lotEntity.lotType,
+            buyoutPrice = lotEntity.buyoutPrice,
+            brand = lotEntity.brand,
             updatedAt = LocalDateTime.now()
         )
         

@@ -26,6 +26,7 @@ private object VehicleOptions {
 }
 
 private val LotTypeOptions = listOf("AUCTION","BUYOUT","HYBRID")
+private val LotBrandOptions = listOf("PARTNER", "SELECT")
 
 @Composable
 fun GeneralSection(
@@ -44,6 +45,7 @@ fun GeneralSection(
     EditableTextField(state.description, "Description")
     EditableEnumField(state.status, "Status", statusOptions)
     EditableEnumField(state.lotType, "Lot Type", LotTypeOptions)
+    EditableEnumField(state.brand, "Brand", LotBrandOptions)
     if (state.lotType.current != "AUCTION") {
         EditableTextField(state.buyoutPrice, "Buyout Price *")
     }

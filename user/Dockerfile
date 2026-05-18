@@ -1,20 +1,28 @@
 # Stage 1: Build stage using Gradle image
-FROM gradle:8.5-jdk21 AS builder
+FROM gradle:8.10-jdk21 AS builder
 
 WORKDIR /app
 
-# Copy source code (only dependencies needed for user)
-COPY user ./user
-COPY user-api ./user-api
-COPY commons ./commons
+# Copy gradle configuration first to cache dependencies
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY user-api/build.gradle.kts ./user-api/
+COPY auth-api/build.gradle.kts ./auth-api/
+COPY commons/build.gradle.kts ./commons/
+COPY user/build.gradle.kts ./user/
 
-# Copy build configuration
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
-COPY gradle.properties .
+# Cache gradle dependencies
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle user:dependencies --no-daemon
+
+# Copy source code
+COPY user-api ./user-api
+COPY auth-api ./auth-api
+COPY commons ./commons
+COPY user ./user
 
 # Build the application
-RUN gradle user:bootJar -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle user:bootJar -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:21-jre-alpine

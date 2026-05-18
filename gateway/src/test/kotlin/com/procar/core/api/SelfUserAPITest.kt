@@ -6,6 +6,7 @@ import com.procar.core.config.SecurityConfig
 import com.procar.core.config.TestSecurityConfig
 import com.procar.core.service.AuthService
 import com.procar.core.service.UserService
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -16,9 +17,9 @@ import org.springframework.security.test.web.reactive.server.SecurityMockServerC
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
 
-@WebFluxTest(controllers = [UserAPI::class])
+@WebFluxTest(controllers = [SelfUserAPI::class])
 @Import(SecurityConfig::class, TestSecurityConfig::class, AnnotationAuthorizationManager::class)
-class UserAPITest {
+class SelfUserAPITest {
 
     @Autowired
     private lateinit var webTestClient: WebTestClient
@@ -40,7 +41,7 @@ class UserAPITest {
             content = emptyList()
         )
 
-        whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage)
+        runBlocking { whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage) }
 
         // When
         webTestClient.mutateWith(mockUser()).get().uri("/users/me/bids")
@@ -48,7 +49,7 @@ class UserAPITest {
             .expectStatus().isOk
 
         // Then
-        verify(userService).getUserBids(null, 0, 20)
+        runBlocking { verify(userService).getUserBids(null, 0, 20) }
     }
 
     @Test
@@ -62,7 +63,7 @@ class UserAPITest {
             content = emptyList()
         )
 
-        whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage)
+        runBlocking { whenever(userService.getUserBids(null, 0, 20)).thenReturn(mockUserBidPage) }
 
         // When
         webTestClient.mutateWith(mockUser()).get().uri("/users/me/bids")
@@ -70,7 +71,7 @@ class UserAPITest {
             .expectStatus().isOk
 
         // Then
-        verify(userService).getUserBids(null, 0, 20)
+        runBlocking { verify(userService).getUserBids(null, 0, 20) }
     }
 
     @Test

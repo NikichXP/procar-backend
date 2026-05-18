@@ -20,6 +20,7 @@ data class VehicleLot(
     val updatedAt: LocalDateTime,
     val lotType: LotType = LotType.AUCTION,
     val buyoutPrice: Double? = null,
+    val brand: LotBrand = LotBrand.PARTNER,
 )
 
 data class VehicleInfo(
@@ -146,7 +147,8 @@ enum class LotStatus {
     DRAFT, // lot is created, not all info is set
     PENDING, // lot is ready to be auctioned or sold, could be either waiting for auction start date or manual start in case of buyout
     ACTIVE, // ongoing trading for the lot
-    AWAITING_PAYMENT, // after winning auction we wait until customer will pay for the lot he won
+    AWAIT_SELLER_CONFIRMATION, // after winning auction or buyout, wait for seller/broker confirmation
+    AWAITING_PAYMENT, // after winning auction or buyout we wait until customer will pay for the lot he won
     AWAITING_SHIPMENT, // we got payment, we are waiting for shipment, pure CRM-only status
     IN_TRANSIT, // we got payment, we are waiting for shipment, pure CRM-only status
     COMPLETED, // customer received the lot, pure CRM-only status
@@ -186,6 +188,8 @@ enum class VehicleCondition {
 }
 
 enum class LotType { AUCTION, BUYOUT, HYBRID }
+
+enum class LotBrand { PARTNER, SELECT }
 
 enum class SellerType {
     DEALER, PRIVATE, AUCTION_HOUSE, LEASING_COMPANY, INSURANCE

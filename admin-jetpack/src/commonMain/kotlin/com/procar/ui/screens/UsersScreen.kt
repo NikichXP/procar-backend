@@ -6,16 +6,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.procar.api.blockUser
 import com.procar.api.createUser
 import com.procar.api.fetchBrokers
 import com.procar.api.fetchUsers
-import com.procar.api.updateUserBroker
-import com.procar.api.updateUserRoles
+import com.procar.api.patchUser
 import com.procar.gateway.api.dto.BrokerDto
 import com.procar.gateway.api.dto.CreateUserRequest
+import com.procar.gateway.api.dto.PatchUserRequest
 import com.procar.gateway.api.dto.UserDto
 import com.procar.gateway.api.dto.UserRole
+import com.procar.gateway.api.dto.UserStatus
 import com.procar.ui.components.DataTable
 import com.procar.ui.components.EnumDropdown
 import com.procar.ui.components.SectionHeader
@@ -64,8 +64,8 @@ fun UsersScreen() {
                         0 -> Text(user.id.take(8) + "…", style = MaterialTheme.typography.bodySmall)
                         1 -> Text(user.username)
                         2 -> Text(user.roles.joinToString(", ") { it.name })
-                        3 -> Text(user.brokerOrgId ?: "—")
-                        4 -> BlockedChip(user.blocked)
+                        3 -> Text(user.brokerId ?: "—")
+                        4 -> BlockedChip(user.status == UserStatus.BLOCKED)
                         5 -> TextButton(onClick = { selectedUser = user }) { Text("Manage") }
                     }
                 }
@@ -122,13 +122,14 @@ private fun UserOptionsDialog(
     var working by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    // Local role selection state
+    var brokerId by remember(user.id) { mutableStateOf(user.brokerId ?: "") }
     val roleState = remember(user.id) {
         mutableStateMapOf<UserRole, Boolean>().apply {
-            UserRole.entries.forEach { put(it, user.roles.contains(it)) }
+            UserRole.entries.forEach { role ->
+                this[role] = user.roles.contains(role)
+            }
         }
     }
-    var brokerId by remember(user.id) { mutableStateOf(user.brokerOrgId ?: "") }
 
     fun runAsync(block: suspend () -> Unit) {
         scope.launch {
@@ -144,7 +145,7 @@ private fun UserOptionsDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.width(440.dp)) {
                 Text("ID: ${user.id}", style = MaterialTheme.typography.bodySmall)
-                Text("Status: ${if (user.blocked) "BLOCKED" else "ACTIVE"}")
+                Text("Status: ${user.status}")
 
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
@@ -153,7 +154,9 @@ private fun UserOptionsDialog(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(
                             checked = roleState[role] == true,
-                            onCheckedChange = { roleState[role] = it }
+                            onCheckedChange = { checked ->
+                                roleState[role] = checked
+                            }
                         )
                         Text(role.name)
                     }
@@ -162,8 +165,8 @@ private fun UserOptionsDialog(
                     enabled = !working,
                     onClick = {
                         runAsync {
-                            val roles = UserRole.entries.filter { roleState[it] == true }
-                            val updated = updateUserRoles(user.id, roles)
+                            val roles = roleState.filter { it.value }.keys.toList()
+                            val updated = patchUser(user.id, PatchUserRequest(roles = roles))
                             onChanged(updated)
                         }
                     }
@@ -186,7 +189,7 @@ private fun UserOptionsDialog(
                         enabled = !working,
                         onClick = {
                             runAsync {
-                                val updated = updateUserBroker(user.id, brokerId.takeIf { it.isNotBlank() })
+                                val updated = patchUser(user.id, PatchUserRequest(brokerId = brokerId.takeIf { it.isNotBlank() }))
                                 onChanged(updated)
                             }
                         }
@@ -196,7 +199,7 @@ private fun UserOptionsDialog(
                         onClick = {
                             runAsync {
                                 brokerId = ""
-                                val updated = updateUserBroker(user.id, null)
+                                val updated = patchUser(user.id, PatchUserRequest(brokerId = null))
                                 onChanged(updated)
                             }
                         }
@@ -206,16 +209,16 @@ private fun UserOptionsDialog(
                 SectionHeader("Status")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(
-                        enabled = !working && !user.blocked,
+                        enabled = !working && user.status != UserStatus.BLOCKED,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                         onClick = {
-                            runAsync { onChanged(blockUser(user.id, true)) }
+                            runAsync { onChanged(patchUser(user.id, PatchUserRequest(status = UserStatus.BLOCKED))) }
                         }
                     ) { Text("Block") }
                     OutlinedButton(
-                        enabled = !working && user.blocked,
+                        enabled = !working && user.status == UserStatus.BLOCKED,
                         onClick = {
-                            runAsync { onChanged(blockUser(user.id, false)) }
+                            runAsync { onChanged(patchUser(user.id, PatchUserRequest(status = UserStatus.ACTIVE))) }
                         }
                     ) { Text("Unblock") }
                 }
@@ -234,8 +237,8 @@ private fun BrokerPicker(
     selectedId: String?,
     onSelected: (String?) -> Unit,
 ) {
-    val options = listOf("— none —") + brokers.map { "${it.id} — ${it.name}" }
-    val current = selectedId?.let { id -> brokers.firstOrNull { it.id == id }?.let { "${it.id} — ${it.name}" } ?: id }
+    val options = listOf("— none —") + brokers.map { "${it.id} — ${it.displayName}" }
+    val current = selectedId?.let { id -> brokers.firstOrNull { it.id == id }?.let { "${it.id} — ${it.displayName}" } ?: id }
         ?: "— none —"
     EnumDropdown(
         label = "Assign broker",
@@ -259,9 +262,7 @@ private fun CreateUserDialog(
     var brokerId by remember { mutableStateOf("") }
     val roleState = remember {
         mutableStateMapOf<UserRole, Boolean>().apply {
-            put(UserRole.USER, true)
-            put(UserRole.BROKER, false)
-            put(UserRole.ADMIN, false)
+            UserRole.entries.forEach { put(it, it == UserRole.CUSTOMER) }
         }
     }
     var saving by remember { mutableStateOf(false) }
@@ -316,11 +317,11 @@ private fun CreateUserDialog(
                         saving = true
                         error = null
                         try {
-                            val roles = UserRole.entries.filter { roleState[it] == true }
+                            val roles = roleState.filter { it.value }.keys.toList()
                             val created = createUser(CreateUserRequest(
                                 username = username,
-                                brokerOrgId = brokerId.takeIf { it.isNotBlank() },
-                                roles = roles.ifEmpty { null }
+                                brokerId = brokerId.takeIf { it.isNotBlank() },
+                                roles = roles
                             ))
                             onCreated(created)
                         } catch (e: Exception) {

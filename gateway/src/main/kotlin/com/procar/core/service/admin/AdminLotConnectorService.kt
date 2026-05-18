@@ -22,15 +22,36 @@ class AdminLotConnectorService(
 ) {
 
     suspend fun createLot(request: GatewayCreateLotRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {
-        val broker = try {
-            adminBrokerConnectorService.getBroker(request.brokerId)
-        } catch (e: Exception) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Broker '${request.brokerId}' not found", e)
+        val broker = request.brokerId?.let { brokerId ->
+            try {
+                adminBrokerConnectorService.getBroker(brokerId)
+            } catch (e: Exception) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Broker '$brokerId' not found", e)
+            }
         }
 
-        val warehouseResponse = adminWarehouseConnectorService.getWarehouse(request.warehouseId)
-        val warehouse = warehouseResponse.body?.data
-            ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Warehouse '${request.warehouseId}' not found")
+        val warehouse = request.warehouseId?.let { warehouseId ->
+            adminWarehouseConnectorService.getWarehouse(warehouseId).body?.data
+                ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Warehouse '$warehouseId' not found")
+        }
+
+        val location = if (warehouse != null) AdminLocationInfoRequest(
+            address = warehouse.address,
+            city = warehouse.city,
+            state = warehouse.state,
+            zipCode = warehouse.zipCode,
+            country = warehouse.country,
+            coordinates = warehouse.coordinates,
+            timezone = warehouse.timezone,
+        ) else AdminLocationInfoRequest(
+            address = "", city = "", state = "", zipCode = "", country = "", timezone = "UTC"
+        )
+
+        val sellerInfo = if (broker != null) AdminSellerInfoRequest(
+            id = broker.id,
+            name = broker.companyName,
+            type = SellerType.DEALER,
+        ) else null
 
         val providerRequest = AdminCreateLotRequest(
             externalId = request.externalId,
@@ -38,32 +59,21 @@ class AdminLotConnectorService(
             description = request.description,
             vehicle = request.vehicle,
             auction = request.auction,
-            location = AdminLocationInfoRequest(
-                address = warehouse.address,
-                city = warehouse.city,
-                state = warehouse.state,
-                zipCode = warehouse.zipCode,
-                country = warehouse.country,
-                coordinates = warehouse.coordinates,
-                timezone = warehouse.timezone,
-            ),
+            location = location,
             metadata = AdminLotMetadataRequest(
                 tags = request.metadata.tags,
                 categories = request.metadata.categories,
-                sellerInfo = AdminSellerInfoRequest(
-                    id = broker.id,
-                    name = broker.name,
-                    type = SellerType.DEALER,
-                ),
+                sellerInfo = sellerInfo,
                 inspection = request.metadata.inspection,
                 history = request.metadata.history,
                 fees = request.metadata.fees,
                 shipping = request.metadata.shipping,
             ),
             status = request.status,
-            brokerOrgId = broker.id,
+            brokerOrgId = broker?.id,
             lotType = request.lotType,
             buyoutPrice = request.buyoutPrice,
+            brand = request.brand,
         )
         return adminLotController.createLot(providerRequest)
     }
@@ -90,6 +100,22 @@ class AdminLotConnectorService(
 
     suspend fun getPossibleStatuses(lotId: String): ResponseEntity<ApiResponse<List<LotStatus>>> {
         return adminLotController.getPossibleStatuses(lotId)
+    }
+
+    suspend fun publishLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotController.publishLot(lotId)
+    }
+
+    suspend fun unpublishLot(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotController.unpublishLot(lotId)
+    }
+
+    suspend fun confirmAvailability(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotController.confirmAvailability(lotId)
+    }
+
+    suspend fun endAuction(lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotController.endAuction(lotId)
     }
 
     suspend fun setHiddenStatus(lotId: String, request: AdminHiddenRequest): ResponseEntity<ApiResponse<AdminLotResponse>> {

@@ -8,20 +8,23 @@ COPY --from=node /usr/lib/x86_64-linux-gnu/libatomic.so.1.2.0 /usr/lib/x86_64-li
 
 WORKDIR /app
 
-# Copy gradle wrapper and config
-COPY gradlew .
-RUN sed -i 's/\r$//' gradlew && chmod +x gradlew
-COPY gradle.properties .
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
+# Copy gradle configuration first to cache dependencies
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY gateway-api/build.gradle.kts ./gateway-api/
+COPY admin-jetpack/build.gradle.kts ./admin-jetpack/
 
-# Copy admin-jetpack source
-COPY admin-jetpack ./admin-jetpack
+# Cache gradle dependencies
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle :admin-jetpack:dependencies --no-daemon
+
+# Copy source code
 COPY gateway-api ./gateway-api
+COPY admin-jetpack ./admin-jetpack
 
 ENV GRADLE_OPTS="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
-RUN gradle :admin-jetpack:wasmJsBrowserDistribution --no-daemon -Dkotlin.daemon.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
+RUN --mount=type=cache,target=/home/gradle/.gradle \
+    gradle :admin-jetpack:wasmJsBrowserDistribution --no-daemon -Dkotlin.daemon.jvmargs="-Xmx2g -XX:MaxMetaspaceSize=512m"
 
 RUN rm -rf /app/admin-jetpack/build/compileSync \
            /app/admin-jetpack/build/kotlin \

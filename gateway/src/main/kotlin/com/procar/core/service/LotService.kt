@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.time.format.DateTimeFormatter
+import com.procar.provider.lot.LotBrand as ProviderLotBrand
 import com.procar.provider.lot.LotStatus as ProviderLotStatus
+import com.procar.provider.lot.LotType as ProviderLotType
 import com.procar.provider.lot.VehicleCondition as ProviderVehicleCondition
 
 @Service
@@ -77,6 +79,7 @@ class LotService(
                 photos = vehicleLot.vehicle.images.map { it.url },
                 lotType = mapLotType(vehicleLot.lotType),
                 buyoutPrice = vehicleLot.buyoutPrice,
+                brand = mapBrand(vehicleLot.brand),
             )
         }
     }
@@ -95,23 +98,7 @@ class LotService(
         // Convert internal response to gateway DTO
         return LotDetail(
             id = vehicleLot.id,
-            car = CarInfo(
-                brandId = vehicleLot.vehicle.make,
-                brandName = vehicleLot.vehicle.make,
-                modelId = vehicleLot.vehicle.model,
-                modelName = vehicleLot.vehicle.model,
-                year = vehicleLot.vehicle.year,
-                condition = mapCondition(vehicleLot.vehicle.condition),
-                mileage = vehicleLot.vehicle.mileage,
-                vin = vehicleLot.vehicle.vin,
-                color = vehicleLot.vehicle.color,
-                description = vehicleLot.description,
-                images = vehicleLot.vehicle.images.map { it.url },
-                documents = CarDocuments(
-                    hasTitle = vehicleLot.vehicle.documents.any { it.type == DocumentType.TITLE },
-                    titleState = null // TODO: Extract from document data
-                )
-            ),
+            car = mapCarInfo(vehicleLot),
             status = mapStatusToGateway(vehicleLot.status),
             currentBid = vehicleLot.auction?.currentBid,
             startingBid = vehicleLot.auction?.startingBid,
@@ -140,6 +127,49 @@ class LotService(
             recentBids = emptyList(), // TODO: Fetch recent bids from bid API
             lotType = mapLotType(vehicleLot.lotType),
             buyoutPrice = vehicleLot.buyoutPrice,
+            brand = mapBrand(vehicleLot.brand),
+        )
+    }
+
+    suspend fun getLotSummary(lotId: String): LotSummary {
+        val response: ResponseEntity<ApiResponse<VehicleLot>> = internalLotAPI.getLotDetail(lotId)
+        val apiResponse = response.body ?: throw RuntimeException("Failed to get lot summary")
+        val vehicleLot = apiResponse.data
+
+        return LotSummary(
+            id = vehicleLot.id,
+            car = mapCarInfo(vehicleLot),
+            status = mapStatusToGateway(vehicleLot.status),
+            currentBid = vehicleLot.auction?.currentBid,
+            startingBid = vehicleLot.auction?.startingBid,
+            bidStep = vehicleLot.auction?.bidIncrement,
+            bidsCount = vehicleLot.auction?.totalBids,
+            startTime = vehicleLot.auction?.startTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            endTime = vehicleLot.auction?.endTime?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            photos = vehicleLot.vehicle.images.map { it.url },
+            lotType = mapLotType(vehicleLot.lotType),
+            buyoutPrice = vehicleLot.buyoutPrice,
+            brand = mapBrand(vehicleLot.brand),
+        )
+    }
+
+    private fun mapCarInfo(vehicleLot: VehicleLot): CarInfo {
+        return CarInfo(
+            brandId = vehicleLot.vehicle.make,
+            brandName = vehicleLot.vehicle.make,
+            modelId = vehicleLot.vehicle.model,
+            modelName = vehicleLot.vehicle.model,
+            year = vehicleLot.vehicle.year,
+            condition = mapCondition(vehicleLot.vehicle.condition),
+            mileage = vehicleLot.vehicle.mileage,
+            vin = vehicleLot.vehicle.vin,
+            color = vehicleLot.vehicle.color,
+            description = vehicleLot.description,
+            images = vehicleLot.vehicle.images.map { it.url },
+            documents = CarDocuments(
+                hasTitle = vehicleLot.vehicle.documents.any { it.type == DocumentType.TITLE },
+                titleState = null
+            )
         )
     }
 
@@ -147,6 +177,7 @@ class LotService(
         return when (status) {
             LotStatus.PENDING -> ProviderLotStatus.PENDING
             LotStatus.ACTIVE -> ProviderLotStatus.ACTIVE
+            LotStatus.AWAIT_SELLER_CONFIRMATION -> ProviderLotStatus.AWAIT_SELLER_CONFIRMATION
             LotStatus.AWAITING_PAYMENT -> ProviderLotStatus.AWAITING_PAYMENT
             LotStatus.AWAITING_SHIPMENT -> ProviderLotStatus.AWAITING_SHIPMENT
             LotStatus.IN_TRANSIT -> ProviderLotStatus.IN_TRANSIT
@@ -160,6 +191,7 @@ class LotService(
             ProviderLotStatus.DRAFT -> LotStatus.INVALID
             ProviderLotStatus.PENDING -> LotStatus.PENDING
             ProviderLotStatus.ACTIVE -> LotStatus.ACTIVE
+            ProviderLotStatus.AWAIT_SELLER_CONFIRMATION -> LotStatus.AWAIT_SELLER_CONFIRMATION
             ProviderLotStatus.AWAITING_PAYMENT -> LotStatus.AWAITING_PAYMENT
             ProviderLotStatus.AWAITING_SHIPMENT -> LotStatus.AWAITING_SHIPMENT
             ProviderLotStatus.IN_TRANSIT -> LotStatus.IN_TRANSIT
@@ -179,9 +211,14 @@ class LotService(
         }
     }
 
-    private fun mapLotType(t: com.procar.provider.lot.LotType): LotType = when (t) {
-        com.procar.provider.lot.LotType.AUCTION -> LotType.AUCTION
-        com.procar.provider.lot.LotType.BUYOUT  -> LotType.BUYOUT
-        com.procar.provider.lot.LotType.HYBRID  -> LotType.HYBRID
+    private fun mapLotType(t: ProviderLotType): LotType = when (t) {
+        ProviderLotType.AUCTION -> LotType.AUCTION
+        ProviderLotType.BUYOUT  -> LotType.BUYOUT
+        ProviderLotType.HYBRID  -> LotType.HYBRID
+    }
+
+    private fun mapBrand(b: ProviderLotBrand): LotBrand = when (b) {
+        ProviderLotBrand.PARTNER -> LotBrand.PARTNER
+        ProviderLotBrand.SELECT -> LotBrand.SELECT
     }
 }
