@@ -35,7 +35,6 @@ class InternalAuctionBidService(
     private val bidRepository: BidRepository,
     private val mongoTemplate: MongoTemplate,
     private val eventPublisher: ApplicationEventPublisher,
-    private val scope: CoroutineScope,
     @Lazy private val lotStatusTransitionService: LotStatusTransitionService
 ) {
 
@@ -104,14 +103,12 @@ class InternalAuctionBidService(
             return rejected(request, "Bid rejected: a concurrent bid already met or exceeded your amount", minBid)
         }
 
-        scope.launch {
-            // Mark previous winning bids as OUTBID
-            mongoTemplate.updateMulti(
-                Query(Criteria.where("lot_id").`is`(lot.id).and("status").`is`(BidStatus.WINNING)),
-                Update().set("status", BidStatus.OUTBID),
-                BidEntity::class.java
-            )
-        }
+        // Mark previous winning bids as OUTBID
+        mongoTemplate.updateMulti(
+            Query(Criteria.where("lot_id").`is`(lot.id).and("status").`is`(BidStatus.WINNING)),
+            Update().set("status", BidStatus.OUTBID),
+            BidEntity::class.java
+        )
 
         val bid = bidRepository.save(BidEntity(
             lotId = lot.id,
@@ -311,7 +308,7 @@ private fun BidEntity.toProviderBid() = ProviderBid(
     amount = amount,
     bidType = bidType,
     status = status,
-    isWinning = isWinning,
+    isWinning = isWinning || status == BidStatus.WINNING || status == BidStatus.WON,
     isAutoBid = isAutoBid,
     placedAt = placedAt
 )

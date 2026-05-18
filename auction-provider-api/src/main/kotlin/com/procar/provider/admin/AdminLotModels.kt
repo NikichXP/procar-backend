@@ -159,8 +159,7 @@ data class AdminLotMetadataRequest(
     val tags: List<String> = emptyList(),
     val categories: List<String> = emptyList(),
 
-    @field:Valid
-    val sellerInfo: AdminSellerInfoRequest,
+    val sellerInfo: AdminSellerInfoRequest? = null,
 
     val inspection: AdminInspectionInfoRequest? = null,
     val history: AdminVehicleHistoryRequest? = null,

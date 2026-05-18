@@ -115,11 +115,3 @@ enum class LotBrand { PARTNER, SELECT }
 
 @Serializable
 enum class LotType { AUCTION, BUYOUT, HYBRID }
-
-@Serializable
-data class BuyoutResult(
-    val lotId: String,
-    val price: Double,
-    val purchasedAt: String,
-    val status: BidStatus = BidStatus.WON,
-)

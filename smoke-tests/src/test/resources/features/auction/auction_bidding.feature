@@ -163,11 +163,15 @@ Feature: Auction Bidding Lifecycle
     Then the status code should be 200
     And I save the field "username" as "buyer_name"
 
-    # 3. Buyer performs buyout
+    # 3. Buyer performs buyout via bid at buyout price
     When I switch to user "${buyer_name}" with password "password"
-    And I request POST "/api/lots/${buyout_lot_id}/buyout"
+    And I request POST "/api/lots/${buyout_lot_id}/bids" with body:
+      """
+      { "amount": 15000 }
+      """
     Then the status code should be 200
-    And the field "/data/lotId" is "${buyout_lot_id}"
+    And the field "/data/bid/lotId" is "${buyout_lot_id}"
+    And the field "/data/status" is "WON"
 
     # 4. Check lot status - should be AWAITING_PAYMENT
     When I request GET "/api/lots/${buyout_lot_id}"
@@ -244,10 +248,14 @@ Feature: Auction Bidding Lifecycle
     Then the status code should be 200
     And I save the field "username" as "user2"
 
-    # 3. User 1 performs buyout
+    # 3. User 1 performs buyout via bid at buyout price
     When I switch to user "${user1}" with password "password"
-    And I request POST "/api/lots/${after_buyout_lot_id}/buyout"
+    And I request POST "/api/lots/${after_buyout_lot_id}/bids" with body:
+      """
+      { "amount": 30000 }
+      """
     Then the status code should be 200
+    And the field "/data/status" is "WON"
 
     # 4. User 2 tries to place a higher bid - should fail
     When I switch to user "${user2}" with password "password"

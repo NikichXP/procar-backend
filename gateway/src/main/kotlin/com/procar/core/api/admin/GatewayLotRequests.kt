@@ -11,14 +11,11 @@ import com.procar.provider.lot.LotBrand
 import com.procar.provider.lot.LotStatus
 import com.procar.provider.lot.LotType
 import jakarta.validation.Valid
-import jakarta.validation.constraints.NotBlank
 
 data class GatewayCreateLotRequest(
-    @field:NotBlank
-    val brokerId: String,
+    val brokerId: String? = null,
 
-    @field:NotBlank
-    val warehouseId: String,
+    val warehouseId: String? = null,
 
     val externalId: String,
     val title: String,

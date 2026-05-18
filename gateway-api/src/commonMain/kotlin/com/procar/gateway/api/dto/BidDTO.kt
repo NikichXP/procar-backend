@@ -49,6 +49,13 @@ data class UserBidPage(
 )
 
 @Serializable
+data class PlaceBidResult(
+    val bid: Bid? = null,
+    val status: BidStatus,
+    val message: String? = null,
+)
+
+@Serializable
 enum class BidStatus {
     WINNING, OUTBID, WON, LOST, REJECTED
 }

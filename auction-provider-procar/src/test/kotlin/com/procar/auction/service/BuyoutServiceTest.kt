@@ -62,7 +62,7 @@ class BuyoutServiceTest {
         val response = buyoutService.buyout(request)
 
         // Then
-        assertEquals(BidStatus.ACCEPTED, response.status)
+        assertEquals(BidStatus.WON, response.status)
         assertEquals(lotId, response.lotId)
         assertEquals(25000.0, response.price)
         assertEquals("Buyout accepted", response.message)
@@ -104,7 +104,7 @@ class BuyoutServiceTest {
         val response = buyoutService.buyout(request)
 
         // Then
-        assertEquals(BidStatus.ACCEPTED, response.status)
+        assertEquals(BidStatus.WON, response.status)
         assertEquals(lotId, response.lotId)
         assertEquals(25000.0, response.price)
     }

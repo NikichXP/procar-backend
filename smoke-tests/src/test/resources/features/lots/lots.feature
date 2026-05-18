@@ -4,7 +4,6 @@ Feature: Lot Browsing
   So that I can find cars I'm interested in
 
   Background:
-    Given the backend is up on "https://api.pc-dev.nikichxp.xyz/"
 
   Scenario: List lots with default filters
     When I request GET "/api/lots"

@@ -21,3 +21,12 @@ data class AuthResult(
     val accessToken: AccessToken? = null,
     val refreshToken: String? = null,
 )
+
+@Serializable
+data class RegisterResult(
+    val username: String,
+    val success: Boolean,
+    val message: String? = null,
+    val accessToken: AccessToken? = null,
+    val refreshToken: String? = null,
+)

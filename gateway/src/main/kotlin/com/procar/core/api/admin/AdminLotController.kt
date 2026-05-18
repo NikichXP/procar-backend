@@ -111,4 +111,9 @@ class AdminLotController(
     suspend fun confirmAvailability(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
         return adminLotConnectorService.confirmAvailability(lotId)
     }
+
+    @PostMapping("/{lotId}/end-auction")
+    suspend fun endAuction(@PathVariable lotId: String): ResponseEntity<ApiResponse<AdminLotResponse>> {
+        return adminLotConnectorService.endAuction(lotId)
+    }
 }

@@ -3,6 +3,7 @@ package com.procar.core.api
 import com.procar.core.config.NoAuth
 import com.procar.core.service.LotService
 import com.procar.gateway.api.dto.*
+import com.procar.provider.common.ApiResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -103,8 +104,8 @@ class LotAPI(
     @GetMapping("/{lotId}")
     suspend fun getLotDetail(
         @Parameter(description = "Lot ID", example = "01956b0a-1234-7abc-9d2e-4f5a6b7c8d9e") @PathVariable lotId: String
-    ): LotDetail {
-        return lotService.getLotDetail(lotId)
+    ): ApiResponse<LotDetail> {
+        return ApiResponse(lotService.getLotDetail(lotId))
     }
 
     companion object {

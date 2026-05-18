@@ -51,7 +51,7 @@ Feature: Admin User Management
     Then the status code should be 404
 
   Scenario: Admin self-protection (prevent self-block and self-delete)
-    When I request GET "/users/me"
+    When I request GET "/api/users/me"
     Then the status code should be 200
     And I save the field "id" as "admin_id"
 
