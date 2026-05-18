@@ -27,5 +27,5 @@ Feature: Authentication
 
   Scenario: Successful login using the specialized step
     Given I am authenticated with credentials "admin" and "admin"
-    And I request GET "/users/me"
+    And I request GET "/api/users/me"
     Then the status code should be 200

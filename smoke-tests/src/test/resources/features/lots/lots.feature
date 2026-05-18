@@ -17,6 +17,6 @@ Feature: Lot Browsing
     And I save the first "content" ID as "firstLotId"
     When I request GET "/api/lots/${firstLotId}"
     Then the status code should be 200
-    And the field "id" is "${firstLotId}"
-    And the field "/car/brandName" is not empty
-    And the field "/car/modelName" is not empty
+    And the field "/data/id" is "${firstLotId}"
+    And the field "/data/car/brandName" is not empty
+    And the field "/data/car/modelName" is not empty
