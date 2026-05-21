@@ -14,7 +14,7 @@ data class LotSearchRequest(
     val priceFrom: Double?,
     val priceTo: Double?,
     val condition: CarCondition?,
-    val offset: Int = 0,
+    val cursor: String? = null,
     val limit: Int = 20,
     val sort: String = "endTime,asc",
 )

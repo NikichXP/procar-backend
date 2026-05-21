@@ -2,6 +2,13 @@
 
 This document tracks changes in the Backend API that require updates or reintegration on the Frontend side.
 
+## 0. Global API Changes
+- **Status**: Completed
+- **Changes**:
+    - **Removed `/api` prefix from all endpoints.**  
+    - All endpoints previously under `/api/*` are now directly under the root (e.g., `/api/lots` -> `/lots`, `/api/admin/*` -> `/admin/*`).
+- **Frontend Action**: Update `baseUrl` or API client configuration to remove `/api` from all request paths.
+
 ## 1. Auth & User Profile
 - **Status**: Completed
 - **Changes**:
@@ -13,7 +20,7 @@ This document tracks changes in the Backend API that require updates or reintegr
 ## 2. Broker Organizations
 - **Status**: Completed
 - **Changes**:
-    - Endpoints moved from `/api/admin/brokers` to `/api/admin/brokers` (standardized).
+    - Endpoints moved to `/admin/brokers` (standardized, `/api` prefix removed).
     - New Broker fields: `companyName`, `displayName`, `country`, `contactEmail`, `status`.
     - New endpoint: `POST /admin/brokers/{id}/status` for activation/blocking.
     - New endpoint: `PATCH /admin/brokers/{id}` for generic updates.
@@ -22,9 +29,9 @@ This document tracks changes in the Backend API that require updates or reintegr
 ## 3. User Management
 - **Status**: Completed
 - **Changes**:
-    - New endpoint: `POST /api/admin/users/{id}/status` for activation/blocking.
-    - New endpoint: `PATCH /api/admin/users/{id}` for generic updates.
-    - New endpoint: `DELETE /api/admin/users/{id}` for full deletion (including auth records).
+    - New endpoint: `POST /admin/users/{id}/status` for activation/blocking.
+    - New endpoint: `PATCH /admin/users/{id}` for generic updates.
+    - New endpoint: `DELETE /admin/users/{id}` for full deletion (including auth records).
 - **Frontend Action**: Update User Management dashboard to use new fields, status update pattern, and deletion.
 
 ## 4. Lots & Catalog
@@ -41,28 +48,31 @@ This document tracks changes in the Backend API that require updates or reintegr
         - `SOLD`: Final successful state.
         - `CANCELLED`: Deal aborted.
     - **New Admin Flow Endpoints**:
-        - `POST /api/admin/lots/{id}/publish`: Moves lot to `ACTIVE`.
-        - `POST /api/admin/lots/{id}/unpublish`: Moves lot to `PENDING`.
-        - `POST /api/admin/lots/{id}/confirm-availability`: Moves lot from `AWAIT_SELLER_CONFIRMATION` to `AWAITING_PAYMENT`.
+        - `POST /admin/lots/{id}/publish`: Moves lot to `ACTIVE`.
+        - `POST /admin/lots/{id}/unpublish`: Moves lot to `PENDING`.
+        - `POST /admin/lots/{id}/confirm-availability`: Moves lot from `AWAIT_SELLER_CONFIRMATION` to `AWAITING_PAYMENT`.
 - **Frontend Action**:
     - Update lot filtering (use `brand` query parameter).
     - Map `AWAIT_SELLER_CONFIRMATION` status in the UI (e.g., "Confirming with Seller").
     - Implement Admin buttons for "Publish", "Unpublish", and "Confirm Availability" (for Brokers).
 
-## 5. Offers
-- **Status**: Pending
+## 5. Bids & Auction Lifecycle
+- **Status**: Completed
 - **Changes**:
-    - New entity `Offer` (distinct from `Bid`).
-    - Endpoints: `POST /lots/{id}/offers`, `GET /users/me/offers`.
-- **Frontend Action**: Implement manual offer flow using the new endpoints.
+    - `BidStatus` refined: `WINNING`, `OUTBID`, `WON`, `LOST`.
+    - **Auction End**: When an auction ends, the highest bid is automatically set to `WON`, and all others to `LOST`.
+    - **Buyout Logic**: Placing a bid at the `buyoutPrice` immediately sets the bid to `WON` and moves the lot to `AWAITING_PAYMENT`.
+- **Frontend Action**: Update bid status badges in user profile and lot details. Handle immediate transition to "Won" state on successful buyout.
 
-## 6. Deals & Payments
-- **Status**: Pending
+## 6. Admin-Led Verification Flow
+- **Status**: Completed (Admin Side)
 - **Changes**:
-    - New entity `Deal` created after Accept Offer.
-    - Fields for tracking `VehiclePaymentStatus` and `ProcarFeeStatus`.
-    - `PaymentInstructions` object available in Deal details.
-- **Frontend Action**: Implement Deal details page and payment instruction visualization.
+    - **User Verification**: Admin can verify/reject users via `PATCH /admin/users/{id}` by updating `verificationStatus` (`NOT_STARTED`, `PENDING`, `VERIFIED`, `REJECTED`) and `depositStatus` (`NOT_PAID`, `PENDING`, `ACTIVE`, `FORFEITED`).
+    - **Broker Activation**: Brokers are activated/blocked via `POST /admin/brokers/{id}/status`.
+- **Frontend Action**: 
+    - Implement Admin UI for toggling verification and deposit statuses on the User detail page.
+    - Implement Admin UI for broker status management.
+    - (Upcoming) Frontend must handle restricted access for non-verified users.
 
 ---
 *Note: This file is updated automatically as backend changes are implemented.*

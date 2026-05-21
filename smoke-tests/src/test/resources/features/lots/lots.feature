@@ -3,18 +3,29 @@ Feature: Lot Browsing
   I want to browse and search for car lots
   So that I can find cars I'm interested in
 
+  # TODO test filtering
+
   Background:
 
   Scenario: List lots with default filters
     When I request GET "/lots"
     Then the status code should be 200
-    And the field "content" is a list
-    And the field "totalElements" is a number
+    And the field "data" is a list
+
+  Scenario: List lots with pagination
+    When I request GET "/lots?limit=5"
+    Then the status code should be 200
+    And the field "data" is a list
+    And the field "limit" is "5"
+    And I save the field "nextCursor" as "cursor"
+    When I request GET "/lots?limit=5&cursor=${cursor}"
+    Then the status code should be 200
+    And the field "limit" is "5"
 
   Scenario: Get lot details
     # We first get a lot ID from the list
     When I request GET "/lots"
-    And I save the first "content" ID as "firstLotId"
+    And I save the first "data" ID as "firstLotId"
     When I request GET "/lots/${firstLotId}"
     Then the status code should be 200
     And the field "/data/id" is "${firstLotId}"

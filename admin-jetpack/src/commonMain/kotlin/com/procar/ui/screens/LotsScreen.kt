@@ -28,9 +28,9 @@ fun LotsScreen() {
     fun loadLots() {
         scope.launchWithState(state, "Error loading lots") {
             val page = fetchLots()
-            lots = page.lots
-            nextCursor = page.pagination.nextCursor
-            hasNext = page.pagination.hasNext
+            lots = page.data
+            nextCursor = page.nextCursor
+            hasNext = page.nextCursor != null
         }
     }
 
@@ -42,9 +42,9 @@ fun LotsScreen() {
             state.errorMessage = null
             try {
                 val page = fetchLots(cursor = cursor)
-                lots = lots + page.lots
-                nextCursor = page.pagination.nextCursor
-                hasNext = page.pagination.hasNext
+                lots = lots + page.data
+                nextCursor = page.nextCursor
+                hasNext = page.nextCursor != null
             } catch (e: Exception) {
                 state.errorMessage = "Error loading more lots: ${e.message}"
             } finally {

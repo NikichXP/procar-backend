@@ -86,11 +86,9 @@ data class LotDetail(
 
 @Serializable
 data class LotPage(
-    @ApiDoc(example = "0") val page: Int,
-    @ApiDoc(example = "20") val size: Int,
-    @ApiDoc(example = "150") val totalElements: Int,
-    @ApiDoc(example = "8") val totalPages: Int,
-    val content: List<LotSummary>,
+    val data: List<LotSummary>,
+    val nextCursor: String? = null,
+    @ApiDoc(example = "20") val limit: Int,
 )
 
 @Serializable

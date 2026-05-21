@@ -174,6 +174,7 @@ data class AdminUpdateStatusRequest(
 
 @Serializable
 data class AdminPaginatedLotsResponse(
-    val lots: List<AdminLotResponse>,
-    val pagination: PaginationResponse = PaginationResponse(hasNext = false),
+    val data: List<AdminLotResponse>,
+    val nextCursor: String? = null,
+    val limit: Int,
 )

@@ -22,7 +22,7 @@ class LotService(
     @Qualifier("internalLotHttpClient") private val internalLotAPI: InternalLotAPI
 ) {
 
-    suspend fun getLots(request: LotSearchRequest): List<LotSummary> {
+    suspend fun getLots(request: LotSearchRequest): LotPage {
         val advancedRequest = AdvancedLotSearchRequest(
             query = null,
             filters = LotSearchFilters(
@@ -44,7 +44,7 @@ class LotService(
             ),
             pagination = PaginationRequest(
                 limit = request.limit,
-                cursor = null
+                cursor = request.cursor
             )
         )
         
@@ -53,7 +53,7 @@ class LotService(
         val searchResult = apiResponse.data
         
         // Convert internal response to gateway DTO
-        return searchResult.results.map { vehicleLot ->
+        val lots = searchResult.results.map { vehicleLot ->
             LotSummary(
                 id = vehicleLot.id,
                 car = CarInfo(
@@ -82,12 +82,17 @@ class LotService(
                 brand = mapBrand(vehicleLot.brand),
             )
         }
+
+        return LotPage(
+            data = lots,
+            nextCursor = searchResult.nextCursor,
+            limit = request.limit
+        )
     }
 
     suspend fun countLots(request: LotSearchRequest): Int {
-        // For now, return the size of the search results
-        // TODO: Implement dedicated count endpoint when available in internal API
-        return getLots(request).size
+        // This is no longer used in cursor-based pagination
+        return 0
     }
 
     suspend fun getLotDetail(lotId: String): LotDetail {

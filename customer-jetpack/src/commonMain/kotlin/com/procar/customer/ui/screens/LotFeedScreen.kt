@@ -30,15 +30,15 @@ fun LotFeedScreen(
             feedState.isLoading = true
             try {
                 val page = fetchLots(
-                    page = 0,
+                    cursor = null,
                     condition = filterState.condition,
                     sort = filterState.sort,
                     priceFrom = filterState.priceFromDouble,
                     priceTo = filterState.priceToDouble,
                 )
-                feedState.lots.addAll(page.content)
-                feedState.currentPage = 0
-                feedState.totalPages = page.totalPages
+                feedState.lots.addAll(page.data)
+                feedState.nextCursor = page.nextCursor
+                feedState.hasMore = page.nextCursor != null
             } catch (e: Exception) {
                 feedState.errorMessage = "Failed to load lots: ${e.message}"
             } finally {
@@ -48,21 +48,20 @@ fun LotFeedScreen(
     }
 
     fun loadNextPage() {
-        if (!feedState.hasMore || feedState.isLoadingMore) return
+        if (!feedState.hasMore || feedState.isLoadingMore || feedState.nextCursor == null) return
         scope.launch {
             feedState.isLoadingMore = true
             try {
-                val nextPage = feedState.currentPage + 1
                 val page = fetchLots(
-                    page = nextPage,
+                    cursor = feedState.nextCursor,
                     condition = filterState.condition,
                     sort = filterState.sort,
                     priceFrom = filterState.priceFromDouble,
                     priceTo = filterState.priceToDouble,
                 )
-                feedState.lots.addAll(page.content)
-                feedState.currentPage = nextPage
-                feedState.totalPages = page.totalPages
+                feedState.lots.addAll(page.data)
+                feedState.nextCursor = page.nextCursor
+                feedState.hasMore = page.nextCursor != null
             } catch (e: Exception) {
                 feedState.errorMessage = "Failed to load more: ${e.message}"
             } finally {

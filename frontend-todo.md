@@ -58,30 +58,10 @@ This document outlines the tasks required to align the Procar Backend API with t
 - [x] Implement Buyout bid logic:
     - Immediately sets bid to `WON`
     - Triggers lot transition to `AWAITING_PAYMENT` (as price is pre-agreed)
-- [ ] Create corresponding .feature files in smoke-tests to validate auction lifecycle and bid transitions
+- [x] Create corresponding .feature files in smoke-tests to validate auction lifecycle and bid transitions
 
-## 6. Deals & Payments (Priority 5)
-- [ ] Create `Deal` entity and repository
-- [ ] Implement `DealStatus`: `CREATED`, `CONFIRMED`, `PAID`, `COMPLETED`, `CANCELLED`
-- [ ] Implement `VehiclePaymentStatus`: `PENDING`, `INSTRUCTIONS_READY`, `PAID`
-- [ ] Implement `ProcarFeeStatus`: `PENDING`, `PAID`
-- [ ] Implement `PaymentInstructions` model
-- [ ] Implement endpoints:
-    - `GET /users/me/deals`
-    - `GET /admin/deals`
-    - `POST /admin/deals/{id}/payment-instructions`
-    - `POST /admin/deals/{id}/mark-vehicle-paid`
-    - `POST /admin/deals/{id}/mark-procar-fee-paid`
-    - `POST /admin/deals/{id}/complete`
-- [ ] Integration with payment provider (Stripe/etc.) for deposits and fees (Priority 6)
-- [ ] Create corresponding .feature files in smoke-tests to validate deal creation and payment flow
-
-## 8. Admin-Led Verification Flow (Priority 1)
-- [ ] Implement `POST /users/me/verification/start` (Customer submits info)
-- [ ] Implement Admin verification endpoints for Customers:
-    - `POST /admin/users/{id}/verification/approve`
-    - `POST /admin/users/{id}/verification/reject`
-- [ ] Implement Admin verification flow for Broker Organizations:
-    - Ensure Brokers are verified/activated only by ADMIN
-- [ ] Enforce access rules: Only verified & deposited CUSTOMERs can bid/offer
-- [ ] Create corresponding .feature files in smoke-tests to validate admin-led verification for both Customers and Brokers
+## 6. Admin-Led Verification Flow (Priority 1)
+- [ ] Implement `POST /users/me/verification/start` (Customer submits info/documents)
+- [x] Implement Admin verification endpoints (Handled via generic `PATCH /admin/users/{id}` or `PATCH /admin/brokers/{id}`)
+- [ ] Implement access rule enforcement in Gateway (Check `VERIFIED` + `ACTIVE` deposit before allowing Bids/Offers)
+- [ ] Create corresponding .feature files in smoke-tests to validate the full verification lifecycle (Start -> Admin Approve -> Bid allowed)

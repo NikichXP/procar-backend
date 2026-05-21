@@ -58,11 +58,11 @@ fun absoluteImageUrl(url: String): String = when {
     else -> "${GatewayConfig.baseUrl}/files/$url"
 }
 
-const val DEFAULT_PAGE_SIZE: Int = 20
+const val DEFAULT_LIMIT: Int = 20
 
 suspend fun fetchLots(
-    page: Int = 0,
-    size: Int = DEFAULT_PAGE_SIZE,
+    cursor: String? = null,
+    limit: Int = DEFAULT_LIMIT,
     status: LotStatus? = null,
     condition: CarCondition? = null,
     brandId: String? = null,
@@ -73,8 +73,8 @@ suspend fun fetchLots(
     priceTo: Double? = null,
     sort: String = "endTime,asc",
 ): LotPage = httpClient.get("${GatewayConfig.baseUrl}/lots") {
-    parameter("page", page)
-    parameter("size", size)
+    if (cursor != null) parameter("cursor", cursor)
+    parameter("limit", limit)
     parameter("sort", sort)
     if (status != null) parameter("status", status.name)
     if (condition != null) parameter("condition", condition.name)

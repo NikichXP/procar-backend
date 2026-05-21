@@ -58,8 +58,8 @@ class LotAPI(
             description = "Vehicle condition filter",
             example = "USED"
         ) @RequestParam(required = false) condition: CarCondition?,
-        @Parameter(description = "Zero-based page number", example = "0") @RequestParam(defaultValue = "0") page: Int,
-        @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") size: Int,
+        @Parameter(description = "Pagination cursor", example = "eyJvZmZzZXQiOjV9") @RequestParam(required = false) cursor: String?,
+        @Parameter(description = "Page size", example = "20") @RequestParam(defaultValue = "20") limit: Int,
         @Parameter(
             description = "Sort field and direction",
             example = "endTime,asc"
@@ -79,22 +79,12 @@ class LotAPI(
             priceFrom = priceFrom,
             priceTo = priceTo,
             condition = condition,
-            offset = page * size,
-            limit = size,
+            cursor = cursor,
+            limit = limit,
             sort = sort
         )
 
-        val lots = lotService.getLots(request)
-        val totalElements = lotService.countLots(request)
-        val totalPages = (totalElements + size - 1) / size
-
-        return LotPage(
-            page = page,
-            size = size,
-            totalElements = totalElements,
-            totalPages = totalPages,
-            content = lots
-        )
+        return lotService.getLots(request)
     }
 
     @Operation(

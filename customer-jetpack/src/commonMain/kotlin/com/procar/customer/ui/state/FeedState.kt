@@ -14,15 +14,13 @@ class FeedState {
     var isLoading by mutableStateOf(false)
     var isLoadingMore by mutableStateOf(false)
     var errorMessage by mutableStateOf<String?>(null)
-    var currentPage by mutableStateOf(0)
-    var totalPages by mutableStateOf(1)
-
-    val hasMore: Boolean get() = currentPage + 1 < totalPages
+    var nextCursor by mutableStateOf<String?>(null)
+    var hasMore by mutableStateOf(true)
 
     fun reset() {
         lots.clear()
-        currentPage = 0
-        totalPages = 1
+        nextCursor = null
+        hasMore = true
         errorMessage = null
     }
 }
